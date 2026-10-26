@@ -11,7 +11,6 @@ import '../../settings/controllers/settings_controller.dart';
 import '../../navigation/controllers/navigation_controller.dart';
 import '../../transactions/controllers/transactions_controller.dart';
 import '../../transactions/views/components/entry_form_sheet.dart';
-import '../../transactions/views/components/month_switcher.dart';
 import '../../transactions/views/components/transaction_tile.dart';
 import 'components/balance_card.dart';
 import 'components/dashboard_stats_card.dart';
@@ -149,7 +148,8 @@ class DashboardView extends StatelessWidget {
     final p = context.pal;
     return GetBuilder<SettingsController>(
       builder: (s) => GetBuilder<TransactionsController>(builder: (tc) {
-        final rows = tc.monthRows;
+        // Dashboard strictly shows current month's data only
+        final rows = tc.currentMonthRows;
         final income = tc.sum(rows, EntryType.income);
         final expense = tc.sum(rows, EntryType.expense);
         final byCat = tc.group(rows, EntryType.expense);
@@ -160,8 +160,7 @@ class DashboardView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _buildGreetingBar(context, s),
-              const SizedBox(height: 4),
-              const MonthSwitcher(),
+              const SizedBox(height: 6),
               AdaptiveColumns(
                 left: [
                   BalanceCard(income: income, expense: expense, budget: s.budget),

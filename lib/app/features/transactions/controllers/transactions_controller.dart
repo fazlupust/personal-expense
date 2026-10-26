@@ -75,16 +75,46 @@ class TransactionsController extends GetxController {
     }
   }
 
+  bool isYearOnly = false;
+
+  void setYearAndMonth(int y, int m) {
+    month = DateTime(y, m);
+    isYearOnly = false;
+    update();
+  }
+
+  void setYearOnly(int y) {
+    month = DateTime(y, 1);
+    isYearOnly = true;
+    update();
+  }
+
+  List<TransactionModel> get currentMonthRows {
+    final now = DateTime.now();
+    return entries
+        .where((e) => e.date.year == now.year && e.date.month == now.month)
+        .toList()
+      ..sort(_newestFirst);
+  }
+
   static int _newestFirst(TransactionModel a, TransactionModel b) {
     final c = b.date.compareTo(a.date);
     return c != 0 ? c : b.id.compareTo(a.id);
   }
 
   // ---- queries ----
-  List<TransactionModel> get monthRows => entries
-      .where((e) => e.date.year == month.year && e.date.month == month.month)
-      .toList()
-    ..sort(_newestFirst);
+  List<TransactionModel> get monthRows {
+    if (isYearOnly) {
+      return entries
+          .where((e) => e.date.year == month.year)
+          .toList()
+        ..sort(_newestFirst);
+    }
+    return entries
+        .where((e) => e.date.year == month.year && e.date.month == month.month)
+        .toList()
+      ..sort(_newestFirst);
+  }
 
   List<TransactionModel> get visibleRows {
     final q = query.trim().toLowerCase();
