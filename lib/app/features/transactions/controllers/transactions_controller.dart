@@ -11,8 +11,7 @@ import '../../../data/services/transaction_service.dart';
 enum TxFilter { all, income, expense }
 
 class TransactionsController extends GetxController {
-  TransactionsController(this._prefs);
-  final SharedPreferences _prefs;
+  TransactionsController([SharedPreferences? _]);
 
   final searchCtrl = TextEditingController();
   List<TransactionModel> entries = [];

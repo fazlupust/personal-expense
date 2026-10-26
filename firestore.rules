@@ -47,5 +47,13 @@ service cloud.firestore {
       allow update: if isAuthenticated() && resource.data.user_id == request.auth.uid;
       allow delete: if isAdmin();
     }
+
+    // 4. App Config (Version & Update check)
+    match /app_config/{configId} {
+      // Anyone can read app_config (even before logging in) to check for updates
+      allow read: if true;
+      // Only admin or authenticated can create/update
+      allow write: if isAuthenticated();
+    }
   }
 }

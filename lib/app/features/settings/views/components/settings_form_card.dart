@@ -8,6 +8,8 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_widgets.dart';
 import '../../controllers/settings_controller.dart';
 
+import '../../../../data/services/app_update_service.dart';
+
 class SettingsFormCard extends StatelessWidget {
   const SettingsFormCard({super.key, required this.settings});
   final SettingsController settings;
@@ -78,6 +80,24 @@ class SettingsFormCard extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           AppButton('Save settings', onPressed: s.saveProfile),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: () => AppUpdateService.to.checkManually(),
+            icon: Icon(Icons.sync_rounded, size: 16, color: context.pal.acc),
+            label: Text(
+              'Check for Updates'.tr,
+              style: TextStyle(
+                color: context.pal.ink,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size.fromHeight(40),
+              side: BorderSide(color: context.pal.line),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+          ),
           const SizedBox(height: 12),
           Center(
             child: FutureBuilder<PackageInfo>(

@@ -6,7 +6,6 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_widgets.dart';
 import '../../../../core/utils/formatters.dart';
-import '../../../../data/models/category_model.dart';
 import '../../../../data/models/entry_type.dart';
 import '../../../../data/models/transaction_model.dart';
 import '../../controllers/entry_form_controller.dart';

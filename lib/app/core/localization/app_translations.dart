@@ -141,5 +141,17 @@ class AppTranslations extends Translations {
     'No categories found': 'কোনো খাত পাওয়া যায়নি',
     'Listening...': 'কথা বলুন, শুনছি...',
     'Microphone not available or permission denied': 'মাইক্রোফোন পাওয়া যায়নি বা পারমিশন নেই',
+    // App Update
+    'Update Available': 'নতুন আপডেট এসেছে',
+    'Update Now': 'এখনই আপডেট করুন',
+    'Update Later': 'পরে করব',
+    'Current': 'বর্তমান',
+    'Latest': 'সর্বশেষ',
+    'Mandatory Update': 'বাধ্যতামূলক আপডেট',
+    'New Version Available': 'নতুন ভার্সন পাওয়া গেছে',
+    'Check for Updates': 'আপডেট চেক করুন',
+    'You are using the latest version.': 'আপনি সর্বশেষ ভার্সন ব্যবহার করছেন।',
+    'Checking for updates...': 'আপডেট চেক করা হচ্ছে...',
+    'Unable to open link': 'লিংক খোলা যায়নি',
   };
 }

@@ -10,8 +10,7 @@ import '../../../data/services/auth_service.dart';
 import '../../../data/services/category_service.dart';
 
 class CategoriesController extends GetxController {
-  CategoriesController(this._prefs);
-  final SharedPreferences _prefs;
+  CategoriesController([SharedPreferences? _]);
 
   final nameCtrl = TextEditingController();
   final nameBnCtrl = TextEditingController();

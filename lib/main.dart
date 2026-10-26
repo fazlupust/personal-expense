@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -9,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'app/core/constants/app_constants.dart';
 import 'app/core/localization/app_translations.dart';
 import 'app/core/theme/app_theme.dart';
+import 'app/data/services/app_update_service.dart';
 import 'app/data/services/auth_service.dart';
 import 'app/data/services/category_service.dart';
 import 'app/data/services/transaction_service.dart';
@@ -25,6 +25,7 @@ Future<void> main() async {
   await initializeDateFormatting();
   final prefs = await SharedPreferences.getInstance();
   Get.put<SharedPreferences>(prefs, permanent: true);
+  Get.put(AppUpdateService(), permanent: true);
   Get.put(AuthService(), permanent: true);
   Get.put(CategoryService(), permanent: true);
   Get.put(TransactionService(), permanent: true);
