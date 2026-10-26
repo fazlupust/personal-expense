@@ -153,5 +153,8 @@ class AppTranslations extends Translations {
     'You are using the latest version.': 'আপনি সর্বশেষ ভার্সন ব্যবহার করছেন।',
     'Checking for updates...': 'আপডেট চেক করা হচ্ছে...',
     'Unable to open link': 'লিংক খোলা যায়নি',
+    'Are you sure you want to sign out?': 'আপনি কি নিশ্চিত লগআউট করতে চান?',
+    'Current month': 'চলতি মাস',
+    'Language changed': 'ভাষা পরিবর্তন করা হয়েছে',
   };
 }

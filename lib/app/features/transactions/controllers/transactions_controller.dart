@@ -20,9 +20,24 @@ class TransactionsController extends GetxController {
 
   StreamSubscription<List<TransactionModel>>? _sub;
 
+  bool get isCurrentMonth {
+    final now = DateTime.now();
+    return month.year == now.year && month.month == now.month;
+  }
+
+  void resetToCurrentMonth() {
+    final now = DateTime.now();
+    final cur = DateTime(now.year, now.month);
+    if (month.year != cur.year || month.month != cur.month) {
+      month = cur;
+      update();
+    }
+  }
+
   @override
   void onInit() {
     super.onInit();
+    resetToCurrentMonth();
     _initTransactions();
   }
 

@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/app_constants.dart';
 
 class SettingsController extends GetxController {
+  static SettingsController get to => Get.find<SettingsController>();
   SettingsController(this._prefs);
   final SharedPreferences _prefs;
 

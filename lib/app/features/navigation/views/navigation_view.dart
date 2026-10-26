@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/responsive.dart';
+import '../../../core/widgets/custom_app_bar.dart';
 import '../../dashboard/views/dashboard_view.dart';
 import '../../reports/views/reports_view.dart';
 import '../../settings/views/settings_view.dart';
@@ -53,6 +54,9 @@ class NavigationView extends StatelessWidget {
 
       if (size == ScreenSize.mobile) {
         return Scaffold(
+          appBar: CustomAppBar(
+            title: _labels[c.index].tr,
+          ),
           body: SafeArea(child: page),
           floatingActionButton: fab,
           floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -132,7 +136,17 @@ class NavigationView extends StatelessWidget {
               ),
             ),
             VerticalDivider(width: 1, color: p.line),
-            Expanded(child: SafeArea(child: page)),
+            Expanded(
+              child: Column(
+                children: [
+                  CustomAppBar(
+                    title: _labels[c.index].tr,
+                    showBackButton: false,
+                  ),
+                  Expanded(child: SafeArea(child: page)),
+                ],
+              ),
+            ),
           ],
         ),
       );

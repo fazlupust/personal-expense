@@ -18,9 +18,35 @@ class MonthSwitcher extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             _RoundButton(icon: Icons.chevron_left, onTap: () => tc.shiftMonth(-1)),
-            Text(
-              Fmt.date(tc.month, 'MMMM yyyy'),
-              style: TextStyle(fontWeight: FontWeight.w600, color: p.ink),
+            InkWell(
+              borderRadius: BorderRadius.circular(8),
+              onTap: () => tc.resetToCurrentMonth(),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      Fmt.date(tc.month, 'MMMM yyyy'),
+                      style: TextStyle(fontWeight: FontWeight.w700, color: p.ink, fontSize: 15),
+                    ),
+                    if (!tc.isCurrentMonth) ...[
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: p.income.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          'Current month'.tr,
+                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: p.income),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
             ),
             _RoundButton(icon: Icons.chevron_right, onTap: () => tc.shiftMonth(1)),
           ],

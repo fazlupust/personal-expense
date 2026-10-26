@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/utils/responsive.dart';
+import '../../../core/widgets/custom_app_bar.dart';
 import '../../../data/models/entry_type.dart';
 import '../controllers/categories_controller.dart';
 import 'components/category_form_card.dart';
@@ -13,7 +14,10 @@ class CategoriesView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Categories'.tr)),
+      appBar: const CustomAppBar(
+        title: 'Categories',
+        showBackButton: true,
+      ),
       body: SafeArea(
         child: GetBuilder<CategoriesController>(
           builder: (c) => ContentWrap(
