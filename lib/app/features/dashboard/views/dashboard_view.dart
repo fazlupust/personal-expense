@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_widgets.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../data/models/entry_type.dart';
 import '../../../data/services/auth_service.dart';
@@ -29,7 +30,8 @@ class DashboardView extends StatelessWidget {
         : (s.name.isNotEmpty ? s.name : 'Personal Expense User'.tr);
     final initial = displayName.isNotEmpty ? displayName.characters.first.toUpperCase() : '?';
 
-    final h = DateTime.now().hour;
+    final now = DateTime.now();
+    final h = now.hour;
     final greetingText = h < 12
         ? 'Good morning'.tr
         : (h < 18 ? 'Good afternoon'.tr : 'Good evening'.tr);
@@ -37,6 +39,9 @@ class DashboardView extends StatelessWidget {
         ? Icons.wb_sunny_rounded
         : (h < 18 ? Icons.wb_twilight_rounded : Icons.nightlight_round);
     final iconColor = h < 18 ? const Color(0xFFF39C12) : const Color(0xFF9B59B6);
+
+    final dateFormatted = Fmt.date(now, 'EEE, d MMM yyyy');
+    final timeFormatted = Fmt.date(now, 'h:mm a');
 
     return Padding(
       padding: const EdgeInsets.only(top: 4, bottom: 8),
@@ -85,8 +90,27 @@ class DashboardView extends StatelessWidget {
                       greetingText,
                       style: TextStyle(
                         fontSize: 12,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                         color: p.mute,
+                      ),
+                    ),
+                    Text(
+                      ' · ',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: p.mute.withOpacity(0.5),
+                      ),
+                    ),
+                    Flexible(
+                      child: Text(
+                        '$dateFormatted, $timeFormatted',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: p.mute.withOpacity(0.85),
+                        ),
                       ),
                     ),
                     if (user?.userNo != null) ...[
