@@ -9,8 +9,8 @@ class NavigationBinding extends Bindings {
   @override
   void dependencies() {
     Get.put(NavigationController());
-    Get.put(TransactionsController(Get.find()));
-    Get.put(CategoriesController(Get.find()));
+    Get.put(TransactionsController());
+    Get.put(CategoriesController());
     Get.put(ReportsController());
   }
 }

@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../../core/constants/app_constants.dart';
 import '../../../data/models/category_model.dart';
 import '../../../data/models/entry_type.dart';
@@ -10,7 +8,7 @@ import '../../../data/services/auth_service.dart';
 import '../../../data/services/category_service.dart';
 
 class CategoriesController extends GetxController {
-  CategoriesController([SharedPreferences? _]);
+  CategoriesController();
 
   final nameCtrl = TextEditingController();
   final nameBnCtrl = TextEditingController();

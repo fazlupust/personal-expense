@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../../data/models/entry_type.dart';
 import '../../../data/models/transaction_model.dart';
 import '../../../data/services/auth_service.dart';
@@ -11,7 +9,7 @@ import '../../../data/services/transaction_service.dart';
 enum TxFilter { all, income, expense }
 
 class TransactionsController extends GetxController {
-  TransactionsController([SharedPreferences? _]);
+  TransactionsController();
 
   final searchCtrl = TextEditingController();
   List<TransactionModel> entries = [];

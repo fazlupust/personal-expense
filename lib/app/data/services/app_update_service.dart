@@ -27,11 +27,12 @@ class AppUpdateService extends GetxService {
   Future<void> _loadLocalVersion() async {
     try {
       final info = await PackageInfo.fromPlatform();
-      _cachedCurrentVersion = info.version;
-    } catch (e) {
-      debugPrint('[AppUpdateService] Error getting PackageInfo: $e');
-      _cachedCurrentVersion = '1.0.0';
-    }
+      if (info.version.isNotEmpty) {
+        _cachedCurrentVersion = info.version;
+        return;
+      }
+    } catch (_) {}
+    _cachedCurrentVersion = '1.0.0';
   }
 
   /// Compares semantic versions (e.g. 1.1.0 vs 1.0.0)
