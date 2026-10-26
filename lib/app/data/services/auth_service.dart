@@ -8,6 +8,7 @@ import '../models/user_model.dart';
 import 'device_location_service.dart';
 
 class AuthService extends GetxService {
+  static AuthService get to => Get.find<AuthService>();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
