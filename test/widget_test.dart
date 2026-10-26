@@ -1,7 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:personal_expense/app/data/models/entry_type.dart';
 import 'package:personal_expense/app/data/services/app_update_service.dart';
 import 'package:personal_expense/app/features/categories/controllers/categories_controller.dart';
+import 'package:personal_expense/app/features/settings/controllers/settings_controller.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   test('AppUpdateService version comparison test', () {
@@ -68,6 +71,56 @@ void main() {
       // Switching to income where 'Salary' exists
       controller.setType(EntryType.income);
       expect(controller.nameError, 'That category already exists.');
+    });
+  });
+
+  group('SettingsController privacy and theme tests', () {
+    late SettingsController settings;
+
+    setUp(() async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+      settings = SettingsController(prefs);
+    });
+
+    tearDown(() {
+      settings.dispose();
+    });
+
+    test('setShowIncome toggles showIncome and isBalanceHidden', () {
+      expect(settings.showIncome, isTrue);
+      expect(settings.isBalanceHidden, isFalse);
+
+      settings.setShowIncome(false);
+      expect(settings.showIncome, isFalse);
+      expect(settings.isBalanceHidden, isTrue);
+
+      settings.setShowIncome(true);
+      expect(settings.showIncome, isTrue);
+      expect(settings.isBalanceHidden, isFalse);
+    });
+
+    test('toggleBalanceVisibility toggles isBalanceHidden independently', () {
+      expect(settings.isBalanceHidden, isFalse);
+
+      settings.toggleBalanceVisibility();
+      expect(settings.isBalanceHidden, isTrue);
+
+      settings.toggleBalanceVisibility();
+      expect(settings.isBalanceHidden, isFalse);
+    });
+
+    test('toggleTheme alternates between light and dark modes', () {
+      settings.setTheme(ThemeMode.light);
+      expect(settings.isDarkMode, isFalse);
+
+      settings.toggleTheme();
+      expect(settings.themeMode, ThemeMode.dark);
+      expect(settings.isDarkMode, isTrue);
+
+      settings.toggleTheme();
+      expect(settings.themeMode, ThemeMode.light);
+      expect(settings.isDarkMode, isFalse);
     });
   });
 }

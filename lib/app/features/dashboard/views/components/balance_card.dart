@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/formatters.dart';
+import '../../../settings/controllers/settings_controller.dart';
 
 class BalanceCard extends StatelessWidget {
   const BalanceCard({
@@ -10,14 +11,21 @@ class BalanceCard extends StatelessWidget {
     required this.income,
     required this.expense,
     required this.budget,
+    this.isHidden = false,
+    this.onToggleVisibility,
   });
 
   final double income;
   final double expense;
   final double budget;
+  final bool isHidden;
+  final VoidCallback? onToggleVisibility;
 
   @override
   Widget build(BuildContext context) {
+    final s = Get.isRegistered<SettingsController>() ? SettingsController.to : null;
+    final hidden = isHidden || (s?.isBalanceHidden ?? false);
+    final toggle = onToggleVisibility ?? s?.toggleBalanceVisibility;
     final net = income - expense;
     final over = budget > 0 && expense > budget;
 
@@ -114,70 +122,142 @@ class BalanceCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.10),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 7,
-                            height: 7,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF4EFA9D),
-                              shape: BoxShape.circle,
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Clickable Eye Toggle Pill
+                        if (toggle != null) ...[
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(20),
+                              onTap: toggle,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.14),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(color: Colors.white.withOpacity(0.18)),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      hidden ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                                      size: 13,
+                                      color: hidden ? const Color(0xFFFFB3A7) : const Color(0xFF5DFFB2),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      hidden ? 'Show'.tr : 'Hide'.tr,
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.white.withOpacity(0.95),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
                           ),
-                          const SizedBox(width: 5),
-                          Text(
-                            AppConstants.currency,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                            ),
-                          ),
+                          const SizedBox(width: 8),
                         ],
-                      ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.10),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 7,
+                                height: 7,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFF4EFA9D),
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 5),
+                              Text(
+                                AppConstants.currency,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
 
-                // Hero Balance Display
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    Fmt.money(net),
-                    style: const TextStyle(
-                      fontSize: 38,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -0.8,
-                      color: Colors.white,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black26,
-                          blurRadius: 10,
-                          offset: Offset(0, 3),
-                        ),
-                      ],
+                // Hero Balance Display (Tappable to toggle visibility)
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: toggle,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              hidden ? '${AppConstants.currency} ••••••' : Fmt.money(net),
+                              style: TextStyle(
+                                fontSize: hidden ? 34 : 38,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: hidden ? 2.0 : -0.8,
+                                color: Colors.white,
+                                shadows: const [
+                                  Shadow(
+                                    color: Colors.black26,
+                                    blurRadius: 10,
+                                    offset: Offset(0, 3),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(
+                            hidden ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                            size: 18,
+                            color: Colors.white.withOpacity(0.60),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 18),
 
                 // Income & Expense Glass Metric Cards
                 Row(
                   children: [
                     Expanded(
-                      child: _GlassMetricBox(
-                        label: 'Income',
-                        amount: income,
-                        isIncome: true,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(16),
+                          onTap: toggle,
+                          child: _GlassMetricBox(
+                            label: 'Income',
+                            amount: income,
+                            isIncome: true,
+                            isHidden: hidden,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -186,6 +266,7 @@ class BalanceCard extends StatelessWidget {
                         label: 'Expense',
                         amount: expense,
                         isIncome: false,
+                        isHidden: false,
                       ),
                     ),
                   ],
@@ -257,11 +338,13 @@ class _GlassMetricBox extends StatelessWidget {
     required this.label,
     required this.amount,
     required this.isIncome,
+    this.isHidden = false,
   });
 
   final String label;
   final double amount;
   final bool isIncome;
+  final bool isHidden;
 
   @override
   Widget build(BuildContext context) {
@@ -299,22 +382,36 @@ class _GlassMetricBox extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  label.tr,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white.withOpacity(0.8),
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      label.tr,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white.withOpacity(0.8),
+                      ),
+                    ),
+                    if (isIncome && isHidden) ...[
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.visibility_off_rounded,
+                        size: 11,
+                        color: Colors.white.withOpacity(0.65),
+                      ),
+                    ],
+                  ],
                 ),
                 const SizedBox(height: 2),
                 FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
-                    Fmt.money(amount),
-                    style: const TextStyle(
-                      fontSize: 15,
+                    isHidden ? '••••••' : Fmt.money(amount),
+                    style: TextStyle(
+                      fontSize: isHidden ? 16 : 15,
                       fontWeight: FontWeight.w800,
+                      letterSpacing: isHidden ? 1.5 : 0,
                       color: Colors.white,
                     ),
                   ),

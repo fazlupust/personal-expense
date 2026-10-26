@@ -163,7 +163,13 @@ class DashboardView extends StatelessWidget {
               const SizedBox(height: 6),
               AdaptiveColumns(
                 left: [
-                  BalanceCard(income: income, expense: expense, budget: s.budget),
+                  BalanceCard(
+                    income: income,
+                    expense: expense,
+                    budget: s.budget,
+                    isHidden: s.isBalanceHidden,
+                    onToggleVisibility: s.toggleBalanceVisibility,
+                  ),
                   DashboardStatsCard(
                     controller: tc,
                     income: income,
@@ -171,6 +177,7 @@ class DashboardView extends StatelessWidget {
                     byCategory: byCat,
                     entryCount: rows.length,
                     daily: tc.dailyExpense(rows),
+                    isHidden: s.isBalanceHidden,
                   ),
                 ],
                 right: [

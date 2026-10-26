@@ -20,8 +20,16 @@ class SettingsController extends GetxController {
   double budget = 0;
   String defaultAccount = AppConstants.accounts.first;
   String? budgetError;
+  bool showIncome = true;
+  bool isBalanceHidden = false;
 
   Locale get locale => Locale(langCode);
+
+  bool get isDarkMode {
+    if (themeMode == ThemeMode.dark) return true;
+    if (themeMode == ThemeMode.light) return false;
+    return WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark;
+  }
 
   @override
   void onInit() {
@@ -45,6 +53,8 @@ class SettingsController extends GetxController {
     if (raw == null) {
       final sys = WidgetsBinding.instance.platformDispatcher.locale.languageCode;
       langCode = sys == 'bn' ? 'bn' : 'en';
+      showIncome = true;
+      isBalanceHidden = false;
       return;
     }
     try {
@@ -54,6 +64,8 @@ class SettingsController extends GetxController {
       name = (m['name'] as String?) ?? '';
       budget = (m['budget'] as num?)?.toDouble() ?? 0;
       defaultAccount = (m['account'] as String?) ?? defaultAccount;
+      showIncome = (m['show_income'] as bool?) ?? true;
+      isBalanceHidden = !showIncome;
     } catch (_) {
       // Corrupt data: fall back to defaults.
     }
@@ -67,6 +79,7 @@ class SettingsController extends GetxController {
           'name': name,
           'budget': budget,
           'account': defaultAccount,
+          'show_income': showIncome,
         }),
       );
 
@@ -75,6 +88,10 @@ class SettingsController extends GetxController {
     Get.changeThemeMode(mode);
     _persist();
     update();
+  }
+
+  void toggleTheme() {
+    setTheme(isDarkMode ? ThemeMode.light : ThemeMode.dark);
   }
 
   void setLanguage(String code) {
@@ -87,6 +104,18 @@ class SettingsController extends GetxController {
   void setDefaultAccount(String account) {
     defaultAccount = account;
     _persist();
+    update();
+  }
+
+  void setShowIncome(bool val) {
+    showIncome = val;
+    isBalanceHidden = !val;
+    _persist();
+    update();
+  }
+
+  void toggleBalanceVisibility() {
+    isBalanceHidden = !isBalanceHidden;
     update();
   }
 

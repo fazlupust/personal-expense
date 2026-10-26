@@ -15,6 +15,7 @@ class DashboardStatsCard extends StatelessWidget {
     required this.byCategory,
     required this.entryCount,
     required this.daily,
+    this.isHidden = false,
   });
 
   final TransactionsController controller;
@@ -23,10 +24,13 @@ class DashboardStatsCard extends StatelessWidget {
   final Map<String, double> byCategory;
   final int entryCount;
   final List<double> daily;
+  final bool isHidden;
 
   @override
   Widget build(BuildContext context) {
-    final rate = income > 0 ? '${Fmt.count(((income - expense) / income * 100).round())}%' : '–';
+    final rate = isHidden
+        ? '••%'
+        : (income > 0 ? '${Fmt.count(((income - expense) / income * 100).round())}%' : '–');
     final top = byCategory.isEmpty ? '–' : byCategory.keys.first.tr;
     return AppCard(
       child: Column(

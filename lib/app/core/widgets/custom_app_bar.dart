@@ -16,6 +16,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.leading,
     this.actions,
     this.showLanguageToggle = true,
+    this.showThemeToggle = true,
     this.showLogout = true,
   });
 
@@ -26,6 +27,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget? leading;
   final List<Widget>? actions;
   final bool showLanguageToggle;
+  final bool showThemeToggle;
   final bool showLogout;
 
   @override
@@ -194,7 +196,51 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               // Custom user actions if any
               if (actions != null) ...actions!,
 
-              // Right 1: Language Switcher (EN | বাংলা)
+              // Right 1: Theme Switcher (Dark / Light)
+              if (showThemeToggle && Get.isRegistered<SettingsController>()) ...[
+                GetBuilder<SettingsController>(
+                  builder: (s) {
+                    final isDark = s.isDarkMode;
+                    return Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(20),
+                        onTap: s.toggleTheme,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: p.bg,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: p.line),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+                                size: 14,
+                                color: isDark ? const Color(0xFFF1C40F) : const Color(0xFF7F8C8D),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                isDark ? 'Light'.tr : 'Dark'.tr,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: p.ink,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(width: 8),
+              ],
+
+              // Right 2: Language Switcher (EN | বাংলা)
               if (showLanguageToggle && Get.isRegistered<SettingsController>()) ...[
                 GetBuilder<SettingsController>(
                   builder: (s) {
