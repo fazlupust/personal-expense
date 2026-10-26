@@ -211,6 +211,40 @@ class SettingsView extends StatelessWidget {
                     ]),
                   ),
 
+                  // Personal Notes & Debts Link
+                  AppCard(
+                    flush: true,
+                    child: InkWell(
+                      onTap: () => Get.toNamed(AppRoutes.notes),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                        child: Row(
+                          children: [
+                            Icon(Icons.sticky_note_2_outlined, color: p.income),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Personal Notes & Debts'.tr,
+                                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: p.ink),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Keep personal reminders, debts & loans'.tr,
+                                    style: TextStyle(fontSize: 12, color: p.mute),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Icon(Icons.chevron_right, color: p.mute),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
                   // Category Management Link
                   AppCard(
                     flush: true,

@@ -11,6 +11,7 @@ import 'app/core/theme/app_theme.dart';
 import 'app/data/services/app_update_service.dart';
 import 'app/data/services/auth_service.dart';
 import 'app/data/services/category_service.dart';
+import 'app/data/services/note_service.dart';
 import 'app/data/services/transaction_service.dart';
 import 'app/features/settings/controllers/settings_controller.dart';
 import 'app/routes/app_pages.dart';
@@ -29,6 +30,7 @@ Future<void> main() async {
   Get.put(AuthService(), permanent: true);
   Get.put(CategoryService(), permanent: true);
   Get.put(TransactionService(), permanent: true);
+  Get.put(NoteService(), permanent: true);
   // Settings (theme + language) must exist before the first frame.
   final settings = Get.put(SettingsController(prefs), permanent: true);
   runApp(PersonalExpenseApp(settings: settings));
