@@ -279,23 +279,38 @@ class EntryFormSheet extends StatelessWidget {
 
                         const SizedBox(height: 16),
 
-                        // Submit Button
-                        AppButton('Save entry', onPressed: () {
-                          if (f.save()) Navigator.of(context).pop();
-                        }),
+                        // Action Buttons: Cancel and Submit together side-by-side
+                        Row(
+                          children: [
+                            Expanded(
+                              child: AppButton(
+                                'Cancel',
+                                style: AppButtonStyle.outlined,
+                                onPressed: () => Navigator.of(context).pop(),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              flex: 2,
+                              child: AppButton(
+                                'Save entry',
+                                onPressed: () {
+                                  if (f.save()) Navigator.of(context).pop();
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
 
                         if (f.isEdit)
-                          AppButton('Delete entry', style: AppButtonStyle.danger, onPressed: () {
-                            f.delete();
-                            Navigator.of(context).pop();
-                          }),
-
-                        Center(
-                          child: TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: Text('Cancel'.tr, style: TextStyle(color: p.mute, fontSize: 15)),
+                          AppButton(
+                            'Delete entry',
+                            style: AppButtonStyle.danger,
+                            onPressed: () {
+                              f.delete();
+                              Navigator.of(context).pop();
+                            },
                           ),
-                        ),
                       ],
                     ),
                   ),

@@ -184,5 +184,14 @@ class AppTranslations extends Translations {
     'Dec': 'ডিসে',
     'Category created successfully': 'খাত সফলভাবে তৈরি হয়েছে',
     'Success': 'সফল',
+    'Generated Report': 'রিপোর্ট সারাংশ',
+    'Financial Highlights': 'আর্থিক সারসংক্ষেপ',
+    'Transactions in this period': 'এই সময়ের লেনদেনসমূহ',
+    'No transactions for this period.': 'এই সময়ের কোনো লেনদেন নেই।',
+    'Surplus': 'উদ্বৃত্ত',
+    'Deficit': 'ঘাটতি',
+    'Daily average': 'দৈনিক গড়',
+    'Account Breakdown': 'অ্যাকাউন্ট অনুযায়ী',
+    'Net Saved': 'নিট সঞ্চয়',
   };
 }
