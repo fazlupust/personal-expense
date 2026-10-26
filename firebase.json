@@ -1,0 +1,43 @@
+{
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "personal-expense-app-517f8",
+          "appId": "1:987439598578:android:3195d62f8df7d85a08f96b",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "personal-expense-app-517f8",
+          "appId": "1:987439598578:ios:e2a497d035dc7de008f96b",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "macos": {
+        "default": {
+          "projectId": "personal-expense-app-517f8",
+          "appId": "1:987439598578:ios:e2a497d035dc7de008f96b",
+          "uploadDebugSymbols": false,
+          "fileOutput": "macos/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "personal-expense-app-517f8",
+          "configurations": {
+            "android": "1:987439598578:android:3195d62f8df7d85a08f96b",
+            "ios": "1:987439598578:ios:e2a497d035dc7de008f96b",
+            "macos": "1:987439598578:ios:e2a497d035dc7de008f96b",
+            "web": "1:987439598578:web:c166a473482109d008f96b"
+          }
+        }
+      }
+    }
+  }
+}

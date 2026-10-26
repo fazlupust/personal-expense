@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 
-class ShellController extends GetxController {
+class NavigationController extends GetxController {
   int index = 0;
 
   void select(int i) {

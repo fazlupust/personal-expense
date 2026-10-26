@@ -7,7 +7,7 @@ import '../../../core/utils/responsive.dart';
 import '../../../data/models/entry_type.dart';
 import '../../reports/views/components/category_bars.dart';
 import '../../settings/controllers/settings_controller.dart';
-import '../../shell/controllers/shell_controller.dart';
+import '../../navigation/controllers/navigation_controller.dart';
 import '../../transactions/controllers/transactions_controller.dart';
 import '../../transactions/views/components/entry_form_sheet.dart';
 import '../../transactions/views/components/month_switcher.dart';
@@ -57,7 +57,7 @@ class DashboardView extends StatelessWidget {
                   AppCard(
                     title: 'Recent transactions',
                     action: 'See all',
-                    onAction: () => Get.find<ShellController>().select(1),
+                    onAction: () => Get.find<NavigationController>().select(1),
                     flush: true,
                     child: recent.isEmpty
                         ? Padding(

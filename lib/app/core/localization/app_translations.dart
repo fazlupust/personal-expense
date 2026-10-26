@@ -117,5 +117,23 @@ class AppTranslations extends Translations {
     'Bank': 'ব্যাংক',
     'Mobile wallet': 'মোবাইল ওয়ালেট',
     'Card': 'কার্ড',
+    // Authentication
+    'Welcome Back': 'স্বাগতম',
+    'Sign in with your phone & password': 'আপনার ফোন নম্বর ও পাসওয়ার্ড দিয়ে লগইন করুন',
+    'Phone Number': 'মোবাইল নম্বর',
+    'Phone Number *': 'মোবাইল নম্বর *',
+    'Password': 'পাসওয়ার্ড',
+    'Password *': 'পাসওয়ার্ড *',
+    'Log In': 'লগইন',
+    'Register': 'রেজিস্টার',
+    "Don't have an account? ": 'অ্যাকাউন্ট নেই? ',
+    'Create Account': 'নতুন অ্যাকাউন্ট তৈরি',
+    'User Information': 'ব্যবহারকারীর তথ্য',
+    'Fill out the details to create your account': 'অ্যাকাউন্ট তৈরি করতে তথ্য দিন',
+    'Complete Registration': 'রেজিস্ট্রেশন সম্পন্ন করুন',
+    'Sign Out': 'লগআউট',
+    'Sign In with Phone': 'ফোন দিয়ে লগইন করুন',
+    'Continue as Guest': 'লগইন ছাড়া দেখুন',
+    'Personal Expense User': 'ব্যক্তিগত খরচ ইউজার',
   };
 }

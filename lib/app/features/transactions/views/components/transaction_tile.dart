@@ -52,7 +52,15 @@ class TransactionTile extends StatelessWidget {
                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: p.ink),
                   ),
                   Text(
-                    '${entry.category.tr} · ${entry.account.tr} · ${Fmt.date(entry.date, 'd MMM')}',
+                    [
+                      entry.category.tr,
+                      entry.account.tr,
+                      Fmt.date(entry.date, 'd MMM'),
+                      if (entry.latitude != null && entry.longitude != null)
+                        '📍 ${entry.latitude!.toStringAsFixed(2)}, ${entry.longitude!.toStringAsFixed(2)}',
+                      if (entry.deviceInfo != null && entry.deviceInfo!.isNotEmpty)
+                        entry.deviceInfo!,
+                    ].join(' · '),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(fontSize: 12, color: p.mute),

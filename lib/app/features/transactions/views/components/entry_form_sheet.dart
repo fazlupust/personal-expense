@@ -130,6 +130,47 @@ class EntryFormSheet extends StatelessWidget {
                       child: Text(Fmt.date(f.date, 'd MMMM yyyy'), style: TextStyle(color: p.ink)),
                     ),
                   ),
+                  if (f.isEdit && (entry?.latitude != null || entry?.deviceInfo != null)) ...[
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: p.bg,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.info_outline, size: 16, color: p.mute),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              [
+                                if (entry?.latitude != null && entry?.longitude != null)
+                                  '📍 ${entry!.latitude!.toStringAsFixed(4)}, ${entry!.longitude!.toStringAsFixed(4)}',
+                                if (entry?.deviceInfo != null && entry!.deviceInfo!.isNotEmpty)
+                                  '📱 ${entry!.deviceInfo!}',
+                              ].join('  ·  '),
+                              style: TextStyle(fontSize: 12, color: p.mute),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ] else if (!f.isEdit) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(Icons.my_location, size: 14, color: p.mute.withOpacity(0.7)),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            'Location & device info will be attached automatically'.tr,
+                            style: TextStyle(fontSize: 11, color: p.mute.withOpacity(0.8)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                   const SizedBox(height: 14),
                   AppButton('Save entry', onPressed: () {
                     if (f.save()) Navigator.of(context).pop();

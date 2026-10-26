@@ -96,15 +96,28 @@ class EntryFormController extends GetxController {
       return false;
     }
     amountError = null;
+
+    final selCategory = _categories.firstWhereOrNull((c) => c.name == category);
+    final catNameBn = selCategory?.nameBn ?? (category ?? 'Other');
+    final catNameEn = selCategory?.nameEn ?? (category ?? 'Other');
+    final catId = selCategory?.id ?? 'other';
+
     Get.find<TransactionsController>().save(
       TransactionModel(
-        id: existing?.id ?? DateTime.now().millisecondsSinceEpoch,
+        id: existing?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        userId: existing?.userId ?? '',
+        categoryId: catId,
+        categoryNameBn: catNameBn,
+        categoryNameEn: catNameEn,
         type: type,
         amount: a,
-        note: noteCtrl.text.trim(),
-        category: category ?? 'Other',
+        noteBn: noteCtrl.text.trim(),
+        noteEn: noteCtrl.text.trim(),
         account: account,
         date: date,
+        latitude: existing?.latitude,
+        longitude: existing?.longitude,
+        deviceInfo: existing?.deviceInfo,
       ),
     );
     return true;

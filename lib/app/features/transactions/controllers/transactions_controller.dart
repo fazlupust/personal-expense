@@ -1,12 +1,12 @@
-import 'dart:convert';
-
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../core/constants/app_constants.dart';
 import '../../../data/models/entry_type.dart';
 import '../../../data/models/transaction_model.dart';
+import '../../../data/services/auth_service.dart';
+import '../../../data/services/transaction_service.dart';
 
 enum TxFilter { all, income, expense }
 
@@ -21,34 +21,47 @@ class TransactionsController extends GetxController {
   bool tableMode = false;
   String query = '';
 
+  StreamSubscription<List<TransactionModel>>? _sub;
+
   @override
   void onInit() {
     super.onInit();
-    _load();
+    _initTransactions();
   }
 
   @override
   void onClose() {
     searchCtrl.dispose();
+    _sub?.cancel();
     super.onClose();
   }
 
-  void _load() {
-    final raw = _prefs.getString(AppConstants.prefsEntries);
-    if (raw == null) return;
-    try {
-      entries = (jsonDecode(raw) as List)
-          .map((e) => TransactionModel.fromJson(e as Map<String, dynamic>))
-          .toList();
-    } catch (_) {
-      entries = [];
+  void _initTransactions() {
+    if (Get.isRegistered<TransactionService>() && Get.isRegistered<AuthService>()) {
+      final auth = Get.find<AuthService>();
+      final txService = Get.find<TransactionService>();
+
+      ever(auth.firebaseUser, (user) {
+        _sub?.cancel();
+        if (user != null) {
+          _sub = txService.streamUserTransactions(user.uid).listen((list) {
+            entries = list;
+            update();
+          });
+        } else {
+          entries = [];
+          update();
+        }
+      });
+
+      if (auth.currentUid != null) {
+        _sub = txService.streamUserTransactions(auth.currentUid!).listen((list) {
+          entries = list;
+          update();
+        });
+      }
     }
   }
-
-  Future<void> _persist() => _prefs.setString(
-        AppConstants.prefsEntries,
-        jsonEncode(entries.map((e) => e.toJson()).toList()),
-      );
 
   static int _newestFirst(TransactionModel a, TransactionModel b) {
     final c = b.date.compareTo(a.date);
@@ -125,21 +138,46 @@ class TransactionsController extends GetxController {
     update();
   }
 
-  void save(TransactionModel m) {
-    final i = entries.indexWhere((e) => e.id == m.id);
-    if (i >= 0) {
-      entries[i] = m;
+  Future<void> save(TransactionModel m) async {
+    if (Get.isRegistered<TransactionService>()) {
+      final txService = Get.find<TransactionService>();
+      final exists = entries.any((e) => e.id == m.id);
+      if (exists) {
+        await txService.updateTransaction(m);
+      } else {
+        await txService.addTransaction(
+          categoryId: m.categoryId,
+          categoryNameBn: m.categoryNameBn,
+          categoryNameEn: m.categoryNameEn,
+          type: m.type,
+          amount: m.amount,
+          noteBn: m.noteBn,
+          noteEn: m.noteEn,
+          date: m.date,
+          account: m.account,
+          latitude: m.latitude,
+          longitude: m.longitude,
+          deviceInfo: m.deviceInfo,
+        );
+      }
     } else {
-      entries.add(m);
+      final i = entries.indexWhere((e) => e.id == m.id);
+      if (i >= 0) {
+        entries[i] = m;
+      } else {
+        entries.add(m);
+      }
+      month = DateTime(m.date.year, m.date.month);
+      update();
     }
-    month = DateTime(m.date.year, m.date.month);
-    _persist();
-    update();
   }
 
-  void remove(int id) {
-    entries.removeWhere((e) => e.id == id);
-    _persist();
-    update();
+  Future<void> remove(String id) async {
+    if (Get.isRegistered<TransactionService>()) {
+      await Get.find<TransactionService>().softDeleteTransaction(id);
+    } else {
+      entries.removeWhere((e) => e.id == id);
+      update();
+    }
   }
 }

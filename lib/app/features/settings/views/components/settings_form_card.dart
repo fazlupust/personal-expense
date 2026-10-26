@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_widgets.dart';
 import '../../controllers/settings_controller.dart';
 
@@ -62,6 +64,19 @@ class SettingsFormCard extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           AppButton('Save settings', onPressed: s.saveProfile),
+          const SizedBox(height: 12),
+          Center(
+            child: FutureBuilder<PackageInfo>(
+              future: PackageInfo.fromPlatform(),
+              builder: (ctx, snapshot) {
+                final v = snapshot.data?.version ?? '1.0.0';
+                return Text(
+                  'Personal Expense v$v',
+                  style: TextStyle(fontSize: 11, color: context.pal.mute.withOpacity(0.6)),
+                );
+              },
+            ),
+          ),
         ],
       ),
     );
