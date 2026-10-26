@@ -78,6 +78,20 @@ class SettingsView extends StatelessWidget {
                                                   style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: p.ink),
                                                 ),
                                               ),
+                                              if (user != null && user.userNo != null) ...[
+                                                const SizedBox(width: 6),
+                                                Container(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                  decoration: BoxDecoration(
+                                                    color: p.ink.withOpacity(0.08),
+                                                    borderRadius: BorderRadius.circular(6),
+                                                  ),
+                                                  child: Text(
+                                                    '#${user.userNo}',
+                                                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: p.ink),
+                                                  ),
+                                                ),
+                                              ],
                                               if (user != null && user.role != 'user') ...[
                                                 const SizedBox(width: 6),
                                                 Container(

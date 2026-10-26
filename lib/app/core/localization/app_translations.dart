@@ -135,5 +135,11 @@ class AppTranslations extends Translations {
     'Sign In with Phone': 'ফোন দিয়ে লগইন করুন',
     'Continue as Guest': 'লগইন ছাড়া দেখুন',
     'Personal Expense User': 'ব্যক্তিগত খরচ ইউজার',
+    'Select Category': 'খাত নির্বাচন করুন',
+    'Search categories...': 'খাত খুঁজুন...',
+    'Voice Input': 'ভয়েস ইনপুট',
+    'No categories found': 'কোনো খাত পাওয়া যায়নি',
+    'Listening...': 'কথা বলুন, শুনছি...',
+    'Microphone not available or permission denied': 'মাইক্রোফোন পাওয়া যায়নি বা পারমিশন নেই',
   };
 }

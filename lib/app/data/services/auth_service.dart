@@ -45,7 +45,16 @@ class AuthService extends GetxService {
     try {
       final doc = await _db.collection('users').doc(uid).get();
       if (doc.exists && doc.data() != null) {
-        final profile = UserModel.fromFirestore(doc);
+        var profile = UserModel.fromFirestore(doc);
+        // Backfill userNo for existing user if missing
+        if (profile.userNo == null) {
+          try {
+            final countSnap = await _db.collection('users').count().get();
+            final assigned = countSnap.count ?? 1;
+            await _db.collection('users').doc(uid).set({'user_no': assigned}, SetOptions(merge: true));
+            profile = profile.copyWith(userNo: assigned);
+          } catch (_) {}
+        }
         userProfile.value = profile;
         return profile;
       }
@@ -100,8 +109,18 @@ class AuthService extends GetxService {
       final loc = await DeviceLocationService.getCurrentLocation();
       final device = await DeviceLocationService.getDeviceSummary();
 
+      // Sequential user ID (1, 2, 3, 4...)
+      int nextUserNo = 1;
+      try {
+        final countSnap = await _db.collection('users').count().get();
+        nextUserNo = (countSnap.count ?? 0) + 1;
+      } catch (_) {
+        nextUserNo = 1;
+      }
+
       final newProfile = UserModel(
         uid: uid,
+        userNo: nextUserNo,
         nameBn: nameBn,
         nameEn: nameEn,
         designationBn: designationBn,

@@ -5,6 +5,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../data/models/category_model.dart';
 import '../../../data/models/entry_type.dart';
 import '../../../data/models/transaction_model.dart';
+import '../../../data/services/voice_service.dart';
 import '../../categories/controllers/categories_controller.dart';
 import '../../settings/controllers/settings_controller.dart';
 import 'transactions_controller.dart';
@@ -21,6 +22,9 @@ class EntryFormController extends GetxController {
   String? category;
   String? amountError;
 
+  bool isListeningAmount = false;
+  bool isListeningNote = false;
+
   bool get isEdit => existing != null;
 
   List<CategoryModel> get _categories => Get.find<CategoriesController>().byType(type);
@@ -32,6 +36,8 @@ class EntryFormController extends GetxController {
     return names;
   }
 
+  List<CategoryModel> get currentCategories => _categories;
+
   List<String> get accountNames {
     final names = List<String>.of(AppConstants.accounts);
     if (!names.contains(account)) names.add(account);
@@ -39,6 +45,13 @@ class EntryFormController extends GetxController {
   }
 
   String emojiOf(String name) => Get.find<CategoriesController>().emojiOf(type, name);
+
+  String displayCategoryName(bool isBn) {
+    if (category == null || category!.isEmpty) return 'Select Category'.tr;
+    final cat = _categories.firstWhereOrNull((c) => c.name == category);
+    if (cat != null) return cat.displayName(isBn);
+    return category!.tr;
+  }
 
   @override
   void onInit() {
@@ -56,12 +69,71 @@ class EntryFormController extends GetxController {
 
   @override
   void onClose() {
+    if (isListeningAmount || isListeningNote) {
+      VoiceService.stop();
+    }
     amountCtrl.dispose();
     noteCtrl.dispose();
     super.onClose();
   }
 
   String _plain(double v) => v % 1 == 0 ? v.toInt().toString() : v.toString();
+
+  void toggleVoiceAmount() {
+    if (isListeningAmount) {
+      VoiceService.stop();
+      isListeningAmount = false;
+      update();
+      return;
+    }
+
+    if (isListeningNote) {
+      VoiceService.stop();
+      isListeningNote = false;
+    }
+
+    VoiceService.startListening(
+      onResult: (words) {
+        final parsed = VoiceService.parseSpokenAmount(words);
+        if (parsed.isNotEmpty) {
+          amountCtrl.text = parsed;
+          amountError = null;
+          update();
+        }
+      },
+      onListeningChange: (listening) {
+        isListeningAmount = listening;
+        update();
+      },
+    );
+  }
+
+  void toggleVoiceNote() {
+    if (isListeningNote) {
+      VoiceService.stop();
+      isListeningNote = false;
+      update();
+      return;
+    }
+
+    if (isListeningAmount) {
+      VoiceService.stop();
+      isListeningAmount = false;
+    }
+
+    VoiceService.startListening(
+      onResult: (words) {
+        if (words.isNotEmpty) {
+          noteCtrl.text = words;
+          update();
+        }
+      },
+      onListeningChange: (listening) {
+        isListeningNote = listening;
+        update();
+      },
+    );
+  }
 
   void setType(EntryType t) {
     type = t;

@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class UserModel {
   const UserModel({
     required this.uid,
+    this.userNo,
     required this.nameBn,
     required this.nameEn,
     required this.designationBn,
@@ -22,6 +23,7 @@ class UserModel {
   });
 
   final String uid;
+  final int? userNo; // Sequential numeric user ID e.g. 1, 2, 3...
   final String nameBn;
   final String nameEn;
   final String designationBn;
@@ -52,6 +54,7 @@ class UserModel {
   Map<String, dynamic> toMap() {
     return {
       'uid': uid,
+      'user_no': userNo,
       'name_bn': nameBn,
       'name_en': nameEn,
       'designation_bn': designationBn,
@@ -84,8 +87,16 @@ class UserModel {
       return null;
     }
 
+    int? parseUserNo(dynamic val) {
+      if (val is int) return val;
+      if (val is num) return val.toInt();
+      if (val is String) return int.tryParse(val);
+      return null;
+    }
+
     return UserModel(
       uid: (map['uid'] as String?) ?? docId,
+      userNo: parseUserNo(map['user_no']),
       nameBn: (map['name_bn'] as String?) ?? '',
       nameEn: (map['name_en'] as String?) ?? '',
       designationBn: (map['designation_bn'] as String?) ?? '',
@@ -112,6 +123,7 @@ class UserModel {
 
   UserModel copyWith({
     String? uid,
+    int? userNo,
     String? nameBn,
     String? nameEn,
     String? designationBn,
@@ -131,6 +143,7 @@ class UserModel {
   }) {
     return UserModel(
       uid: uid ?? this.uid,
+      userNo: userNo ?? this.userNo,
       nameBn: nameBn ?? this.nameBn,
       nameEn: nameEn ?? this.nameEn,
       designationBn: designationBn ?? this.designationBn,

@@ -32,7 +32,21 @@ class SettingsFormCard extends StatelessWidget {
             controller: s.budgetCtrl,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
-            decoration: InputDecoration(errorText: s.budgetError?.tr),
+            decoration: InputDecoration(
+              errorText: s.budgetError?.tr,
+              prefixIcon: Container(
+                width: 44,
+                alignment: Alignment.center,
+                child: Text(
+                  AppConstants.currency,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: context.pal.income,
+                  ),
+                ),
+              ),
+            ),
           ),
           const SizedBox(height: 10),
           const FieldLabel('Language'),
