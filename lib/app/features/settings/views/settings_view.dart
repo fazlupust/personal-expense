@@ -10,6 +10,7 @@ import '../../../data/services/auth_service.dart';
 import '../../../routes/app_routes.dart';
 import '../../transactions/controllers/transactions_controller.dart';
 import '../controllers/settings_controller.dart';
+import 'components/change_password_sheet.dart';
 import 'components/settings_form_card.dart';
 
 /// "Profile" tab: profile header, lifetime stats, settings, categories, and auth controls.
@@ -152,6 +153,21 @@ class SettingsView extends StatelessWidget {
                                 const SizedBox(height: 14),
                                 Row(
                                   children: [
+                                    if (isLoggedIn) ...[
+                                      Expanded(
+                                        child: OutlinedButton.icon(
+                                          onPressed: () => showChangePasswordSheet(context),
+                                          icon: const Icon(Icons.lock_reset_rounded, size: 18),
+                                          label: Text('Change Password'.tr),
+                                          style: OutlinedButton.styleFrom(
+                                            foregroundColor: p.ink,
+                                            side: BorderSide(color: p.line),
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                    ],
                                     Expanded(
                                       child: OutlinedButton.icon(
                                         onPressed: () {

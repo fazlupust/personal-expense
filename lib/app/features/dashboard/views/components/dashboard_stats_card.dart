@@ -16,6 +16,7 @@ class DashboardStatsCard extends StatelessWidget {
     required this.entryCount,
     required this.daily,
     this.isHidden = false,
+    this.isExpenseHidden = false,
   });
 
   final TransactionsController controller;
@@ -25,12 +26,14 @@ class DashboardStatsCard extends StatelessWidget {
   final int entryCount;
   final List<double> daily;
   final bool isHidden;
+  final bool isExpenseHidden;
 
   @override
   Widget build(BuildContext context) {
-    final rate = isHidden
+    final rate = (isHidden || isExpenseHidden)
         ? '••%'
         : (income > 0 ? '${Fmt.count(((income - expense) / income * 100).round())}%' : '–');
+    final avgExpense = isExpenseHidden ? '••••••' : Fmt.money(expense / controller.elapsedDays);
     final top = byCategory.isEmpty ? '–' : byCategory.keys.first.tr;
     return AppCard(
       child: Column(
@@ -38,7 +41,7 @@ class DashboardStatsCard extends StatelessWidget {
         children: [
           StatGrid(items: [
             StatItem('Savings rate', rate),
-            StatItem('Avg expense per day', Fmt.money(expense / controller.elapsedDays)),
+            StatItem('Avg expense per day', avgExpense),
             StatItem('Top category', top),
             StatItem('Entries', Fmt.count(entryCount)),
           ]),

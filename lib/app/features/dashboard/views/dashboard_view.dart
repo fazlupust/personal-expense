@@ -193,6 +193,8 @@ class DashboardView extends StatelessWidget {
                     budget: s.budget,
                     isHidden: s.isBalanceHidden,
                     onToggleVisibility: s.toggleBalanceVisibility,
+                    isExpenseHidden: s.isExpenseHidden,
+                    onToggleExpenseVisibility: s.toggleExpenseVisibility,
                   ),
                   DashboardStatsCard(
                     controller: tc,
@@ -202,6 +204,7 @@ class DashboardView extends StatelessWidget {
                     entryCount: rows.length,
                     daily: tc.dailyExpense(rows),
                     isHidden: s.isBalanceHidden,
+                    isExpenseHidden: s.isExpenseHidden,
                   ),
                 ],
                 right: [

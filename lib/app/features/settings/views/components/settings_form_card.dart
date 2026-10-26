@@ -9,6 +9,8 @@ import '../../../../core/theme/app_widgets.dart';
 import '../../controllers/settings_controller.dart';
 
 import '../../../../data/services/app_update_service.dart';
+import '../../../../data/services/auth_service.dart';
+import 'change_password_sheet.dart';
 
 class SettingsFormCard extends StatelessWidget {
   const SettingsFormCard({super.key, required this.settings});
@@ -79,6 +81,8 @@ class SettingsFormCard extends StatelessWidget {
             },
           ),
           const SizedBox(height: 14),
+
+          // Show income & balance toggle
           Container(
             decoration: BoxDecoration(
               color: context.pal.bg,
@@ -138,8 +142,93 @@ class SettingsFormCard extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(height: 8),
+
+          // Show expense toggle
+          Container(
+            decoration: BoxDecoration(
+              color: context.pal.bg,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: context.pal.line),
+            ),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () => s.setShowExpense(!s.showExpense),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: Checkbox(
+                        value: s.showExpense,
+                        activeColor: context.pal.income,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                        onChanged: (v) {
+                          if (v != null) s.setShowExpense(v);
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Show expense'.tr,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: context.pal.ink,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Display expense on dashboard'.tr,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: context.pal.mute,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      s.showExpense ? Icons.visibility_rounded : Icons.visibility_off_rounded,
+                      size: 20,
+                      color: s.showExpense ? context.pal.income : context.pal.mute,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
           const SizedBox(height: 16),
           AppButton('Save settings', onPressed: s.saveProfile),
+
+          // Change password option if logged in
+          if (Get.isRegistered<AuthService>() && Get.find<AuthService>().isLoggedIn) ...[
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: () => showChangePasswordSheet(context),
+              icon: Icon(Icons.lock_reset_rounded, size: 16, color: context.pal.ink),
+              label: Text(
+                'Change Password'.tr,
+                style: TextStyle(
+                  color: context.pal.ink,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(40),
+                side: BorderSide(color: context.pal.line),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
+          ],
+
           const SizedBox(height: 8),
           OutlinedButton.icon(
             onPressed: () => AppUpdateService.to.checkManually(),

@@ -114,6 +114,29 @@ void main() {
       expect(settings.isBalanceHidden, isFalse);
     });
 
+    test('setShowExpense toggles showExpense and isExpenseHidden', () {
+      expect(settings.showExpense, isTrue);
+      expect(settings.isExpenseHidden, isFalse);
+
+      settings.setShowExpense(false);
+      expect(settings.showExpense, isFalse);
+      expect(settings.isExpenseHidden, isTrue);
+
+      settings.setShowExpense(true);
+      expect(settings.showExpense, isTrue);
+      expect(settings.isExpenseHidden, isFalse);
+    });
+
+    test('toggleExpenseVisibility toggles isExpenseHidden independently', () {
+      expect(settings.isExpenseHidden, isFalse);
+
+      settings.toggleExpenseVisibility();
+      expect(settings.isExpenseHidden, isTrue);
+
+      settings.toggleExpenseVisibility();
+      expect(settings.isExpenseHidden, isFalse);
+    });
+
     test('toggleTheme alternates between light and dark modes', () {
       settings.setTheme(ThemeMode.light);
       expect(settings.isDarkMode, isFalse);

@@ -184,4 +184,38 @@ class AuthService extends GetxService {
     await _db.collection('users').doc(currentUid).update(updated.toMap());
     userProfile.value = updated;
   }
+
+  /// Change password for currently logged-in user
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw FirebaseAuthException(
+        code: 'user-not-found',
+        message: 'No user is currently logged in.',
+      );
+    }
+
+    final email = user.email;
+    if (email == null) {
+      throw FirebaseAuthException(
+        code: 'invalid-email',
+        message: 'User email not found.',
+      );
+    }
+
+    isLoading.value = true;
+    try {
+      // Re-authenticate user with current password
+      final cred = EmailAuthProvider.credential(email: email, password: currentPassword);
+      await user.reauthenticateWithCredential(cred);
+
+      // Update password
+      await user.updatePassword(newPassword);
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }

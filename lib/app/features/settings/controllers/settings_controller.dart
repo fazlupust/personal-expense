@@ -22,6 +22,8 @@ class SettingsController extends GetxController {
   String? budgetError;
   bool showIncome = true;
   bool isBalanceHidden = false;
+  bool showExpense = true;
+  bool isExpenseHidden = false;
 
   Locale get locale => Locale(langCode);
 
@@ -55,6 +57,8 @@ class SettingsController extends GetxController {
       langCode = sys == 'bn' ? 'bn' : 'en';
       showIncome = true;
       isBalanceHidden = false;
+      showExpense = true;
+      isExpenseHidden = false;
       return;
     }
     try {
@@ -66,6 +70,8 @@ class SettingsController extends GetxController {
       defaultAccount = (m['account'] as String?) ?? defaultAccount;
       showIncome = (m['show_income'] as bool?) ?? true;
       isBalanceHidden = !showIncome;
+      showExpense = (m['show_expense'] as bool?) ?? true;
+      isExpenseHidden = !showExpense;
     } catch (_) {
       // Corrupt data: fall back to defaults.
     }
@@ -80,6 +86,7 @@ class SettingsController extends GetxController {
           'budget': budget,
           'account': defaultAccount,
           'show_income': showIncome,
+          'show_expense': showExpense,
         }),
       );
 
@@ -116,6 +123,18 @@ class SettingsController extends GetxController {
 
   void toggleBalanceVisibility() {
     isBalanceHidden = !isBalanceHidden;
+    update();
+  }
+
+  void setShowExpense(bool val) {
+    showExpense = val;
+    isExpenseHidden = !val;
+    _persist();
+    update();
+  }
+
+  void toggleExpenseVisibility() {
+    isExpenseHidden = !isExpenseHidden;
     update();
   }
 

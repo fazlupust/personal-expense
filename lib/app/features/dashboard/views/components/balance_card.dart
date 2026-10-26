@@ -13,6 +13,8 @@ class BalanceCard extends StatelessWidget {
     required this.budget,
     this.isHidden = false,
     this.onToggleVisibility,
+    this.isExpenseHidden = false,
+    this.onToggleExpenseVisibility,
   });
 
   final double income;
@@ -20,12 +22,16 @@ class BalanceCard extends StatelessWidget {
   final double budget;
   final bool isHidden;
   final VoidCallback? onToggleVisibility;
+  final bool isExpenseHidden;
+  final VoidCallback? onToggleExpenseVisibility;
 
   @override
   Widget build(BuildContext context) {
     final s = Get.isRegistered<SettingsController>() ? SettingsController.to : null;
     final hidden = isHidden || (s?.isBalanceHidden ?? false);
+    final expenseHidden = isExpenseHidden || (s?.isExpenseHidden ?? false);
     final toggle = onToggleVisibility ?? s?.toggleBalanceVisibility;
+    final toggleExpense = onToggleExpenseVisibility ?? s?.toggleExpenseVisibility;
     final net = income - expense;
     final over = budget > 0 && expense > budget;
 
@@ -256,17 +262,26 @@ class BalanceCard extends StatelessWidget {
                             amount: income,
                             isIncome: true,
                             isHidden: hidden,
+                            onToggle: toggle,
                           ),
                         ),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: _GlassMetricBox(
-                        label: 'Expense',
-                        amount: expense,
-                        isIncome: false,
-                        isHidden: false,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(16),
+                          onTap: toggleExpense,
+                          child: _GlassMetricBox(
+                            label: 'Expense',
+                            amount: expense,
+                            isIncome: false,
+                            isHidden: expenseHidden,
+                            onToggle: toggleExpense,
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -339,12 +354,14 @@ class _GlassMetricBox extends StatelessWidget {
     required this.amount,
     required this.isIncome,
     this.isHidden = false,
+    this.onToggle,
   });
 
   final String label;
   final double amount;
   final bool isIncome;
   final bool isHidden;
+  final VoidCallback? onToggle;
 
   @override
   Widget build(BuildContext context) {
@@ -383,22 +400,35 @@ class _GlassMetricBox extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      label.tr,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white.withOpacity(0.8),
+                    Flexible(
+                      child: Text(
+                        label.tr,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white.withOpacity(0.8),
+                        ),
                       ),
                     ),
-                    if (isIncome && isHidden) ...[
+                    if (onToggle != null) ...[
                       const SizedBox(width: 4),
-                      Icon(
-                        Icons.visibility_off_rounded,
-                        size: 11,
-                        color: Colors.white.withOpacity(0.65),
+                      InkWell(
+                        onTap: onToggle,
+                        borderRadius: BorderRadius.circular(10),
+                        child: Padding(
+                          padding: const EdgeInsets.all(2.0),
+                          child: Icon(
+                            isHidden ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                            size: 13,
+                            color: isHidden
+                                ? const Color(0xFFFFB3A7)
+                                : Colors.white.withOpacity(0.85),
+                          ),
+                        ),
                       ),
                     ],
                   ],
