@@ -22,6 +22,7 @@ class AppUpdateService extends GetxService {
   Future<void> onInit() async {
     super.onInit();
     await _loadLocalVersion();
+    unawaited(fetchUpdateConfig());
   }
 
   Future<void> _loadLocalVersion() async {

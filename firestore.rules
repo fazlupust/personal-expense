@@ -50,10 +50,8 @@ service cloud.firestore {
 
     // 4. App Config (Version & Update check)
     match /app_config/{configId} {
-      // Anyone can read app_config (even before logging in) to check for updates
-      allow read: if true;
-      // Only admin or authenticated can create/update
-      allow write: if isAuthenticated();
+      // Anyone can read and initialize config
+      allow read, write: if true;
     }
   }
 }
