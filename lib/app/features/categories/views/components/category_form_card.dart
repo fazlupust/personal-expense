@@ -32,7 +32,7 @@ class CategoryFormCard extends StatelessWidget {
             controller: c.nameCtrl,
             textCapitalization: TextCapitalization.sentences,
             inputFormatters: [LengthLimitingTextInputFormatter(24)],
-            onChanged: (_) => c.clearError(),
+            onChanged: c.onNameChanged,
             onSubmitted: (_) => c.create(),
             decoration: InputDecoration(errorText: c.nameError?.tr),
           ),

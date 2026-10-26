@@ -178,5 +178,7 @@ class AppTranslations extends Translations {
     'Oct': 'অক্টো',
     'Nov': 'নভে',
     'Dec': 'ডিসে',
+    'Category created successfully': 'খাত সফলভাবে তৈরি হয়েছে',
+    'Success': 'সফল',
   };
 }

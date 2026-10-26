@@ -79,9 +79,68 @@ class CategoriesController extends GetxController {
     return '•';
   }
 
+  bool isDuplicate(String inputName, EntryType type) {
+    final clean = inputName.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+    if (clean.isEmpty) return false;
+
+    // Check across all loaded categories
+    for (final c in categories) {
+      if (c.type != type) continue;
+
+      final en = c.nameEn.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+      final bn = c.nameBn.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+      final legacy = c.name.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+      final tr = c.name.tr.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+
+      if (clean == en || clean == bn || clean == legacy || clean == tr) {
+        return true;
+      }
+    }
+
+    // Also check default categories as a fallback
+    for (final d in AppConstants.defaultCategories) {
+      if (d.type != type) continue;
+      final en = d.nameEn.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+      final bn = d.nameBn.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+      final legacy = d.name.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+      final tr = d.name.tr.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+
+      if (clean == en || clean == bn || clean == legacy || clean == tr) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  void onNameChanged(String val) {
+    final trimmed = val.trim();
+    if (trimmed.isEmpty) {
+      if (nameError != null) {
+        nameError = null;
+        update();
+      }
+      return;
+    }
+
+    if (isDuplicate(trimmed, formType)) {
+      nameError = 'That category already exists.';
+      update();
+    } else if (nameError != null) {
+      nameError = null;
+      update();
+    }
+  }
+
   void setType(EntryType t) {
     formType = t;
-    nameError = null;
+    // Re-check duplicate on type switch
+    final current = nameCtrl.text.trim();
+    if (current.isNotEmpty && isDuplicate(current, formType)) {
+      nameError = 'That category already exists.';
+    } else {
+      nameError = null;
+    }
     update();
   }
 
@@ -100,45 +159,62 @@ class CategoriesController extends GetxController {
   Future<void> create() async {
     final name = nameCtrl.text.trim();
     final nameBn = nameBnCtrl.text.trim();
-    if (name.isEmpty && nameBn.isEmpty) {
+    final effective = name.isNotEmpty ? name : nameBn;
+
+    if (effective.isEmpty) {
       nameError = 'Enter a category name.';
       update();
+      return;
+    }
+
+    if (isDuplicate(effective, formType)) {
+      nameError = 'That category already exists.';
+      update();
+      Get.snackbar(
+        'Alert'.tr,
+        'That category already exists.'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 2),
+      );
       return;
     }
 
     final effectiveEn = name.isNotEmpty ? name : nameBn;
     final effectiveBn = nameBn.isNotEmpty ? nameBn : name;
 
-    final exists = categories.any(
-      (c) => c.type == formType && (c.nameEn.toLowerCase() == effectiveEn.toLowerCase() || c.nameBn == effectiveBn),
-    );
-    if (exists) {
+    try {
+      if (Get.isRegistered<CategoryService>() && Get.isRegistered<AuthService>() && Get.find<AuthService>().isLoggedIn) {
+        await Get.find<CategoryService>().addCategory(
+          nameBn: effectiveBn,
+          nameEn: effectiveEn,
+          type: formType,
+          emoji: formEmoji,
+        );
+      } else {
+        categories.add(CategoryModel(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          nameBn: effectiveBn,
+          nameEn: effectiveEn,
+          type: formType,
+          emoji: formEmoji,
+        ));
+      }
+
+      nameCtrl.clear();
+      nameBnCtrl.clear();
+      nameError = null;
+      update();
+
+      Get.snackbar(
+        'Success'.tr,
+        'Category created successfully'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 2),
+      );
+    } catch (_) {
       nameError = 'That category already exists.';
       update();
-      return;
     }
-
-    if (Get.isRegistered<CategoryService>() && Get.isRegistered<AuthService>() && Get.find<AuthService>().isLoggedIn) {
-      await Get.find<CategoryService>().addCategory(
-        nameBn: effectiveBn,
-        nameEn: effectiveEn,
-        type: formType,
-        emoji: formEmoji,
-      );
-    } else {
-      categories.add(CategoryModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        nameBn: effectiveBn,
-        nameEn: effectiveEn,
-        type: formType,
-        emoji: formEmoji,
-      ));
-    }
-
-    nameCtrl.clear();
-    nameBnCtrl.clear();
-    nameError = null;
-    update();
   }
 
   Future<void> delete(CategoryModel c) async {

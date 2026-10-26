@@ -14,20 +14,20 @@ class AppConstants {
   static const List<String> accounts = ['Cash', 'Bank', 'Mobile wallet', 'Card'];
 
   static const List<CategoryModel> defaultCategories = [
-    CategoryModel(name: 'Food', emoji: '🍜', type: EntryType.expense, isDefault: true),
-    CategoryModel(name: 'Transport', emoji: '🚌', type: EntryType.expense, isDefault: true),
-    CategoryModel(name: 'Bills', emoji: '💡', type: EntryType.expense, isDefault: true),
-    CategoryModel(name: 'Rent', emoji: '🏠', type: EntryType.expense, isDefault: true),
-    CategoryModel(name: 'Shopping', emoji: '🛍', type: EntryType.expense, isDefault: true),
-    CategoryModel(name: 'Health', emoji: '💊', type: EntryType.expense, isDefault: true),
-    CategoryModel(name: 'Education', emoji: '📚', type: EntryType.expense, isDefault: true),
-    CategoryModel(name: 'Fun', emoji: '🎬', type: EntryType.expense, isDefault: true),
-    CategoryModel(name: 'Other', emoji: '📦', type: EntryType.expense, isDefault: true),
-    CategoryModel(name: 'Salary', emoji: '💼', type: EntryType.income, isDefault: true),
-    CategoryModel(name: 'Business', emoji: '🏪', type: EntryType.income, isDefault: true),
-    CategoryModel(name: 'Freelance', emoji: '💻', type: EntryType.income, isDefault: true),
-    CategoryModel(name: 'Gift', emoji: '🎁', type: EntryType.income, isDefault: true),
-    CategoryModel(name: 'Other', emoji: '💰', type: EntryType.income, isDefault: true),
+    CategoryModel(nameEn: 'Food', nameBn: 'খাবার', emoji: '🍜', type: EntryType.expense, isDefault: true),
+    CategoryModel(nameEn: 'Transport', nameBn: 'যাতায়াত', emoji: '🚌', type: EntryType.expense, isDefault: true),
+    CategoryModel(nameEn: 'Bills', nameBn: 'বিল', emoji: '💡', type: EntryType.expense, isDefault: true),
+    CategoryModel(nameEn: 'Rent', nameBn: 'ভাড়া', emoji: '🏠', type: EntryType.expense, isDefault: true),
+    CategoryModel(nameEn: 'Shopping', nameBn: 'কেনাকাটা', emoji: '🛍', type: EntryType.expense, isDefault: true),
+    CategoryModel(nameEn: 'Health', nameBn: 'স্বাস্থ্য', emoji: '💊', type: EntryType.expense, isDefault: true),
+    CategoryModel(nameEn: 'Education', nameBn: 'শিক্ষা', emoji: '📚', type: EntryType.expense, isDefault: true),
+    CategoryModel(nameEn: 'Fun', nameBn: 'বিনোদন', emoji: '🎬', type: EntryType.expense, isDefault: true),
+    CategoryModel(nameEn: 'Other', nameBn: 'অন্যান্য', emoji: '📦', type: EntryType.expense, isDefault: true),
+    CategoryModel(nameEn: 'Salary', nameBn: 'বেতন', emoji: '💼', type: EntryType.income, isDefault: true),
+    CategoryModel(nameEn: 'Business', nameBn: 'ব্যবসা', emoji: '🏪', type: EntryType.income, isDefault: true),
+    CategoryModel(nameEn: 'Freelance', nameBn: 'ফ্রিল্যান্স', emoji: '💻', type: EntryType.income, isDefault: true),
+    CategoryModel(nameEn: 'Gift', nameBn: 'উপহার', emoji: '🎁', type: EntryType.income, isDefault: true),
+    CategoryModel(nameEn: 'Other', nameBn: 'অন্যান্য', emoji: '💰', type: EntryType.income, isDefault: true),
   ];
 
   static const List<String> categoryEmojis = [

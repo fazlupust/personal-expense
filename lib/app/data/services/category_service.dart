@@ -26,7 +26,7 @@ class CategoryService extends GetxService {
     });
   }
 
-  /// Add a new category
+  /// Add a new category with duplicate validation
   Future<String> addCategory({
     required String nameBn,
     required String nameEn,
@@ -34,6 +34,36 @@ class CategoryService extends GetxService {
     String emoji = '🏷️',
   }) async {
     final uid = _auth.currentUid ?? '';
+
+    // Duplicate check in Firestore
+    String norm(String s) => s.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+    final targetEn = norm(nameEn);
+    final targetBn = norm(nameBn);
+
+    try {
+      final snapshot = await _collection
+          .where('type', isEqualTo: type.name)
+          .where('is_active', isEqualTo: true)
+          .get();
+
+      final isDuplicate = snapshot.docs.any((doc) {
+        final data = doc.data();
+        final en = norm((data['name_en'] ?? '').toString());
+        final bn = norm((data['name_bn'] ?? '').toString());
+        final n = norm((data['name'] ?? '').toString());
+        return (targetEn.isNotEmpty && (en == targetEn || bn == targetEn || n == targetEn)) ||
+            (targetBn.isNotEmpty && (en == targetBn || bn == targetBn || n == targetBn));
+      });
+
+      if (isDuplicate) {
+        throw Exception('That category already exists.');
+      }
+    } catch (e) {
+      if (e.toString().contains('That category already exists.')) {
+        rethrow;
+      }
+    }
+
     final docRef = _collection.doc();
     final newCat = CategoryModel(
       id: docRef.id,
