@@ -8,7 +8,9 @@ import '../../../data/services/auth_service.dart';
 import '../../../data/services/category_service.dart';
 
 class CategoriesController extends GetxController {
-  CategoriesController();
+  CategoriesController() {
+    _initCategories();
+  }
 
   final nameCtrl = TextEditingController();
   final nameBnCtrl = TextEditingController();
@@ -218,11 +220,35 @@ class CategoriesController extends GetxController {
   }
 
   Future<void> delete(CategoryModel c) async {
+    final isDev = Get.isRegistered<AuthService>() && Get.find<AuthService>().isDeveloper;
+    final isDefault = c.isDefaultCategory || c.isDefault || AppConstants.isDefaultCategory(c.nameEn, c.nameBn, c.name);
+
+    if (isDefault && !isDev) {
+      if (Get.context != null) {
+        Get.snackbar(
+          'Alert'.tr,
+          'Default categories cannot be deleted.'.tr,
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 2),
+        );
+      }
+      return;
+    }
+
     if (Get.isRegistered<CategoryService>() && Get.isRegistered<AuthService>() && Get.find<AuthService>().isLoggedIn && c.id.isNotEmpty) {
       await Get.find<CategoryService>().softDeleteCategory(c.id);
     } else {
       categories.remove(c);
     }
     update();
+
+    if (Get.context != null) {
+      Get.snackbar(
+        'Success'.tr,
+        'Category deleted successfully'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 2),
+      );
+    }
   }
 }

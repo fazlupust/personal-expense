@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:personal_expense/app/data/models/category_model.dart';
 import 'package:personal_expense/app/data/models/entry_type.dart';
 import 'package:personal_expense/app/data/models/note_model.dart';
+import 'package:personal_expense/app/data/models/user_model.dart';
 import 'package:personal_expense/app/data/services/app_update_service.dart';
 import 'package:personal_expense/app/features/categories/controllers/categories_controller.dart';
 import 'package:personal_expense/app/features/notes/controllers/notes_controller.dart';
@@ -75,6 +77,63 @@ void main() {
       // Switching to income where 'Salary' exists
       controller.setType(EntryType.income);
       expect(controller.nameError, 'That category already exists.');
+    });
+
+    test('identifies 01744309649 as developer role', () {
+      expect(UserModel.isDevPhone('01744309649'), isTrue);
+      expect(UserModel.isDevPhone('+8801744309649'), isTrue);
+      expect(UserModel.isDevPhone('01712345678'), isFalse);
+
+      const devUser = UserModel(
+        uid: 'dev123',
+        nameBn: 'ডেভেলপার',
+        nameEn: 'Developer',
+        designationBn: 'ডেভেলপার',
+        designationEn: 'Developer',
+        phone: '01744309649',
+      );
+      expect(devUser.isDeveloper, isTrue);
+
+      const normalUser = UserModel(
+        uid: 'usr123',
+        nameBn: 'ইউজার',
+        nameEn: 'User',
+        designationBn: 'ইউজার',
+        designationEn: 'User',
+        phone: '01712345678',
+      );
+      expect(normalUser.isDeveloper, isFalse);
+    });
+
+    test('normal user cannot delete default category', () async {
+      final initialCount = controller.categories.length;
+      final defaultCat = controller.categories.firstWhere((c) => c.isDefault);
+
+      // Attempt to delete default category as normal user (no dev auth registered)
+      await controller.delete(defaultCat);
+
+      // Verify category was NOT deleted
+      expect(controller.categories.length, equals(initialCount));
+      expect(controller.categories.contains(defaultCat), isTrue);
+    });
+
+    test('normal user can delete user-added category', () async {
+      final userCat = CategoryModel(
+        id: 'user_cat_1',
+        nameEn: 'Custom Special Gym',
+        nameBn: 'বিশেষ জিম',
+        type: EntryType.expense,
+        isDefault: false,
+      );
+      controller.categories.add(userCat);
+      final countWithCustom = controller.categories.length;
+
+      // Delete custom category
+      await controller.delete(userCat);
+
+      // Verify category was deleted
+      expect(controller.categories.length, equals(countWithCustom - 1));
+      expect(controller.categories.contains(userCat), isFalse);
     });
   });
 

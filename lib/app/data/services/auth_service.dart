@@ -20,6 +20,17 @@ class AuthService extends GetxService {
   String? get currentUid => _auth.currentUser?.uid;
   bool get isLoggedIn => _auth.currentUser != null;
 
+  bool get isDeveloper {
+    if (userProfile.value?.isDeveloper == true) return true;
+    if (userProfile.value?.role == 'developer') return true;
+    if (UserModel.isDevPhone(userProfile.value?.phone)) return true;
+    final phone = currentUser?.phoneNumber;
+    if (UserModel.isDevPhone(phone)) return true;
+    final emailPrefix = currentUser?.email?.split('@').first;
+    if (UserModel.isDevPhone(emailPrefix)) return true;
+    return false;
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -47,6 +58,15 @@ class AuthService extends GetxService {
       final doc = await _db.collection('users').doc(uid).get();
       if (doc.exists && doc.data() != null) {
         var profile = UserModel.fromFirestore(doc);
+        // Ensure developer role for dev phone
+        if (UserModel.isDevPhone(profile.phone) || UserModel.isDevPhone(currentUser?.email?.split('@').first)) {
+          if (profile.role != 'developer') {
+            profile = profile.copyWith(role: 'developer');
+            try {
+              await _db.collection('users').doc(uid).set({'role': 'developer'}, SetOptions(merge: true));
+            } catch (_) {}
+          }
+        }
         // Backfill userNo for existing user if missing
         if (profile.userNo == null) {
           try {
@@ -119,6 +139,8 @@ class AuthService extends GetxService {
         nextUserNo = 1;
       }
 
+      final assignedRole = UserModel.isDevPhone(phone) ? 'developer' : role;
+
       final newProfile = UserModel(
         uid: uid,
         userNo: nextUserNo,
@@ -130,7 +152,7 @@ class AuthService extends GetxService {
         email: email,
         addressBn: addressBn,
         addressEn: addressEn,
-        role: role,
+        role: assignedRole,
         isActive: true,
         lastLoginLatitude: loc.latitude,
         lastLoginLongitude: loc.longitude,
@@ -163,7 +185,12 @@ class AuthService extends GetxService {
       );
       if (cred.user != null) {
         await _recordLoginMetadata(cred.user!.uid);
-        await fetchUserProfile(cred.user!.uid);
+        var profile = await fetchUserProfile(cred.user!.uid);
+        if (UserModel.isDevPhone(phone) && profile != null && profile.role != 'developer') {
+          profile = profile.copyWith(role: 'developer');
+          await _db.collection('users').doc(cred.user!.uid).set({'role': 'developer'}, SetOptions(merge: true));
+          userProfile.value = profile;
+        }
       }
       return cred;
     } finally {

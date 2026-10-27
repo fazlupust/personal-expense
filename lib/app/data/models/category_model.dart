@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../core/constants/app_constants.dart';
 import 'entry_type.dart';
 
 class CategoryModel {
@@ -30,6 +31,8 @@ class CategoryModel {
   final DateTime? updatedAt;
   final String emoji;
 
+  bool get isDefaultCategory => isDefault || AppConstants.isDefaultCategory(nameEn, nameBn, _name);
+
   String displayName(bool isBn) {
     if (isBn && nameBn.isNotEmpty) return nameBn;
     if (nameEn.isNotEmpty) return nameEn;
@@ -46,7 +49,7 @@ class CategoryModel {
       'name_en': nameEn.isNotEmpty ? nameEn : (_name ?? ''),
       'type': type.name,
       'is_active': isActive,
-      'is_default': isDefault,
+      'is_default': isDefault || isDefaultCategory,
       'created_by': createdBy,
       'updated_by': updatedBy,
       'emoji': emoji,
@@ -64,14 +67,18 @@ class CategoryModel {
 
     final typeStr = (map['type'] as String?) ?? 'expense';
     final entryType = typeStr == 'income' ? EntryType.income : EntryType.expense;
+    final en = (map['name_en'] as String?) ?? '';
+    final bn = (map['name_bn'] as String?) ?? '';
+    final legacy = (map['name'] as String?);
+    final isDef = (map['is_default'] as bool?) ?? AppConstants.isDefaultCategory(en, bn, legacy);
 
     return CategoryModel(
       id: (map['id'] as String?) ?? docId,
-      nameBn: (map['name_bn'] as String?) ?? '',
-      nameEn: (map['name_en'] as String?) ?? '',
+      nameBn: bn,
+      nameEn: en,
       type: entryType,
       isActive: (map['is_active'] as bool?) ?? true,
-      isDefault: (map['is_default'] as bool?) ?? false,
+      isDefault: isDef,
       createdBy: (map['created_by'] as String?) ?? '',
       updatedBy: (map['updated_by'] as String?) ?? '',
       createdAt: parseDate(map['created_at']),
