@@ -285,15 +285,14 @@ class EntryFormSheet extends StatelessWidget {
                             Expanded(
                               child: AppButton(
                                 'Cancel',
-                                style: AppButtonStyle.outlined,
+                                style: AppButtonStyle.cancel,
                                 onPressed: () => Navigator.of(context).pop(),
                               ),
                             ),
-                            const SizedBox(width: 10),
+                            const SizedBox(width: 12),
                             Expanded(
-                              flex: 2,
                               child: AppButton(
-                                'Save entry',
+                                'Submit',
                                 onPressed: () {
                                   if (f.save()) Navigator.of(context).pop();
                                 },

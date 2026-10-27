@@ -205,7 +205,7 @@ class SegmentBar<T> extends StatelessWidget {
   }
 }
 
-enum AppButtonStyle { filled, outlined, danger }
+enum AppButtonStyle { filled, outlined, danger, cancel }
 
 class AppButton extends StatelessWidget {
   const AppButton(this.label, {super.key, required this.onPressed, this.style = AppButtonStyle.filled});
@@ -224,6 +224,12 @@ class AppButton extends StatelessWidget {
           onPressed: onPressed,
           style: FilledButton.styleFrom(
               backgroundColor: p.income, foregroundColor: Colors.white, shape: shape, textStyle: textStyle),
+          child: child,
+        ),
+      AppButtonStyle.cancel => FilledButton(
+          onPressed: onPressed,
+          style: FilledButton.styleFrom(
+              backgroundColor: p.expense, foregroundColor: Colors.white, shape: shape, textStyle: textStyle),
           child: child,
         ),
       AppButtonStyle.outlined => OutlinedButton(

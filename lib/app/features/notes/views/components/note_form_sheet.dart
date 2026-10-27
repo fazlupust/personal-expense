@@ -356,18 +356,17 @@ class NoteFormSheet extends StatelessWidget {
                               Expanded(
                                 child: AppButton(
                                   'Cancel',
-                                  style: AppButtonStyle.outlined,
+                                  style: AppButtonStyle.cancel,
                                   onPressed: () {
                                     c.stopAllVoice();
                                     Navigator.of(context).pop();
                                   },
                                 ),
                               ),
-                              const SizedBox(width: 10),
+                              const SizedBox(width: 12),
                               Expanded(
-                                flex: 2,
                                 child: AppButton(
-                                  'Save Note',
+                                  'Submit',
                                   onPressed: () async {
                                     c.stopAllVoice();
                                     final ok = await c.save();

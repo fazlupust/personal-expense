@@ -144,26 +144,28 @@ class SettingsView extends StatelessWidget {
                                   Row(
                                     children: [
                                       Expanded(
-                                        child: OutlinedButton.icon(
+                                        child: ElevatedButton.icon(
                                           onPressed: () => showEditProfileSheet(context),
-                                          icon: const Icon(Icons.edit_outlined, size: 17),
+                                          icon: const Icon(Icons.edit_outlined, size: 17, color: Colors.white),
                                           label: Text('Edit Profile'.tr),
-                                          style: OutlinedButton.styleFrom(
-                                            foregroundColor: p.income,
-                                            side: BorderSide(color: p.income.withOpacity(0.5)),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: p.income,
+                                            foregroundColor: Colors.white,
+                                            elevation: 0,
                                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                           ),
                                         ),
                                       ),
                                       const SizedBox(width: 8),
                                       Expanded(
-                                        child: OutlinedButton.icon(
+                                        child: ElevatedButton.icon(
                                           onPressed: () => showChangePasswordSheet(context),
-                                          icon: const Icon(Icons.lock_reset_rounded, size: 17),
+                                          icon: const Icon(Icons.lock_reset_rounded, size: 17, color: Colors.white),
                                           label: Text('Change Password'.tr),
-                                          style: OutlinedButton.styleFrom(
-                                            foregroundColor: p.ink,
-                                            side: BorderSide(color: p.line),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: p.income,
+                                            foregroundColor: Colors.white,
+                                            elevation: 0,
                                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                           ),
                                         ),
@@ -188,26 +190,28 @@ class SettingsView extends StatelessWidget {
                                   Row(
                                     children: [
                                       Expanded(
-                                        child: OutlinedButton.icon(
+                                        child: ElevatedButton.icon(
                                           onPressed: () => showEditProfileSheet(context),
-                                          icon: const Icon(Icons.edit_outlined, size: 17),
+                                          icon: const Icon(Icons.edit_outlined, size: 17, color: Colors.white),
                                           label: Text('Edit Profile'.tr),
-                                          style: OutlinedButton.styleFrom(
-                                            foregroundColor: p.income,
-                                            side: BorderSide(color: p.income.withOpacity(0.5)),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: p.income,
+                                            foregroundColor: Colors.white,
+                                            elevation: 0,
                                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                           ),
                                         ),
                                       ),
                                       const SizedBox(width: 8),
                                       Expanded(
-                                        child: OutlinedButton.icon(
+                                        child: ElevatedButton.icon(
                                           onPressed: () => Get.toNamed(AppRoutes.login),
-                                          icon: const Icon(Icons.login, size: 17),
+                                          icon: const Icon(Icons.login, size: 17, color: Colors.white),
                                           label: Text('Sign In with Phone'.tr),
-                                          style: OutlinedButton.styleFrom(
-                                            foregroundColor: p.income,
-                                            side: BorderSide(color: p.income),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: p.income,
+                                            foregroundColor: Colors.white,
+                                            elevation: 0,
                                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                           ),
                                         ),
@@ -246,13 +250,14 @@ class SettingsView extends StatelessWidget {
                                 ],
                               ),
                               const SizedBox(height: 12),
-                              OutlinedButton.icon(
+                              ElevatedButton.icon(
                                 onPressed: () => showEditProfileSheet(context),
-                                icon: const Icon(Icons.edit_outlined, size: 17),
+                                icon: const Icon(Icons.edit_outlined, size: 17, color: Colors.white),
                                 label: Text('Edit Profile'.tr),
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: p.income,
-                                  side: BorderSide(color: p.income.withOpacity(0.5)),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: p.income,
+                                  foregroundColor: Colors.white,
+                                  elevation: 0,
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                 ),
                               ),

@@ -233,40 +233,44 @@ class SettingsFormCard extends StatelessWidget {
           // Change password option if logged in
           if (Get.isRegistered<AuthService>() && Get.find<AuthService>().isLoggedIn) ...[
             const SizedBox(height: 8),
-            OutlinedButton.icon(
+            ElevatedButton.icon(
               onPressed: () => showChangePasswordSheet(context),
-              icon: Icon(Icons.lock_reset_rounded, size: 16, color: context.pal.ink),
+              icon: const Icon(Icons.lock_reset_rounded, size: 16, color: Colors.white),
               label: Text(
                 'Change Password'.tr,
-                style: TextStyle(
-                  color: context.pal.ink,
+                style: const TextStyle(
+                  color: Colors.white,
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              style: OutlinedButton.styleFrom(
+              style: ElevatedButton.styleFrom(
                 minimumSize: const Size.fromHeight(40),
-                side: BorderSide(color: context.pal.line),
+                backgroundColor: context.pal.income,
+                foregroundColor: Colors.white,
+                elevation: 0,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
             ),
           ],
 
           const SizedBox(height: 8),
-          OutlinedButton.icon(
+          ElevatedButton.icon(
             onPressed: () => AppUpdateService.to.checkManually(),
-            icon: Icon(Icons.sync_rounded, size: 16, color: context.pal.acc),
+            icon: const Icon(Icons.sync_rounded, size: 16, color: Colors.white),
             label: Text(
               'Check for Updates'.tr,
-              style: TextStyle(
-                color: context.pal.ink,
+              style: const TextStyle(
+                color: Colors.white,
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            style: OutlinedButton.styleFrom(
+            style: ElevatedButton.styleFrom(
               minimumSize: const Size.fromHeight(40),
-              side: BorderSide(color: context.pal.line),
+              backgroundColor: context.pal.income,
+              foregroundColor: Colors.white,
+              elevation: 0,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
           ),
