@@ -54,11 +54,14 @@ class GenerateReportView extends StatelessWidget {
             }
 
             return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              child: ContentWrap(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 24),
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 800),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
                     // 1. Period Header Card
                     Container(
                       padding: const EdgeInsets.all(18),
@@ -181,59 +184,94 @@ class GenerateReportView extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
 
-                    // 3. Net Savings Banner
+                    // 3. Net Savings Banner (Fully Responsive)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
                       decoration: BoxDecoration(
                         color: p.card,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(color: p.line),
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                'Net Saved'.tr,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: p.mute,
-                                ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Net Saved'.tr,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: p.mute,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    '${net < 0 ? '−' : ''}${Fmt.money(net.abs())}',
+                                    style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w900,
+                                      color: net >= 0 ? p.income : p.expense,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 3),
-                              Text(
-                                '${net < 0 ? '−' : ''}${Fmt.money(net.abs())}',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w900,
-                                  color: net >= 0 ? p.income : p.expense,
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                decoration: BoxDecoration(
+                                  color: (net >= 0 ? p.income : p.expense).withOpacity(0.12),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: (net >= 0 ? p.income : p.expense).withOpacity(0.3),
+                                  ),
+                                ),
+                                child: Text(
+                                  income > 0
+                                      ? '${'Savings rate'.tr}: $savingsRate%'
+                                      : (net >= 0 ? 'Surplus'.tr : 'Deficit'.tr),
+                                  style: TextStyle(
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: net >= 0 ? p.income : p.expense,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 6,
+                          const SizedBox(height: 12),
+                          Divider(height: 1, color: p.line),
+                          const SizedBox(height: 12),
+                          Row(
                             children: [
-                              _ReportBadge(
-                                label: 'Savings rate'.tr,
-                                value: income > 0 ? '$savingsRate%' : '–',
-                                color: p.income,
+                              Expanded(
+                                child: _ReportBadge(
+                                  label: 'Daily average'.tr,
+                                  value: Fmt.money(avgPerDay),
+                                  color: p.acc,
+                                ),
                               ),
-                              _ReportBadge(
-                                label: 'Daily average'.tr,
-                                value: Fmt.money(avgPerDay),
-                                color: p.acc,
-                              ),
-                              if (largestExpense > 0)
-                                _ReportBadge(
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: _ReportBadge(
                                   label: 'Largest expense'.tr,
                                   value: Fmt.money(largestExpense),
                                   color: p.expense,
                                 ),
+                              ),
+                              if (income > 0) ...[
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: _ReportBadge(
+                                    label: 'Savings rate'.tr,
+                                    value: '$savingsRate%',
+                                    color: p.income,
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                         ],
@@ -324,7 +362,8 @@ class GenerateReportView extends StatelessWidget {
                   ],
                 ),
               ),
-            );
+            ),
+          );
           },
         ),
       ),

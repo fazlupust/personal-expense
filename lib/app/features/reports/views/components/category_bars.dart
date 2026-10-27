@@ -33,8 +33,8 @@ class CategoryBars extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 7),
             child: Row(
               children: [
-                SizedBox(
-                  width: 100,
+                Flexible(
+                  flex: 3,
                   child: Text(
                     '${cats.emojiOf(type, e.key)} ${e.key.tr}',
                     maxLines: 1,
@@ -42,7 +42,9 @@ class CategoryBars extends StatelessWidget {
                     style: TextStyle(fontSize: 13, color: p.mute),
                   ),
                 ),
+                const SizedBox(width: 8),
                 Expanded(
+                  flex: 4,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(4),
                     child: LinearProgressIndicator(
@@ -54,8 +56,8 @@ class CategoryBars extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                SizedBox(
-                  width: 108,
+                Flexible(
+                  flex: 3,
                   child: Text(
                     '${Fmt.money(e.value)} · ${Fmt.count(total > 0 ? (e.value / total * 100).round() : 0)}%',
                     textAlign: TextAlign.right,

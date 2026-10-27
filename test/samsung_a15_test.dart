@@ -15,6 +15,7 @@ import 'package:personal_expense/app/features/transactions/views/components/entr
 import 'package:personal_expense/app/features/settings/views/components/budget_management_sheet.dart';
 import 'package:personal_expense/app/features/settings/views/components/edit_profile_sheet.dart';
 import 'package:personal_expense/app/features/notes/views/components/note_form_sheet.dart';
+import 'package:personal_expense/app/features/reports/views/generate_report_view.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -223,5 +224,28 @@ void main() {
     expect(tester.takeException(), isNull, reason: 'NoteFormSheet should render without overflow');
     expect(find.text('Submit'.tr), findsOneWidget);
     expect(find.text('Cancel'.tr), findsOneWidget);
+  });
+
+  testWidgets('Samsung Galaxy A15 GenerateReportView renders cleanly with reduced padding and zero overflow', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2340);
+    tester.view.devicePixelRatio = 2.625;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        translations: AppTranslations(),
+        locale: const Locale('bn'),
+        theme: AppTheme.light,
+        home: const GenerateReportView(),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull, reason: 'GenerateReportView should render cleanly without overflow');
+    expect(find.text('Net Saved'.tr), findsOneWidget);
+    expect(find.text('Generated Report'.tr), findsOneWidget);
   });
 }
