@@ -31,9 +31,9 @@ void main() {
       final c = Get.put(PrayerTasbihController());
 
       expect(c.allZikirs.length, greaterThanOrEqualTo(10));
-      expect(c.selectedZikir.titleBn, equals('সুবহানাল্লাহ'));
+      expect(c.selectedZikir.titleBn, equals('লা ইলাহা ইল্লাল্লাহ'));
       expect(c.currentCount, equals(0));
-      expect(c.targetCount, equals(33));
+      expect(c.targetCount, equals(100));
       expect(c.completedCycles, equals(0));
       expect(c.todayTotal, equals(0));
       expect(c.lifetimeTotal, equals(0));
@@ -93,7 +93,9 @@ void main() {
       expect(c.getZikirTodayCount('subhanallah'), equals(0));
       expect(c.getZikirLifetimeCount('subhanallah'), equals(0));
 
-      // Increment subhanallah 3 times
+      // Select subhanallah and increment 3 times
+      final subhan = c.allZikirs.firstWhere((z) => z.id == 'subhanallah');
+      c.selectZikir(subhan);
       c.increment();
       c.increment();
       c.increment();
@@ -188,7 +190,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(TasbihCounterView), findsOneWidget);
-      expect(find.text('سُبْحَانَ اللَّهِ'), findsOneWidget);
+      expect(find.text('لَا إِلٰهَ إِلَّا اللَّهُ'), findsOneWidget);
 
       // Tap to count button
       await tester.tap(find.text('+1 Count'));
@@ -205,7 +207,6 @@ void main() {
 
       Get.put(PrayerTasbihController());
 
-
       await tester.pumpWidget(
         GetMaterialApp(
           translations: AppTranslations(),
@@ -216,7 +217,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.byType(TasbihCounterView), findsOneWidget);
-      expect(find.text('سُبْحَانَ اللَّهِ'), findsOneWidget);
+      expect(find.text('لَا إِلٰهَ إِلَّا اللَّهُ'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
