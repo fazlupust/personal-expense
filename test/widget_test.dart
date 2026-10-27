@@ -417,6 +417,17 @@ void main() {
       expect(controller.filteredNotes.length, 4);
     });
 
+    test('clearSearch clears query and searchCtrl text', () {
+      controller.setSearchQuery('test query');
+      expect(controller.searchQuery, 'test query');
+      expect(controller.searchCtrl.text, 'test query');
+
+      controller.clearSearch();
+      expect(controller.searchQuery, isEmpty);
+      expect(controller.searchCtrl.text, isEmpty);
+      expect(controller.filteredNotes.length, 4);
+    });
+
     test('save() validates title and inserts new note', () async {
       controller.openCreate();
       expect(controller.titleCtrl.text, isEmpty);

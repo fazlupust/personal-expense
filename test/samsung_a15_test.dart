@@ -15,6 +15,8 @@ import 'package:personal_expense/app/features/transactions/views/components/entr
 import 'package:personal_expense/app/features/settings/views/components/budget_management_sheet.dart';
 import 'package:personal_expense/app/features/settings/views/components/edit_profile_sheet.dart';
 import 'package:personal_expense/app/features/notes/views/components/note_form_sheet.dart';
+import 'package:personal_expense/app/features/notes/views/notes_view.dart';
+import 'package:personal_expense/app/data/models/note_model.dart';
 import 'package:personal_expense/app/features/reports/views/generate_report_view.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -247,5 +249,65 @@ void main() {
     expect(tester.takeException(), isNull, reason: 'GenerateReportView should render cleanly without overflow');
     expect(find.text('Net Saved'.tr), findsOneWidget);
     expect(find.text('Generated Report'.tr), findsOneWidget);
+  });
+
+  testWidgets('Samsung Galaxy A15 NotesView renders time, hides GPS coords, and clears search', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2340);
+    tester.view.devicePixelRatio = 2.625;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final notesCtrl = Get.find<NotesController>();
+    notesCtrl.notes = [
+      NoteModel(
+        id: 'note_1',
+        title: 'Office due from Rahim',
+        personName: 'Rahim',
+        amount: 500.0,
+        notes: 'Team snacks money',
+        date: DateTime(2026, 10, 27, 14, 30),
+        latitude: 23.82,
+        longitude: 90.41,
+      ),
+    ];
+    notesCtrl.isLoading = false;
+    notesCtrl.update();
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        translations: AppTranslations(),
+        locale: const Locale('en'),
+        theme: AppTheme.light,
+        home: const NotesView(),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+
+    // Verify raw latitude / longitude coordinates are NOT displayed
+    expect(find.textContaining('23.82'), findsNothing);
+    expect(find.textContaining('90.41'), findsNothing);
+
+    // Verify time is displayed
+    expect(find.textContaining('02:30 PM'), findsOneWidget);
+
+    // Type in search box
+    await tester.enterText(find.byType(TextField), 'Rahim');
+    await tester.pumpAndSettle();
+
+    expect(notesCtrl.searchQuery, 'Rahim');
+    expect(notesCtrl.searchCtrl.text, 'Rahim');
+    expect(find.byIcon(Icons.clear_rounded), findsOneWidget);
+
+    // Tap clear button
+    await tester.tap(find.byIcon(Icons.clear_rounded));
+    await tester.pumpAndSettle();
+
+    expect(notesCtrl.searchQuery, isEmpty);
+    expect(notesCtrl.searchCtrl.text, isEmpty);
+    expect(find.byIcon(Icons.clear_rounded), findsNothing);
   });
 }

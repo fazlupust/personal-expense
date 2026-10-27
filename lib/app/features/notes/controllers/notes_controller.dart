@@ -16,6 +16,7 @@ class NotesController extends GetxController {
   final personCtrl = TextEditingController();
   final amountCtrl = TextEditingController();
   final notesCtrl = TextEditingController();
+  final searchCtrl = TextEditingController();
 
   DateTime formDate = DateTime.now();
   NoteModel? editingNote;
@@ -52,6 +53,7 @@ class NotesController extends GetxController {
     personCtrl.dispose();
     amountCtrl.dispose();
     notesCtrl.dispose();
+    searchCtrl.dispose();
     _sub?.cancel();
     super.onClose();
   }
@@ -324,6 +326,15 @@ class NotesController extends GetxController {
 
   void setSearchQuery(String q) {
     searchQuery = q;
+    if (searchCtrl.text != q) {
+      searchCtrl.text = q;
+    }
+    update();
+  }
+
+  void clearSearch() {
+    searchQuery = '';
+    searchCtrl.clear();
     update();
   }
 

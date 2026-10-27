@@ -220,7 +220,7 @@ class NoteFormSheet extends StatelessWidget {
                               ),
                               const SizedBox(width: 10),
 
-                              // Date Picker Box
+                              // Date & Time Picker Box
                               Expanded(
                                 flex: 2,
                                 child: InkWell(
@@ -231,8 +231,19 @@ class NoteFormSheet extends StatelessWidget {
                                       firstDate: DateTime(2020),
                                       lastDate: DateTime(2035),
                                     );
-                                    if (picked != null) {
-                                      c.setFormDate(picked);
+                                    if (picked != null && context.mounted) {
+                                      final pickedTime = await showTimePicker(
+                                        context: context,
+                                        initialTime: TimeOfDay.fromDateTime(c.formDate),
+                                      );
+                                      final newDate = DateTime(
+                                        picked.year,
+                                        picked.month,
+                                        picked.day,
+                                        pickedTime?.hour ?? c.formDate.hour,
+                                        pickedTime?.minute ?? c.formDate.minute,
+                                      );
+                                      c.setFormDate(newDate);
                                     }
                                   },
                                   borderRadius: BorderRadius.circular(10),
@@ -254,15 +265,15 @@ class NoteFormSheet extends StatelessWidget {
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                'Date'.tr,
-                                                style: TextStyle(fontSize: 10, color: p.mute),
+                                                'Date & Time'.tr,
+                                                style: TextStyle(fontSize: 10.5, color: p.mute),
                                               ),
                                               Text(
-                                                Fmt.date(c.formDate, 'd MMM yyyy'),
+                                                Fmt.date(c.formDate, 'd MMM, hh:mm a'),
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                                 style: TextStyle(
-                                                  fontSize: 12,
+                                                  fontSize: 12.5,
                                                   fontWeight: FontWeight.w700,
                                                   color: p.ink,
                                                 ),
@@ -343,22 +354,7 @@ class NoteFormSheet extends StatelessWidget {
                               alignLabelWithHint: true,
                             ),
                           ),
-                          const SizedBox(height: 10),
-
-                          // Location note indicator
-                          Row(
-                            children: [
-                              Icon(Icons.my_location, size: 13, color: p.mute.withOpacity(0.7)),
-                              const SizedBox(width: 6),
-                              Expanded(
-                                child: Text(
-                                  'Location & device info will be attached automatically'.tr,
-                                  style: TextStyle(fontSize: 11, color: p.mute.withOpacity(0.8)),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 18),
+                          const SizedBox(height: 16),
 
                           // 5. Action Buttons: Cancel and Save side-by-side
                           Row(

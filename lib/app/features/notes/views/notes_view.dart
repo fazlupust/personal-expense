@@ -89,34 +89,41 @@ class NotesView extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    isFilteredPerson ? Icons.person_rounded : Icons.account_balance_wallet_rounded,
-                                    size: 13,
-                                    color: Colors.white,
-                                  ),
-                                  const SizedBox(width: 5),
-                                  Text(
-                                    isFilteredPerson ? c.selectedPerson : 'All Notes Summary'.tr,
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w700,
+                            Flexible(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      isFilteredPerson ? Icons.person_rounded : Icons.account_balance_wallet_rounded,
+                                      size: 14,
                                       color: Colors.white,
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(width: 5),
+                                    Flexible(
+                                      child: Text(
+                                        isFilteredPerson ? c.selectedPerson : 'All Notes Summary'.tr,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontSize: 12.5,
+                                          fontWeight: FontWeight.w700,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
+                            const SizedBox(width: 8),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                               decoration: BoxDecoration(
                                 color: Colors.white.withOpacity(0.12),
                                 borderRadius: BorderRadius.circular(12),
@@ -124,7 +131,7 @@ class NotesView extends StatelessWidget {
                               child: Text(
                                 '${Fmt.count(list.length)} ${'notes'.tr}',
                                 style: TextStyle(
-                                  fontSize: 11,
+                                  fontSize: 12.5,
                                   fontWeight: FontWeight.w600,
                                   color: Colors.white.withOpacity(0.9),
                                 ),
@@ -136,7 +143,7 @@ class NotesView extends StatelessWidget {
                         Text(
                           'Total Calculated Amount'.tr,
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 13.5,
                             fontWeight: FontWeight.w500,
                             color: Colors.white.withOpacity(0.85),
                           ),
@@ -147,7 +154,7 @@ class NotesView extends StatelessWidget {
                           child: Text(
                             Fmt.money(c.totalAmount),
                             style: const TextStyle(
-                              fontSize: 32,
+                              fontSize: 34,
                               fontWeight: FontWeight.w900,
                               color: Colors.white,
                               letterSpacing: -0.5,
@@ -158,7 +165,7 @@ class NotesView extends StatelessWidget {
                           const SizedBox(height: 4),
                           Text(
                             '${Fmt.count(c.notesWithAmountCount)} ${'notes with financial amount'.tr}',
-                            style: TextStyle(fontSize: 11, color: Colors.white.withOpacity(0.8)),
+                            style: TextStyle(fontSize: 12.5, color: Colors.white.withOpacity(0.85)),
                           ),
                         ],
                       ],
@@ -168,14 +175,18 @@ class NotesView extends StatelessWidget {
 
                   // 2. Search Box
                   TextField(
+                    controller: c.searchCtrl,
                     onChanged: c.setSearchQuery,
+                    style: TextStyle(fontSize: 15.5, color: p.ink),
                     decoration: InputDecoration(
                       hintText: 'Search notes by title, person, or note...'.tr,
-                      prefixIcon: const Icon(Icons.search_rounded, size: 20),
-                      suffixIcon: c.searchQuery.isNotEmpty
+                      hintStyle: TextStyle(fontSize: 14.5, color: p.mute),
+                      prefixIcon: Icon(Icons.search_rounded, size: 21, color: p.mute),
+                      suffixIcon: (c.searchQuery.isNotEmpty || c.searchCtrl.text.isNotEmpty)
                           ? IconButton(
-                              icon: const Icon(Icons.clear_rounded, size: 18),
-                              onPressed: () => c.setSearchQuery(''),
+                              icon: Icon(Icons.clear_rounded, size: 19, color: p.ink),
+                              tooltip: 'Clear'.tr,
+                              onPressed: c.clearSearch,
                             )
                           : null,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -197,7 +208,7 @@ class NotesView extends StatelessWidget {
                             labelStyle: TextStyle(
                               color: c.selectedPerson == 'All' ? Colors.white : p.ink,
                               fontWeight: c.selectedPerson == 'All' ? FontWeight.w700 : FontWeight.w500,
-                              fontSize: 12,
+                              fontSize: 13.5,
                             ),
                           ),
                           const SizedBox(width: 6),
@@ -205,7 +216,7 @@ class NotesView extends StatelessWidget {
                             ChoiceChip(
                               avatar: Icon(
                                 Icons.person_rounded,
-                                size: 14,
+                                size: 15,
                                 color: c.selectedPerson == person ? Colors.white : p.mute,
                               ),
                               label: Text(person),
@@ -215,7 +226,7 @@ class NotesView extends StatelessWidget {
                               labelStyle: TextStyle(
                                 color: c.selectedPerson == person ? Colors.white : p.ink,
                                 fontWeight: c.selectedPerson == person ? FontWeight.w700 : FontWeight.w500,
-                                fontSize: 12,
+                                fontSize: 13.5,
                               ),
                             ),
                             const SizedBox(width: 6),
@@ -430,7 +441,7 @@ class _NoteCardItem extends StatelessWidget {
                       child: Text(
                         '$serial',
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 13,
                           fontWeight: FontWeight.w700,
                           color: p.income,
                         ),
@@ -446,7 +457,7 @@ class _NoteCardItem extends StatelessWidget {
                           Text(
                             note.title,
                             style: TextStyle(
-                              fontSize: 16.5,
+                              fontSize: 17.5,
                               fontWeight: FontWeight.w700,
                               color: p.ink,
                             ),
@@ -456,12 +467,12 @@ class _NoteCardItem extends StatelessWidget {
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.person_outline_rounded, size: 14, color: p.income),
+                                Icon(Icons.person_outline_rounded, size: 15, color: p.income),
                                 const SizedBox(width: 4),
                                 Text(
                                   note.personName,
                                   style: TextStyle(
-                                    fontSize: 13.5,
+                                    fontSize: 14.5,
                                     fontWeight: FontWeight.w600,
                                     color: p.income,
                                   ),
@@ -476,7 +487,7 @@ class _NoteCardItem extends StatelessWidget {
                     // Amount if present
                     if (note.hasAmount) ...[
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
                           color: p.bg,
                           borderRadius: BorderRadius.circular(12),
@@ -485,7 +496,7 @@ class _NoteCardItem extends StatelessWidget {
                         child: Text(
                           Fmt.money(note.amount),
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 17.5,
                             fontWeight: FontWeight.w800,
                             color: p.income,
                           ),
@@ -501,48 +512,59 @@ class _NoteCardItem extends StatelessWidget {
                   Text(
                     note.notes,
                     style: TextStyle(
-                      fontSize: 14.5,
-                      color: p.ink.withOpacity(0.88),
-                      height: 1.4,
+                      fontSize: 15.5,
+                      color: p.ink.withOpacity(0.9),
+                      height: 1.45,
                     ),
                   ),
                 ],
 
                 const SizedBox(height: 10),
 
-                // Bottom row: Date, Location, and Action Buttons
+                // Bottom row: Date, Time, and Action Buttons
                 Row(
                   children: [
-                    Icon(Icons.calendar_today_rounded, size: 13, color: p.mute),
-                    const SizedBox(width: 4),
-                    Text(
-                      Fmt.date(note.date, 'd MMM yyyy'),
-                      style: TextStyle(fontSize: 12.5, color: p.mute),
-                    ),
-                    if (note.hasLocation) ...[
-                      const SizedBox(width: 10),
-                      Icon(Icons.location_on_outlined, size: 13, color: p.income),
-                      const SizedBox(width: 2),
-                      Text(
-                        '${note.latitude!.toStringAsFixed(2)}, ${note.longitude!.toStringAsFixed(2)}',
-                        style: TextStyle(fontSize: 12.5, color: p.mute),
+                    Expanded(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.calendar_today_rounded, size: 13, color: p.mute),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              Fmt.date(note.date, 'd MMM yyyy'),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: p.mute),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(Icons.access_time_rounded, size: 13.5, color: p.mute),
+                          const SizedBox(width: 4),
+                          Text(
+                            Fmt.date(note.date, 'hh:mm a'),
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: p.mute),
+                          ),
+                        ],
                       ),
-                    ],
-                    const Spacer(),
-                    IconButton(
-                      icon: Icon(Icons.edit_outlined, size: 16, color: p.mute),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                      tooltip: 'Edit Note'.tr,
-                      onPressed: onTap,
                     ),
-                    const SizedBox(width: 12),
-                    IconButton(
-                      icon: Icon(Icons.delete_outline_rounded, size: 16, color: p.expense),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                      tooltip: 'Delete Note'.tr,
-                      onPressed: onDelete,
+                    const SizedBox(width: 6),
+                    InkWell(
+                      onTap: onTap,
+                      borderRadius: BorderRadius.circular(8),
+                      child: Padding(
+                        padding: const EdgeInsets.all(6),
+                        child: Icon(Icons.edit_outlined, size: 18, color: p.mute),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    InkWell(
+                      onTap: onDelete,
+                      borderRadius: BorderRadius.circular(8),
+                      child: Padding(
+                        padding: const EdgeInsets.all(6),
+                        child: Icon(Icons.delete_outline_rounded, size: 18, color: p.expense),
+                      ),
                     ),
                   ],
                 ),
