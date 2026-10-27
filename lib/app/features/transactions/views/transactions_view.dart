@@ -25,7 +25,6 @@ class TransactionsView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const PageTitle('Transactions'),
             const MonthSwitcher(),
             TextField(
               controller: tc.searchCtrl,

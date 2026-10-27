@@ -23,6 +23,7 @@ class DashboardPrayerCard extends StatelessWidget {
     );
     final currentWaqt = schedule.getCurrentWaqt(now);
     final nextPrayer = schedule.getNextPrayer(now);
+    final activeProhibited = schedule.getActiveProhibitedTime(now);
 
     var targetTime = nextPrayer.time;
     if (targetTime.isBefore(now)) {
@@ -109,15 +110,65 @@ class DashboardPrayerCard extends StatelessWidget {
                               ),
                             ),
                           ),
+                          if (activeProhibited != null) ...[
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFD63031).withOpacity(0.18),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                'Prohibited'.tr,
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFFD63031),
+                                ),
+                              ),
+                            ),
+                          ],
                         ],
                       ),
-                      const SizedBox(height: 3),
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          Icon(Icons.schedule_rounded, size: 12, color: p.income.withOpacity(0.85)),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              currentWaqt.formatRange(),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w700,
+                                color: p.income,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      if (activeProhibited != null) ...[
+                        Text(
+                          '${'Prohibited prayer time now'.tr} (${activeProhibited.formatRange()})',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFFD63031),
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                      ],
                       Text(
                         '${'Next:'.tr} $nextPrayerName ($nextPrayerTime) · $countdownStr ${'left'.tr}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 11.5,
                           fontWeight: FontWeight.w500,
                           color: p.mute,
                         ),

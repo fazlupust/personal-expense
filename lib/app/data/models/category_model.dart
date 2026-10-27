@@ -70,7 +70,7 @@ class CategoryModel {
     final en = (map['name_en'] as String?) ?? '';
     final bn = (map['name_bn'] as String?) ?? '';
     final legacy = (map['name'] as String?);
-    final isDef = (map['is_default'] as bool?) ?? AppConstants.isDefaultCategory(en, bn, legacy);
+    final isDef = (map['is_default'] as bool?) == true || AppConstants.isDefaultCategory(en, bn, legacy);
 
     return CategoryModel(
       id: (map['id'] as String?) ?? docId,

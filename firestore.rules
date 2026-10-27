@@ -64,5 +64,15 @@ service cloud.firestore {
       allow update: if isAuthenticated() && resource.data.user_id == request.auth.uid;
       allow delete: if isAdmin();
     }
+
+    // 6. Tasbih / Zikir records (Day-wise counts and summary - strictly private to user)
+    match /users/{userId}/tasbih_daily/{dateKey} {
+      // Users can only read and write their own daily zikir counts
+      allow read, write: if isOwner(userId);
+    }
+    match /users/{userId}/tasbih_summary/{docId} {
+      // Users can only read and write their own zikir summary
+      allow read, write: if isOwner(userId);
+    }
   }
 }

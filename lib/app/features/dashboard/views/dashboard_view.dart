@@ -285,7 +285,7 @@ class DashboardView extends StatelessWidget {
                   totalOver: expense - s.budget,
                   exceededCategories: exceededCategories,
                 ),
-              const DashboardPrayerCard(),
+              if (s.showPrayerCard) const DashboardPrayerCard(),
               AdaptiveColumns(
                 left: [
                   BalanceCard(

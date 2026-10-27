@@ -15,6 +15,13 @@ class AppConstants {
 
   static const List<CategoryModel> defaultCategories = [
     // Expense Categories
+    CategoryModel(nameEn: 'Child Food', nameBn: 'বাচ্চার খাবার', emoji: '🍜', type: EntryType.expense, isDefault: true),
+    CategoryModel(nameEn: 'Food & Dining', nameBn: 'খাবার ও রেস্তোরাঁ', emoji: '🍔', type: EntryType.expense, isDefault: true),
+    CategoryModel(nameEn: 'Housing & Rent', nameBn: 'বাসাভাড়া', emoji: '🏠', type: EntryType.expense, isDefault: true),
+    CategoryModel(nameEn: 'Utilities', nameBn: 'ইউটিলিটি ও বিল', emoji: '⚡', type: EntryType.expense, isDefault: true),
+    CategoryModel(nameEn: 'Health & Medicine', nameBn: 'স্বাস্থ্য ও ওষুধ', emoji: '💊', type: EntryType.expense, isDefault: true),
+    CategoryModel(nameEn: 'Fish', nameBn: 'মাছ ও বাজার', emoji: '🍜', type: EntryType.expense, isDefault: true),
+    CategoryModel(nameEn: 'DPS Saving', nameBn: 'ডিপিএস ও সঞ্চয়', emoji: '🍜', type: EntryType.expense, isDefault: true),
     CategoryModel(nameEn: 'Food', nameBn: 'খাবার', emoji: '🍜', type: EntryType.expense, isDefault: true),
     CategoryModel(nameEn: 'Groceries', nameBn: 'বাজার ও মুদি', emoji: '🛒', type: EntryType.expense, isDefault: true),
     CategoryModel(nameEn: 'Child & Baby Care', nameBn: 'বাচ্চার খরচ', emoji: '👶', type: EntryType.expense, isDefault: true),
@@ -70,7 +77,11 @@ class AppConstants {
 
   /// Checks if a category name matches any standard default category
   static bool isDefaultCategory(String? nameEn, String? nameBn, [String? name]) {
-    String norm(String? s) => (s ?? '').trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+    String norm(String? s) => (s ?? '')
+        .trim()
+        .toLowerCase()
+        .replaceAll('&', 'and')
+        .replaceAll(RegExp(r'\s+'), ' ');
     final nEn = norm(nameEn);
     final nBn = norm(nameBn);
     final nLegacy = norm(name);

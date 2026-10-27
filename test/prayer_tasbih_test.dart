@@ -151,6 +151,96 @@ void main() {
       c.toggleAsrMethod();
       expect(c.isHanafi, isFalse);
     });
+
+    test('User A and User B have completely isolated and private zikir counts', () async {
+      final c = Get.put(PrayerTasbihController());
+
+      // User A logs in and recites 5 times on la_ilaha_illallah
+      await c.loadForUserForTesting('user_a');
+      final laIlaha = c.allZikirs.firstWhere((z) => z.id == 'la_ilaha_illallah');
+      c.selectZikir(laIlaha);
+
+      for (int i = 0; i < 5; i++) {
+        c.increment();
+      }
+
+      expect(c.todayTotal, equals(5));
+      expect(c.lifetimeTotal, equals(5));
+      expect(c.getZikirTodayCount('la_ilaha_illallah'), equals(5));
+      expect(c.getZikirLifetimeCount('la_ilaha_illallah'), equals(5));
+
+      // User B logs in on same device: User B must NOT see User A's zikir data
+      await c.loadForUserForTesting('user_b');
+      expect(c.todayTotal, equals(0));
+      expect(c.lifetimeTotal, equals(0));
+      expect(c.getZikirTodayCount('la_ilaha_illallah'), equals(0));
+      expect(c.getZikirLifetimeCount('la_ilaha_illallah'), equals(0));
+
+      // User B recites 10 times on astaghfirullah
+      final astaghfir = c.allZikirs.firstWhere((z) => z.id == 'astaghfirullah');
+      c.selectZikir(astaghfir);
+      for (int i = 0; i < 10; i++) {
+        c.increment();
+      }
+
+      expect(c.todayTotal, equals(10));
+      expect(c.lifetimeTotal, equals(10));
+      expect(c.getZikirTodayCount('astaghfirullah'), equals(10));
+      expect(c.getZikirTodayCount('la_ilaha_illallah'), equals(0));
+
+      // User A logs back in: User A sees only their own data, never User B's
+      await c.loadForUserForTesting('user_a');
+      expect(c.todayTotal, equals(5));
+      expect(c.lifetimeTotal, equals(5));
+      expect(c.getZikirTodayCount('la_ilaha_illallah'), equals(5));
+      expect(c.getZikirTodayCount('astaghfirullah'), equals(0));
+      expect(c.getZikirLifetimeCount('astaghfirullah'), equals(0));
+    });
+
+    test('Day-wise and zikir-wise counts update and maintain integrity across reload', () async {
+      final c = Get.put(PrayerTasbihController());
+      await c.loadForUserForTesting('day_test_user');
+
+      final subhan = c.allZikirs.firstWhere((z) => z.id == 'subhanallah');
+      c.selectZikir(subhan);
+      for (int i = 0; i < 33; i++) {
+        c.increment();
+      }
+
+      final alhamdu = c.allZikirs.firstWhere((z) => z.id == 'alhamdulillah');
+      c.selectZikir(alhamdu);
+      for (int i = 0; i < 33; i++) {
+        c.increment();
+      }
+
+      expect(c.todayTotal, equals(66));
+      expect(c.getZikirTodayCount('subhanallah'), equals(33));
+      expect(c.getZikirTodayCount('alhamdulillah'), equals(33));
+
+      // Re-load same user from SharedPreferences
+      await c.loadForUserForTesting('day_test_user');
+      expect(c.todayTotal, equals(66));
+      expect(c.getZikirTodayCount('subhanallah'), equals(33));
+      expect(c.getZikirTodayCount('alhamdulillah'), equals(33));
+    });
+
+    test('toggleCountVisibility toggles isCountHidden and persists per user', () async {
+      final c = Get.put(PrayerTasbihController());
+      await c.loadForUserForTesting('privacy_user');
+
+      expect(c.isCountHidden, isFalse);
+
+      await c.toggleCountVisibility();
+      expect(c.isCountHidden, isTrue);
+
+      // Re-load same user: should restore hidden state
+      await c.loadForUserForTesting('privacy_user');
+      expect(c.isCountHidden, isTrue);
+
+      // Another user default is false
+      await c.loadForUserForTesting('other_privacy_user');
+      expect(c.isCountHidden, isFalse);
+    });
   });
 
   group('Prayer & Tasbih Samsung A15 UI Tests', () {
@@ -190,6 +280,13 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(TasbihCounterView), findsOneWidget);
+      // Zikir details card is hidden by default to keep recitation private
+      expect(find.text('Show zikir details'), findsOneWidget);
+      expect(find.text('لَا إِلٰهَ إِلَّا اللَّهُ'), findsNothing);
+
+      // Tap to reveal zikir details card
+      await tester.tap(find.text('Show zikir details'));
+      await tester.pumpAndSettle();
       expect(find.text('لَا إِلٰهَ إِلَّا اللَّهُ'), findsOneWidget);
 
       // Tap to count button
@@ -217,6 +314,13 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.byType(TasbihCounterView), findsOneWidget);
+      // In Bengali locale, verify zikir details card is hidden by default
+      expect(find.text('জিকির বিস্তারিত দেখান'), findsOneWidget);
+      expect(find.text('لَا إِلٰهَ إِلَّا اللَّهُ'), findsNothing);
+
+      // Tap to reveal in Bengali
+      await tester.tap(find.text('জিকির বিস্তারিত দেখান'));
+      await tester.pumpAndSettle();
       expect(find.text('لَا إِلٰهَ إِلَّا اللَّهُ'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
@@ -305,6 +409,84 @@ void main() {
 
       expect(find.byType(TasbihCounterView), findsOneWidget);
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('PrayerTasbihView renders prayer time ranges and prohibited times cleanly on 360x800 dp in Bengali', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 3.0; // 360x800 dp
+      addTearDown(tester.view.resetPhysicalSize);
+
+      Get.put(PrayerTasbihController());
+
+      await tester.pumpWidget(
+        GetMaterialApp(
+          translations: AppTranslations(),
+          locale: const Locale('bn', 'BD'),
+          theme: ThemeData(extensions: const [AppPalette.light]),
+          home: const PrayerTasbihView(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(PrayerTasbihView), findsOneWidget);
+      expect(find.byIcon(Icons.schedule_rounded), findsWidgets);
+      // Prohibited prayer times section header & icon
+      expect(find.text('নামাজের নিষিদ্ধ সময়'), findsOneWidget);
+      expect(find.text('হারাম / নিষিদ্ধ'), findsOneWidget);
+      expect(find.byIcon(Icons.block_rounded), findsWidgets);
+      // 3 prohibited items rendered
+      expect(find.text('সূর্যোদয়ের সময়'), findsOneWidget);
+      expect(find.text('ঠিক দ্বিপ্রহরের সময় (যাওয়াল)'), findsOneWidget);
+      expect(find.text('সূর্যাস্তের সময়'), findsOneWidget);
+
+      // Alert toggle
+      final alertFinder = find.text('অ্যালার্ট চালু');
+      await tester.scrollUntilVisible(alertFinder, 200);
+      await tester.pumpAndSettle();
+      expect(alertFinder, findsOneWidget);
+
+      await tester.tap(alertFinder);
+      await tester.pumpAndSettle();
+      expect(find.text('অ্যালার্ট বন্ধ'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('TasbihCounterView hides count when isCountHidden is toggled', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2340);
+      tester.view.devicePixelRatio = 2.8125;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final c = Get.put(PrayerTasbihController());
+      await c.loadForUserForTesting('stealth_view_user');
+      await c.setCountHidden(false);
+
+      for (int i = 0; i < 7; i++) {
+        c.increment();
+      }
+
+      await tester.pumpWidget(
+        GetMaterialApp(
+          initialRoute: AppRoutes.tasbihCounter,
+          theme: ThemeData(extensions: const [AppPalette.light]),
+          getPages: AppPages.pages,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Number 7 should be visible initially (dial, today, lifetime total)
+      expect(find.text('7'), findsWidgets);
+
+      // Toggle privacy mode
+      await c.toggleCountVisibility();
+      await tester.pumpAndSettle();
+
+      // Number 7 should no longer be visible; '***' should be visible
+      expect(find.text('7'), findsNothing);
+      expect(find.text('***'), findsWidgets);
+      expect(tester.takeException(), isNull);
+
+      // Advance clock past the 600ms Firestore debounce timer
+      await tester.pump(const Duration(milliseconds: 700));
     });
   });
 }

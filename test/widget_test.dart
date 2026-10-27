@@ -147,12 +147,26 @@ void main() {
       expect(names, contains('Doctor & Diagnostic'));
       expect(names, contains('Clothing & Apparel'));
       expect(names, contains('Relatives & Family'));
+      expect(names, contains('Child Food'));
+      expect(names, contains('Food & Dining'));
+      expect(names, contains('Housing & Rent'));
+      expect(names, contains('Utilities'));
+      expect(names, contains('Health & Medicine'));
+      expect(names, contains('Fish'));
+      expect(names, contains('DPS Saving'));
 
       expect(AppConstants.isDefaultCategory('Child & Baby Care', 'বাচ্চার খরচ'), isTrue);
       expect(AppConstants.isDefaultCategory('Medicine', 'ওষুধ ও ফার্মেসি'), isTrue);
       expect(AppConstants.isDefaultCategory('Doctor & Diagnostic', 'ডাক্তার ও টেস্ট ফি'), isTrue);
       expect(AppConstants.isDefaultCategory('Clothing & Apparel', 'পোশাক ও কাপড়চোপড়'), isTrue);
       expect(AppConstants.isDefaultCategory('Relatives & Family', 'আত্মীয়-স্বজন'), isTrue);
+      expect(AppConstants.isDefaultCategory('Child Food', 'বাচ্চার খাবার'), isTrue);
+      expect(AppConstants.isDefaultCategory('Food & Dining', 'খাবার ও রেস্তোরাঁ'), isTrue);
+      expect(AppConstants.isDefaultCategory('Housing & Rent', 'বাসাভাড়া'), isTrue);
+      expect(AppConstants.isDefaultCategory('Utilities', 'ইউটিলিটি ও বিল'), isTrue);
+      expect(AppConstants.isDefaultCategory('Health & Medicine', 'স্বাস্থ্য ও ওষুধ'), isTrue);
+      expect(AppConstants.isDefaultCategory('Fish', 'মাছ ও বাজার'), isTrue);
+      expect(AppConstants.isDefaultCategory('DPS Saving', 'ডিপিএস ও সঞ্চয়'), isTrue);
     });
   });
 
@@ -224,6 +238,22 @@ void main() {
 
       settings.toggleExpenseVisibility();
       expect(settings.isExpenseHidden, isFalse);
+    });
+
+    test('setShowPrayerCard toggles showPrayerCard and persists state', () async {
+      expect(settings.showPrayerCard, isTrue);
+
+      settings.setShowPrayerCard(false);
+      expect(settings.showPrayerCard, isFalse);
+
+      settings.togglePrayerCardVisibility();
+      expect(settings.showPrayerCard, isTrue);
+
+      settings.setShowPrayerCard(false);
+      final restored = SettingsController(prefs);
+      restored.onInit();
+      expect(restored.showPrayerCard, isFalse);
+      restored.dispose();
     });
 
     test('visibility states persist to SharedPreferences across app reload', () async {

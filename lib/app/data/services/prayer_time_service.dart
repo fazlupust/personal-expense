@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:intl/intl.dart';
 
 /// Bangladesh Divisions and locations for accurate prayer times
 class BangladeshLocation {
@@ -75,7 +76,141 @@ class BangladeshLocation {
     ),
   ];
 
+  static const List<BangladeshLocation> districts = [
+    BangladeshLocation(
+      id: 'pabna',
+      nameEn: 'Pabna',
+      nameBn: 'পাবনা',
+      latitude: 24.0064,
+      longitude: 89.2372,
+    ),
+    BangladeshLocation(
+      id: 'sirajganj',
+      nameEn: 'Sirajganj',
+      nameBn: 'সিরাজগঞ্জ',
+      latitude: 24.4534,
+      longitude: 89.7008,
+    ),
+    BangladeshLocation(
+      id: 'naogaon',
+      nameEn: 'Naogaon',
+      nameBn: 'নওগাঁ',
+      latitude: 24.8103,
+      longitude: 88.9414,
+    ),
+    BangladeshLocation(
+      id: 'chapainawabganj',
+      nameEn: 'Chapainawabganj',
+      nameBn: 'চাঁপাইনবাবগঞ্জ',
+      latitude: 24.5965,
+      longitude: 88.2775,
+    ),
+    BangladeshLocation(
+      id: 'bogura',
+      nameEn: 'Bogura',
+      nameBn: 'বগুড়া',
+      latitude: 24.8465,
+      longitude: 89.3777,
+    ),
+    BangladeshLocation(
+      id: 'natore',
+      nameEn: 'Natore',
+      nameBn: 'নাটোর',
+      latitude: 24.4102,
+      longitude: 88.9796,
+    ),
+    BangladeshLocation(
+      id: 'kushtia',
+      nameEn: 'Kushtia',
+      nameBn: 'কুষ্টিয়া',
+      latitude: 23.9013,
+      longitude: 89.1205,
+    ),
+    BangladeshLocation(
+      id: 'jashore',
+      nameEn: 'Jashore',
+      nameBn: 'যশোর',
+      latitude: 23.1664,
+      longitude: 89.2081,
+    ),
+    BangladeshLocation(
+      id: 'cumilla',
+      nameEn: 'Cumilla',
+      nameBn: 'কুমিল্লা',
+      latitude: 23.4682,
+      longitude: 91.1788,
+    ),
+    BangladeshLocation(
+      id: 'gazipur',
+      nameEn: 'Gazipur',
+      nameBn: 'গাজীপুর',
+      latitude: 23.9999,
+      longitude: 90.4203,
+    ),
+    BangladeshLocation(
+      id: 'narayanganj',
+      nameEn: 'Narayanganj',
+      nameBn: 'নারায়ণগঞ্জ',
+      latitude: 23.6238,
+      longitude: 90.5000,
+    ),
+    BangladeshLocation(
+      id: 'tangail',
+      nameEn: 'Tangail',
+      nameBn: 'টাঙ্গাইল',
+      latitude: 24.2513,
+      longitude: 89.9167,
+    ),
+    BangladeshLocation(
+      id: 'dinajpur',
+      nameEn: 'Dinajpur',
+      nameBn: 'দিনাজপুর',
+      latitude: 25.6217,
+      longitude: 88.6355,
+    ),
+    BangladeshLocation(
+      id: 'coxs_bazar',
+      nameEn: 'Cox\'s Bazar',
+      nameBn: 'কক্সবাজার',
+      latitude: 21.4272,
+      longitude: 92.0058,
+    ),
+    BangladeshLocation(
+      id: 'brahmanbaria',
+      nameEn: 'Brahmanbaria',
+      nameBn: 'ব্রাহ্মণবাড়িয়া',
+      latitude: 23.9571,
+      longitude: 91.1119,
+    ),
+    BangladeshLocation(
+      id: 'noakhali',
+      nameEn: 'Noakhali',
+      nameBn: 'নোয়াখালী',
+      latitude: 22.8696,
+      longitude: 91.0998,
+    ),
+    BangladeshLocation(
+      id: 'feni',
+      nameEn: 'Feni',
+      nameBn: 'ফেনী',
+      latitude: 23.0159,
+      longitude: 91.3976,
+    ),
+  ];
+
+  static List<BangladeshLocation> get allLocations => [
+        ...divisions,
+        ...districts,
+      ];
+
   static BangladeshLocation get defaultLocation => divisions.first;
+
+  static BangladeshLocation findById(String id) {
+    return allLocations.firstWhere(
+      (d) => d.id == id,
+      orElse: () => defaultLocation,
+    );
+  }
 }
 
 enum PrayerName {
@@ -93,6 +228,7 @@ class PrayerTimeItem {
   final String nameBn;
   final String arabicName;
   final DateTime time;
+  final DateTime? endTime;
   final bool isWaqt; // true for 5 daily prayers, false for sunrise
   final String icon;
 
@@ -102,9 +238,58 @@ class PrayerTimeItem {
     required this.nameBn,
     required this.arabicName,
     required this.time,
+    this.endTime,
     required this.isWaqt,
     required this.icon,
   });
+
+  /// Formatted time span (e.g. "5:03 AM – 6:18 AM" or "6:18 AM")
+  String formatRange({String format = 'h:mm a'}) {
+    final startStr = DateFormat(format).format(time);
+    if (endTime != null) {
+      final endStr = DateFormat(format).format(endTime!);
+      return '$startStr – $endStr';
+    }
+    return startStr;
+  }
+}
+
+/// Prohibited / Haram times for performing Salah
+class ProhibitedTimeItem {
+  final String id;
+  final String nameEn;
+  final String nameBn;
+  final String arabicName;
+  final DateTime start;
+  final DateTime end;
+  final String icon;
+  final String noteBn;
+  final String noteEn;
+  final int bufferMinutes;
+  final bool isCautionary;
+
+  const ProhibitedTimeItem({
+    required this.id,
+    required this.nameEn,
+    required this.nameBn,
+    required this.arabicName,
+    required this.start,
+    required this.end,
+    required this.icon,
+    required this.noteBn,
+    required this.noteEn,
+    this.bufferMinutes = 15,
+    this.isCautionary = true,
+  });
+
+  /// True if now falls in this prohibited window
+  bool contains(DateTime now) => !now.isBefore(start) && now.isBefore(end);
+
+  String formatRange({String format = 'h:mm a'}) {
+    final s = DateFormat(format).format(start);
+    final e = DateFormat(format).format(end);
+    return '$s – $e';
+  }
 }
 
 class DailyPrayerSchedule {
@@ -143,6 +328,7 @@ class DailyPrayerSchedule {
           nameBn: 'ফজর',
           arabicName: 'الفجر',
           time: fajr,
+          endTime: sunrise,
           isWaqt: true,
           icon: '🌅',
         ),
@@ -152,6 +338,7 @@ class DailyPrayerSchedule {
           nameBn: 'সূর্যোদয়',
           arabicName: 'الشروق',
           time: sunrise,
+          endTime: null,
           isWaqt: false,
           icon: '☀️',
         ),
@@ -161,6 +348,7 @@ class DailyPrayerSchedule {
           nameBn: 'যোহর',
           arabicName: 'الظهر',
           time: dhuhr,
+          endTime: asr,
           isWaqt: true,
           icon: '🌞',
         ),
@@ -170,6 +358,7 @@ class DailyPrayerSchedule {
           nameBn: 'আসর',
           arabicName: 'العصر',
           time: asr,
+          endTime: maghrib,
           isWaqt: true,
           icon: '🌤️',
         ),
@@ -179,6 +368,7 @@ class DailyPrayerSchedule {
           nameBn: 'মাগরিব (ইফতার)',
           arabicName: 'المغرب',
           time: maghrib,
+          endTime: isha,
           isWaqt: true,
           icon: '🌇',
         ),
@@ -188,6 +378,7 @@ class DailyPrayerSchedule {
           nameBn: 'এশা',
           arabicName: 'العشاء',
           time: isha,
+          endTime: fajr.add(const Duration(days: 1)),
           isWaqt: true,
           icon: '🌙',
         ),
@@ -197,7 +388,17 @@ class DailyPrayerSchedule {
   PrayerTimeItem getCurrentWaqt(DateTime now) {
     if (now.isBefore(fajr)) {
       // Before Fajr is Isha / Tahajjud
-      return items.firstWhere((i) => i.prayer == PrayerName.isha);
+      final ishaItem = items.firstWhere((i) => i.prayer == PrayerName.isha);
+      return PrayerTimeItem(
+        prayer: ishaItem.prayer,
+        nameEn: ishaItem.nameEn,
+        nameBn: ishaItem.nameBn,
+        arabicName: ishaItem.arabicName,
+        time: isha.subtract(const Duration(days: 1)),
+        endTime: fajr,
+        isWaqt: true,
+        icon: ishaItem.icon,
+      );
     } else if (now.isBefore(sunrise)) {
       return items.firstWhere((i) => i.prayer == PrayerName.fajr);
     } else if (now.isBefore(dhuhr)) {
@@ -232,6 +433,58 @@ class DailyPrayerSchedule {
       // Tomorrow Fajr
       return items.firstWhere((i) => i.prayer == PrayerName.fajr);
     }
+  }
+
+  /// 3 Prohibited / Haram times for performing Salah (Sahih Muslim: 831)
+  /// Note: These times are astronomical and vary every day based on the solar position.
+  /// Islamic scholars and Islamic Foundation Bangladesh define them as cautionary windows (15–20 minutes).
+  List<ProhibitedTimeItem> getProhibitedTimes({int bufferMinutes = 15}) => [
+        ProhibitedTimeItem(
+          id: 'sunrise',
+          nameEn: 'At Sunrise',
+          nameBn: 'সূর্যোদয়ের সময়',
+          arabicName: 'عند شروق الشمس',
+          start: sunrise,
+          end: sunrise.add(Duration(minutes: bufferMinutes)),
+          icon: '🌅',
+          bufferMinutes: bufferMinutes,
+          noteBn: 'প্রতিদিন পরিবর্তনশীল: সূর্যোদয় থেকে $bufferMinutes মিনিট (ইশরাক শুরুর পূর্ব মুহূর্ত)',
+          noteEn: 'Varies daily: from sunrise until $bufferMinutes min after (before Ishraq)',
+        ),
+        ProhibitedTimeItem(
+          id: 'zawal',
+          nameEn: 'At Midday (Zawal)',
+          nameBn: 'ঠিক দ্বিপ্রহরের সময় (যাওয়াল)',
+          arabicName: 'عند استواء الشمس',
+          start: dhuhr.subtract(Duration(minutes: bufferMinutes)),
+          end: dhuhr,
+          icon: '☀️',
+          bufferMinutes: bufferMinutes,
+          noteBn: 'প্রতিদিন পরিবর্তনশীল: সূর্য মাথার ঠিক উপরে থাকার সময় (যোহরের ওয়াক্তের আগের $bufferMinutes মিনিট)',
+          noteEn: 'Varies daily: when sun is at zenith ($bufferMinutes min before Dhuhr)',
+        ),
+        ProhibitedTimeItem(
+          id: 'sunset',
+          nameEn: 'At Sunset',
+          nameBn: 'সূর্যাস্তের সময়',
+          arabicName: 'عند غروب الشمس',
+          start: maghrib.subtract(Duration(minutes: bufferMinutes)),
+          end: maghrib,
+          icon: '🌇',
+          bufferMinutes: bufferMinutes,
+          noteBn: 'প্রতিদিন পরিবর্তনশীল: সূর্যাস্তের পূর্ববর্তী $bufferMinutes মিনিট (মাগরিব ওয়াক্ত শুরুর পূর্ব মুহূর্ত)',
+          noteEn: 'Varies daily: $bufferMinutes min before sunset (until Maghrib starts)',
+        ),
+      ];
+
+  List<ProhibitedTimeItem> get prohibitedTimes => getProhibitedTimes();
+
+  /// Returns the active prohibited time item if now falls into one, or null
+  ProhibitedTimeItem? getActiveProhibitedTime(DateTime now, {int bufferMinutes = 15}) {
+    for (final item in getProhibitedTimes(bufferMinutes: bufferMinutes)) {
+      if (item.contains(now)) return item;
+    }
+    return null;
   }
 }
 

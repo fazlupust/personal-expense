@@ -27,7 +27,6 @@ class ReportsView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const PageTitle('Reports'),
               SegmentBar<int>(
                 options: {
                   1: 'This month'.tr,

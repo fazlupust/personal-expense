@@ -28,6 +28,7 @@ class SettingsController extends GetxController {
   bool isIncomeHidden = false;
   bool showExpense = true;
   bool isExpenseHidden = false;
+  bool showPrayerCard = true;
 
   Locale get locale => Locale(langCode);
 
@@ -142,6 +143,7 @@ class SettingsController extends GetxController {
       isIncomeHidden = false;
       showExpense = true;
       isExpenseHidden = false;
+      showPrayerCard = true;
       budget = 0;
       categoryBudgets = {};
       return;
@@ -155,6 +157,7 @@ class SettingsController extends GetxController {
       defaultAccount = (m['account'] as String?) ?? defaultAccount;
       showIncome = (m['show_income'] as bool?) ?? true;
       showExpense = (m['show_expense'] as bool?) ?? true;
+      showPrayerCard = (m['show_prayer_card'] as bool?) ?? true;
       isBalanceHidden = (m['is_balance_hidden'] as bool?) ?? !showIncome;
       isIncomeHidden = (m['is_income_hidden'] as bool?) ?? !showIncome;
       isExpenseHidden = (m['is_expense_hidden'] as bool?) ?? !showExpense;
@@ -201,6 +204,10 @@ class SettingsController extends GetxController {
           isExpenseHidden = data['is_expense_hidden'] as bool;
           changed = true;
         }
+        if (data['show_prayer_card'] is bool) {
+          showPrayerCard = data['show_prayer_card'] as bool;
+          changed = true;
+        }
         if (changed) {
           await _prefs.setString(
             _userPrefsKey(uid),
@@ -215,6 +222,7 @@ class SettingsController extends GetxController {
               'is_balance_hidden': isBalanceHidden,
               'is_income_hidden': isIncomeHidden,
               'is_expense_hidden': isExpenseHidden,
+              'show_prayer_card': showPrayerCard,
               'category_budgets': categoryBudgets,
             }),
           );
@@ -236,6 +244,7 @@ class SettingsController extends GetxController {
       'is_balance_hidden': isBalanceHidden,
       'is_income_hidden': isIncomeHidden,
       'is_expense_hidden': isExpenseHidden,
+      'show_prayer_card': showPrayerCard,
       'category_budgets': categoryBudgets,
     });
     await _prefs.setString(_prefsKey, payload);
@@ -249,6 +258,7 @@ class SettingsController extends GetxController {
           'is_balance_hidden': isBalanceHidden,
           'is_income_hidden': isIncomeHidden,
           'is_expense_hidden': isExpenseHidden,
+          'show_prayer_card': showPrayerCard,
         }, SetOptions(merge: true));
       } catch (_) {}
     }
@@ -329,6 +339,16 @@ class SettingsController extends GetxController {
     isExpenseHidden = !val;
     _persist();
     update();
+  }
+
+  void setShowPrayerCard(bool val) {
+    showPrayerCard = val;
+    _persist();
+    update();
+  }
+
+  void togglePrayerCardVisibility() {
+    setShowPrayerCard(!showPrayerCard);
   }
 
   void toggleExpenseVisibility() {

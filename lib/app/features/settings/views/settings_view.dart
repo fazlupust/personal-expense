@@ -38,7 +38,6 @@ class SettingsView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const PageTitle('Profile'),
               AdaptiveColumns(
                 left: [
                   // User Profile Card

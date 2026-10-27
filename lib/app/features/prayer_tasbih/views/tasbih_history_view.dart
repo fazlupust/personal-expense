@@ -34,6 +34,16 @@ class TasbihHistoryView extends StatelessWidget {
             showThemeToggle: false,
             showLogout: false,
             actions: [
+              // Count visibility toggle
+              IconButton(
+                icon: Icon(
+                  c.isCountHidden ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                  size: 20,
+                  color: c.isCountHidden ? p.mute : p.income,
+                ),
+                tooltip: c.isCountHidden ? 'Show count'.tr : 'Hide count'.tr,
+                onPressed: c.toggleCountVisibility,
+              ),
               // Shortcut to Tasbih Counter
               IconButton(
                 icon: Icon(Icons.fingerprint_rounded, size: 22, color: p.income),
@@ -124,11 +134,14 @@ class TasbihHistoryView extends StatelessWidget {
                                     Icon(Icons.query_stats_rounded, size: 16, color: p.income),
                                     const SizedBox(width: 4),
                                     Text(
-                                      '${NumberFormat('#,###').format(totalCount)} ${'Times'.tr}',
+                                      c.isCountHidden
+                                          ? '***'
+                                          : '${NumberFormat('#,###').format(totalCount)} ${'Times'.tr}',
                                       style: TextStyle(
                                         fontSize: 12.5,
                                         fontWeight: FontWeight.w800,
                                         color: p.income,
+                                        letterSpacing: c.isCountHidden ? 2 : 0,
                                       ),
                                     ),
                                   ],
@@ -340,11 +353,12 @@ class TasbihHistoryView extends StatelessWidget {
                                                 ),
                                               ),
                                               child: Text(
-                                                '$count ${'Times'.tr}',
+                                                c.isCountHidden ? '***' : '$count ${'Times'.tr}',
                                                 style: TextStyle(
                                                   fontSize: 12,
                                                   fontWeight: FontWeight.w800,
                                                   color: count > 0 ? Colors.white : p.mute,
+                                                  letterSpacing: c.isCountHidden ? 2 : 0,
                                                 ),
                                               ),
                                             ),

@@ -471,16 +471,37 @@ class TasbihCounterView extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     IconButton(
+                      visualDensity: VisualDensity.compact,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                      icon: Icon(
+                        c.isCountHidden ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                        size: 20,
+                        color: c.isCountHidden ? p.mute : p.income,
+                      ),
+                      tooltip: c.isCountHidden ? 'Show count'.tr : 'Hide count'.tr,
+                      onPressed: c.toggleCountVisibility,
+                    ),
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                       icon: Icon(Icons.query_stats_rounded, size: 20, color: p.income),
                       tooltip: 'Tasbih History & Filter'.tr,
                       onPressed: () => _showTasbihAnalyticsSheet(context, c, p),
                     ),
                     IconButton(
+                      visualDensity: VisualDensity.compact,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                       icon: Icon(Icons.auto_stories_rounded, size: 20, color: p.income),
                       tooltip: 'All Zikirs & Duas'.tr,
                       onPressed: () => _showAllZikirsSheet(context, c, p),
                     ),
                     IconButton(
+                      visualDensity: VisualDensity.compact,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                       icon: Icon(
                         c.isVibrationEnabled ? Icons.vibration_rounded : Icons.smartphone_rounded,
                         size: 20,
@@ -490,6 +511,9 @@ class TasbihCounterView extends StatelessWidget {
                       onPressed: c.toggleVibration,
                     ),
                     IconButton(
+                      visualDensity: VisualDensity.compact,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                       icon: Icon(Icons.refresh_rounded, size: 20, color: p.expense),
                       tooltip: 'Reset'.tr,
                       onPressed: () => _showResetConfirmDialog(context, c, p),
@@ -594,132 +618,196 @@ class TasbihCounterView extends StatelessWidget {
               const SizedBox(height: 10),
 
               // Selected Zikir Card (Arabic, Pronunciation, Meaning, Virtue)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                decoration: BoxDecoration(
-                  color: p.card,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: p.line),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Arabic
-                    Text(
-                      zikir.arabic,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 21,
-                        fontWeight: FontWeight.w700,
-                        color: p.income,
-                        height: 1.3,
+              if (c.isZikirCardHidden || c.isCountHidden) ...[
+                Center(
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(10),
+                    onTap: () {
+                      if (c.isCountHidden) {
+                        c.toggleCountVisibility();
+                      }
+                      c.setZikirCardHidden(false);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.visibility_outlined, size: 14, color: p.income),
+                          const SizedBox(width: 5),
+                          Text(
+                            'Show zikir details'.tr,
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w600,
+                              color: p.income,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    // Bengali Pronunciation & Meaning
-                    Wrap(
-                      alignment: WrapAlignment.center,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      spacing: 6,
-                      runSpacing: 2,
-                      children: [
-                        Text(
-                          zikir.titleBn,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 14.5,
-                            fontWeight: FontWeight.w700,
-                            color: p.ink,
+                  ),
+                ),
+                const SizedBox(height: 6),
+              ] else ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: p.card,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: p.line),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.03),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // Header Row: Hide card button
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          InkWell(
+                            borderRadius: BorderRadius.circular(6),
+                            onTap: c.toggleZikirCardVisibility,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.visibility_off_outlined, size: 13, color: p.mute),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'Hide'.tr,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: p.mute,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
+                        ],
+                      ),
+                      // Arabic
+                      Text(
+                        zikir.arabic,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 21,
+                          fontWeight: FontWeight.w700,
+                          color: p.income,
+                          height: 1.3,
                         ),
-                        Text('•', style: TextStyle(color: p.mute, fontSize: 11)),
-                        Text(
-                          Get.locale?.languageCode == 'bn' ? zikir.meaningBn : zikir.meaningEn,
-                          textAlign: TextAlign.center,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: p.mute,
+                      ),
+                      const SizedBox(height: 4),
+                      // Bengali Pronunciation & Meaning
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 6,
+                        runSpacing: 2,
+                        children: [
+                          Text(
+                            zikir.titleBn,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 14.5,
+                              fontWeight: FontWeight.w700,
+                              color: p.ink,
+                            ),
+                          ),
+                          Text('•', style: TextStyle(color: p.mute, fontSize: 11)),
+                          Text(
+                            Get.locale?.languageCode == 'bn' ? zikir.meaningBn : zikir.meaningEn,
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: p.mute,
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (zikir.benefitBn != null && zikir.benefitBn!.isNotEmpty) ...[
+                        const SizedBox(height: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
+                          decoration: BoxDecoration(
+                            color: p.income.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.stars_rounded, size: 13, color: p.income),
+                              const SizedBox(width: 4),
+                              Flexible(
+                                child: Text(
+                                  zikir.benefitBn!,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: p.income,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
-                    ),
-                    if (zikir.benefitBn != null && zikir.benefitBn!.isNotEmpty) ...[
-                      const SizedBox(height: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
-                        decoration: BoxDecoration(
-                          color: p.income.withOpacity(0.08),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.stars_rounded, size: 13, color: p.income),
-                            const SizedBox(width: 4),
-                            Flexible(
-                              child: Text(
-                                zikir.benefitBn!,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: p.income,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: 6),
-                    // Compact Per-Zikir Recitation Count & Filter Shortcut
-                    InkWell(
-                      borderRadius: BorderRadius.circular(8),
-                      onTap: () => _showTasbihAnalyticsSheet(context, c, p),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: p.income.withOpacity(0.08),
+                      if (!c.isCountHidden) ...[
+                        const SizedBox(height: 6),
+                        // Compact Per-Zikir Recitation Count & Visibility Shortcut
+                        InkWell(
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: p.income.withOpacity(0.2)),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.query_stats_rounded, size: 14, color: p.income),
-                            const SizedBox(width: 6),
-                            Flexible(
-                              child: Text(
-                                '${c.getZikirTodayCount(zikir.id)} ${'Times'.tr} (${'Today'.tr}) · ${c.getZikirLifetimeCount(zikir.id)} ${'Times'.tr} (${'All Time'.tr})',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
-                                  color: p.income,
-                                ),
-                              ),
+                          onTap: c.toggleCountVisibility,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: p.income.withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: p.income.withOpacity(0.2)),
                             ),
-                            const SizedBox(width: 4),
-                            Icon(Icons.chevron_right_rounded, size: 14, color: p.income),
-                          ],
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.visibility_off_rounded, size: 14, color: p.income),
+                                const SizedBox(width: 6),
+                                Flexible(
+                                  child: Text(
+                                    '${c.getZikirTodayCount(zikir.id)} ${'Times'.tr} (${'Today'.tr}) · ${c.getZikirLifetimeCount(zikir.id)} ${'Times'.tr} (${'All Time'.tr})',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      color: p.income,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Icon(Icons.chevron_right_rounded, size: 14, color: p.income),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  ],
+                      ],
+                    ],
+                  ),
                 ),
-              ),
+                const SizedBox(height: 12),
+              ],
 
               const SizedBox(height: 12),
 
@@ -778,97 +866,108 @@ class TasbihCounterView extends StatelessWidget {
                               radius: 0.8,
                             ),
                           ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              // Target Badge (Tap to change target)
-                              FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: InkWell(
-                                  borderRadius: BorderRadius.circular(10),
-                                  onTap: () => _showTargetSelector(context, c, p),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                    decoration: BoxDecoration(
-                                      color: p.income.withOpacity(0.15),
-                                      borderRadius: BorderRadius.circular(10),
+                          child: Center(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Padding(
+                                padding: const EdgeInsets.all(4.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    // Target Badge (Tap to change target)
+                                    FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.circular(10),
+                                        onTap: () => _showTargetSelector(context, c, p),
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                          decoration: BoxDecoration(
+                                            color: p.income.withOpacity(0.15),
+                                            borderRadius: BorderRadius.circular(10),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(
+                                                target > 0 ? 'Target: $target'.tr : 'Target: ∞'.tr,
+                                                style: TextStyle(
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: p.income,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 3),
+                                              Icon(Icons.arrow_drop_down, size: 14, color: p.income),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
                                     ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          target > 0 ? 'Target: $target'.tr : 'Target: ∞'.tr,
+                                    const SizedBox(height: 4),
+
+                                    // Huge Counter Number
+                                    FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                                        child: Text(
+                                          c.isCountHidden ? '***' : NumberFormat('#,###').format(current),
+                                          style: TextStyle(
+                                            fontSize: c.isCountHidden ? 44 : 48,
+                                            fontWeight: FontWeight.w900,
+                                            color: p.ink,
+                                            letterSpacing: c.isCountHidden ? 4 : -1,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+
+                                    // Completed cycles indicator
+                                    if (c.completedCycles > 0) ...[
+                                      FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Text(
+                                          c.isCountHidden
+                                              ? '${'Round:'.tr} ***'
+                                              : '${'Round:'.tr} ${c.completedCycles}',
                                           style: TextStyle(
                                             fontSize: 11,
                                             fontWeight: FontWeight.w700,
                                             color: p.income,
                                           ),
                                         ),
-                                        const SizedBox(width: 3),
-                                        Icon(Icons.arrow_drop_down, size: 14, color: p.income),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-
-                              // Huge Counter Number
-                              FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                                  child: Text(
-                                    NumberFormat('#,###').format(current),
-                                    style: TextStyle(
-                                      fontSize: 48,
-                                      fontWeight: FontWeight.w900,
-                                      color: p.ink,
-                                      letterSpacing: -1,
-                                    ),
-                                  ),
-                                ),
-                              ),
-
-                              // Completed cycles indicator
-                              if (c.completedCycles > 0) ...[
-                                FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  child: Text(
-                                    '${'Round:'.tr} ${c.completedCycles}',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w700,
-                                      color: p.income,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                              const SizedBox(height: 2),
-
-                              // Tap Hint (scaled down cleanly in any language)
-                              FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(Icons.touch_app_rounded, size: 12, color: p.mute),
-                                      const SizedBox(width: 3),
-                                      Text(
-                                        'Tap to count'.tr,
-                                        style: TextStyle(
-                                          fontSize: 10.5,
-                                          fontWeight: FontWeight.w500,
-                                          color: p.mute,
-                                        ),
                                       ),
                                     ],
-                                  ),
+                                    const SizedBox(height: 2),
+
+                                    // Tap Hint (scaled down cleanly in any language)
+                                    FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(Icons.touch_app_rounded, size: 12, color: p.mute),
+                                            const SizedBox(width: 3),
+                                            Text(
+                                              'Tap to count'.tr,
+                                              style: TextStyle(
+                                                fontSize: 10.5,
+                                                fontWeight: FontWeight.w500,
+                                                color: p.mute,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
+                            ),
                           ),
                         ),
                       ],
@@ -969,11 +1068,12 @@ class TasbihCounterView extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            NumberFormat('#,###').format(c.todayTotal),
+                            c.isCountHidden ? '***' : NumberFormat('#,###').format(c.todayTotal),
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w800,
                               color: p.ink,
+                              letterSpacing: c.isCountHidden ? 2 : 0,
                             ),
                           ),
                         ],
@@ -1012,11 +1112,12 @@ class TasbihCounterView extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            NumberFormat('#,###').format(c.lifetimeTotal),
+                            c.isCountHidden ? '***' : NumberFormat('#,###').format(c.lifetimeTotal),
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w800,
                               color: p.ink,
+                              letterSpacing: c.isCountHidden ? 2 : 0,
                             ),
                           ),
                         ],
@@ -1124,6 +1225,16 @@ class TasbihCounterView extends StatelessWidget {
             showThemeToggle: false,
             showLogout: false,
             actions: [
+              // Count visibility toggle
+              IconButton(
+                icon: Icon(
+                  c.isCountHidden ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                  size: 20,
+                  color: c.isCountHidden ? p.mute : p.income,
+                ),
+                tooltip: c.isCountHidden ? 'Show count'.tr : 'Hide count'.tr,
+                onPressed: c.toggleCountVisibility,
+              ),
               // Tasbih History & Analytics
               IconButton(
                 icon: Icon(Icons.query_stats_rounded, size: 21, color: p.income),

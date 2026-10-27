@@ -1,10 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../data/services/auth_service.dart';
 import '../../../data/services/prayer_time_service.dart';
 
 enum ZikirCategory {
@@ -81,6 +85,29 @@ class ZikirItem {
 class PrayerTasbihController extends GetxController {
   static PrayerTasbihController get to => Get.find<PrayerTasbihController>();
 
+  // --- User Scope & Isolation ---
+  String? _overrideUid;
+  String get _currentUid =>
+      _overrideUid ??
+      (Get.isRegistered<AuthService>()
+          ? (Get.find<AuthService>().currentUid ?? '')
+          : '');
+
+  SharedPreferences? _prefs;
+
+  Future<void> loadForUserForTesting(String uid) async {
+    if (_currentUid.isNotEmpty && _todayTotal > 0) {
+      await _persistTasbihData(_currentUid);
+    }
+    _overrideUid = uid;
+    await _loadTasbihData(uid);
+  }
+
+  String _userKey(String base, [String? uidOverride]) {
+    final uid = uidOverride ?? _currentUid;
+    return uid.isNotEmpty ? '${base}_$uid' : base;
+  }
+
   // --- Prayer Times State ---
   late BangladeshLocation _selectedLocation;
   BangladeshLocation get selectedLocation => _selectedLocation;
@@ -116,24 +143,46 @@ class PrayerTasbihController extends GetxController {
     ),
     ZikirItem(
       id: 'subhanallahi_wa_bihamdihi',
-      arabic: 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ ، سُبْحَانَ اللَّهِ الْعَظِيمِ',
+      arabic: 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',
       titleBn: 'সুবহানাল্লাহি ওয়া বিহামদিহি',
       titleEn: 'SubhanAllahi wa bihamdihi',
-      meaningBn: 'আল্লাহর প্রশংসাসহ পবিত্রতা ঘোষণা করি, মহান আল্লাহ পরম পবিত্র',
+      meaningBn: 'আল্লাহর প্রশংসাসহ পবিত্রতা ঘোষণা করি',
       meaningEn: 'Glory be to Allah and all praise is His',
       defaultTarget: 100,
-      benefitBn: 'মুখে উচ্চারণে সহজ, মিজানের পাল্লায় অতি ভারী এবং রহমানের কাছে অতি প্রিয়। দিনে ১০০ বার পাঠে সমুদ্রের ফেনা পরিমাণ গুনাহ হলেও ক্ষমা হয়।',
+      benefitBn: 'দিনে ১০০ বার পাঠে সমুদ্রের ফেনা পরিমাণ গুনাহ হলেও ক্ষমা করে দেওয়া হয়।',
       category: ZikirCategory.morningEvening,
     ),
     ZikirItem(
       id: 'astaghfirullah',
-      arabic: 'أَسْتَغْفِرُ اللَّهَ وَأَتُوبُ إِلَيْهِ',
+      arabic: 'أَسْتَغْفِرُ اللَّهَ',
       titleBn: 'আস্তাগফিরুল্লাহ',
       titleEn: 'Astaghfirullah',
-      meaningBn: 'আমি আল্লাহর কাছে ক্ষমা চাই এবং তাঁর দিকে প্রত্যাবর্তন করি',
+      meaningBn: 'আমি আল্লাহর কাছে ক্ষমা প্রার্থনা করছি',
       meaningEn: 'I seek forgiveness from Allah',
       defaultTarget: 100,
       benefitBn: 'রিজিকে প্রাচুর্য, বিপদমুক্তি ও মনের প্রশান্তি এনে দেয়।',
+      category: ZikirCategory.forgiveness,
+    ),
+    ZikirItem(
+      id: 'subhanallahi_wa_bihamdihi_azim',
+      arabic: 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ ، سُبْحَانَ اللَّهِ الْعَظِيمِ',
+      titleBn: 'সুবহানাল্লাহি ওয়া বিহামদিহি সুবহানাল্লাহিল আজিম',
+      titleEn: 'SubhanAllahi wa bihamdihi SubhanAllahil Azeem',
+      meaningBn: 'আল্লাহর প্রশংসাসহ পবিত্রতা ঘোষণা করি, মহান আল্লাহ পরম পবিত্র',
+      meaningEn: 'Glory be to Allah and all praise is His, Glory be to Allah the Almighty',
+      defaultTarget: 100,
+      benefitBn: 'মুখে উচ্চারণে সহজ, মিজানের পাল্লায় অতি ভারী এবং রহমানের কাছে অতি প্রিয়।',
+      category: ZikirCategory.morningEvening,
+    ),
+    ZikirItem(
+      id: 'astaghfirullah_wa_atubu_ilaih',
+      arabic: 'أَسْتَغْفِرُ اللَّهَ وَأَتُوبُ إِلَيْهِ',
+      titleBn: 'আস্তাগফিরুল্লাহ ওয়া আতুবু ইলাইহি',
+      titleEn: 'Astaghfirullaha wa Atubu Ilayh',
+      meaningBn: 'আমি আল্লাহর কাছে ক্ষমা চাই এবং তাঁর দিকে প্রত্যাবর্তন করি',
+      meaningEn: 'I seek forgiveness from Allah and repent to Him',
+      defaultTarget: 100,
+      benefitBn: 'নবীজি (সাঃ) দিনে ৭০ থেকে ১০০ বার এই তাওবা ও ইস্তিগফার পাঠ করতেন।',
       category: ZikirCategory.forgiveness,
     ),
     ZikirItem(
@@ -422,6 +471,18 @@ class PrayerTasbihController extends GetxController {
   bool _isSoundEnabled = true;
   bool get isSoundEnabled => _isSoundEnabled;
 
+  bool _isCountHidden = false;
+  bool get isCountHidden => _isCountHidden;
+
+  bool _isZikirCardHidden = true;
+  bool get isZikirCardHidden => _isZikirCardHidden;
+
+  bool _isProhibitedAlertOn = true;
+  bool get isProhibitedAlertOn => _isProhibitedAlertOn;
+
+  int _prohibitedBufferMinutes = 15;
+  int get prohibitedBufferMinutes => _prohibitedBufferMinutes;
+
   // Active tab index (0 = Prayer Times, 1 = Digital Tasbih)
   int _activeTab = 0;
   int get activeTab => _activeTab;
@@ -436,6 +497,7 @@ class PrayerTasbihController extends GetxController {
 
     _recalculatePrayerTimes();
     _loadTasbihData();
+    _bindAuth();
 
     // Start timer to update countdown every minute
     if (!Get.testMode) {
@@ -443,6 +505,35 @@ class PrayerTasbihController extends GetxController {
         _updatePrayerCountdown();
       });
     }
+  }
+
+  void _bindAuth() {
+    if (Get.isRegistered<AuthService>()) {
+      final auth = Get.find<AuthService>();
+      ever(auth.firebaseUser, (user) {
+        if (user != null) {
+          _loadTasbihData(user.uid);
+          _syncFromFirestore(user.uid);
+        } else {
+          _resetUserScopedData();
+        }
+      });
+      if (auth.currentUid != null && auth.currentUid!.isNotEmpty) {
+        _syncFromFirestore(auth.currentUid!);
+      }
+    }
+  }
+
+  void _resetUserScopedData() {
+    _currentCount = 0;
+    _todayTotal = 0;
+    _lifetimeTotal = 0;
+    _completedCycles = 0;
+    _zikirLifetimeCounts.clear();
+    _zikirDailyCounts.clear();
+    _isCountHidden = false;
+    _isZikirCardHidden = true;
+    update();
   }
 
   void stopTimer() {
@@ -453,6 +544,11 @@ class PrayerTasbihController extends GetxController {
   @override
   void onClose() {
     _countdownTimer?.cancel();
+    _firestoreDebounceTimer?.cancel();
+    final uid = _currentUid;
+    if (uid.isNotEmpty) {
+      _flushToFirestore(uid);
+    }
     super.onClose();
   }
 
@@ -619,6 +715,20 @@ class PrayerTasbihController extends GetxController {
     _saveLocation();
   }
 
+  Future<void> toggleProhibitedAlert() async {
+    _isProhibitedAlertOn = !_isProhibitedAlertOn;
+    update();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_userKey('prohibited_alert_on', _currentUid), _isProhibitedAlertOn);
+  }
+
+  Future<void> setProhibitedBufferMinutes(int minutes) async {
+    _prohibitedBufferMinutes = minutes;
+    update();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_userKey('prohibited_buffer_minutes', _currentUid), _prohibitedBufferMinutes);
+  }
+
   // --- Tasbih Methods ---
   void selectZikir(ZikirItem zikir) {
     _selectedZikir = zikir;
@@ -663,6 +773,7 @@ class PrayerTasbihController extends GetxController {
     }
 
     _persistTasbihData();
+    _scheduleFirestoreSync();
     update();
   }
 
@@ -685,6 +796,7 @@ class PrayerTasbihController extends GetxController {
         HapticFeedback.selectionClick();
       }
       _persistTasbihData();
+      _scheduleFirestoreSync();
       update();
     }
   }
@@ -710,34 +822,255 @@ class PrayerTasbihController extends GetxController {
     update();
   }
 
+  Future<void> toggleCountVisibility() async {
+    _isCountHidden = !_isCountHidden;
+    update();
+    await _persistSettings();
+  }
+
+  Future<void> setCountHidden(bool val) async {
+    _isCountHidden = val;
+    update();
+    await _persistSettings();
+  }
+
+  Future<void> toggleZikirCardVisibility() async {
+    _isZikirCardHidden = !_isZikirCardHidden;
+    update();
+    await _persistSettings();
+  }
+
+  Future<void> setZikirCardHidden(bool val) async {
+    _isZikirCardHidden = val;
+    update();
+    await _persistSettings();
+  }
+
+  // --- Firestore Sync & User-Isolation ---
+  Timer? _firestoreDebounceTimer;
+
+  void _scheduleFirestoreSync() {
+    final uid = _currentUid;
+    if (uid.isEmpty) return;
+    _firestoreDebounceTimer?.cancel();
+    _firestoreDebounceTimer = Timer(const Duration(milliseconds: 600), () {
+      _flushToFirestore(uid);
+    });
+  }
+
+  Future<void> flushNowForTesting([String? uidOverride]) async {
+    final uid = uidOverride ?? _currentUid;
+    if (uid.isNotEmpty) {
+      await _flushToFirestore(uid);
+    }
+  }
+
+  Future<void> _flushToFirestore(String uid) async {
+    if (uid.isEmpty) {
+      debugPrint('[TasbihFirestore] Skip sync: No user UID found. Saved locally in SharedPreferences.');
+      return;
+    }
+    try {
+      final todayKey = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      final dayCounts = _zikirDailyCounts[todayKey] ?? <String, int>{};
+
+      final db = FirebaseFirestore.instance;
+      final batch = db.batch();
+
+      // 1. Day-wise and zikir-wise document: users/{uid}/tasbih_daily/{todayKey}
+      final dayDoc = db
+          .collection('users')
+          .doc(uid)
+          .collection('tasbih_daily')
+          .doc(todayKey);
+
+      batch.set(
+        dayDoc,
+        {
+          'user_id': uid,
+          'date': todayKey,
+          'counts': Map<String, dynamic>.from(dayCounts),
+          'day_total': _todayTotal,
+          'updated_at': FieldValue.serverTimestamp(),
+        },
+        SetOptions(merge: true),
+      );
+
+      // 2. Summary document with lifetime total and zikir-wise totals
+      final summaryDoc = db
+          .collection('users')
+          .doc(uid)
+          .collection('tasbih_summary')
+          .doc('summary');
+
+      batch.set(
+        summaryDoc,
+        {
+          'user_id': uid,
+          'lifetime_total': _lifetimeTotal,
+          'today_total': _todayTotal,
+          'last_date': todayKey,
+          'zikir_lifetime_counts': Map<String, dynamic>.from(_zikirLifetimeCounts),
+          'updated_at': FieldValue.serverTimestamp(),
+        },
+        SetOptions(merge: true),
+      );
+
+      await batch.commit();
+      debugPrint('[TasbihFirestore] Synced to Firestore for user: $uid (date: $todayKey, counts: $dayCounts)');
+    } catch (e) {
+      debugPrint('[TasbihFirestore] Error syncing to Firestore: $e');
+    }
+  }
+
+  Future<void> _syncFromFirestore(String uid) async {
+    if (uid.isEmpty) return;
+    try {
+      final db = FirebaseFirestore.instance;
+
+      // 1. Fetch summary document
+      final summaryDoc = await db
+          .collection('users')
+          .doc(uid)
+          .collection('tasbih_summary')
+          .doc('summary')
+          .get();
+
+      if (summaryDoc.exists && summaryDoc.data() != null) {
+        final data = summaryDoc.data()!;
+        final remoteLifetime = (data['lifetime_total'] as num?)?.toInt() ?? 0;
+        if (remoteLifetime > _lifetimeTotal) {
+          _lifetimeTotal = remoteLifetime;
+        }
+
+        final remoteZikirCounts = data['zikir_lifetime_counts'] as Map<String, dynamic>?;
+        if (remoteZikirCounts != null) {
+          remoteZikirCounts.forEach((k, v) {
+            final cnt = (v as num).toInt();
+            _zikirLifetimeCounts[k] = max(_zikirLifetimeCounts[k] ?? 0, cnt);
+          });
+        }
+      }
+
+      // 2. Fetch daily documents (limit to recent 90 days for fast loading)
+      final todayKey = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      final dailySnap = await db
+          .collection('users')
+          .doc(uid)
+          .collection('tasbih_daily')
+          .limit(90)
+          .get();
+
+      for (final doc in dailySnap.docs) {
+        final dateKey = doc.id;
+        final counts = doc.data()['counts'] as Map<String, dynamic>?;
+        if (counts != null) {
+          final dayMap = _zikirDailyCounts.putIfAbsent(dateKey, () => <String, int>{});
+          counts.forEach((k, v) {
+            final cnt = (v as num).toInt();
+            dayMap[k] = max(dayMap[k] ?? 0, cnt);
+          });
+        }
+      }
+
+      // Re-evaluate today's total from day map
+      final todayMap = _zikirDailyCounts[todayKey];
+      if (todayMap != null && todayMap.isNotEmpty) {
+        int sumToday = 0;
+        todayMap.forEach((_, c) => sumToday += c);
+        if (sumToday > _todayTotal) {
+          _todayTotal = sumToday;
+        }
+      }
+
+      await _persistTasbihData(uid);
+      update();
+      debugPrint('[TasbihFirestore] Loaded from Firestore for user: $uid (today: $_todayTotal, lifetime: $_lifetimeTotal)');
+    } catch (e) {
+      debugPrint('[TasbihFirestore] Error fetching from Firestore: $e');
+    }
+  }
+
   // --- Persistence ---
-  Future<void> _loadTasbihData() async {
+  Future<void> _loadTasbihData([String? uidOverride]) async {
+    final uid = uidOverride ?? _currentUid;
     final prefs = await SharedPreferences.getInstance();
 
-    final locationId = prefs.getString('prayer_location_id') ?? 'dhaka';
-    _selectedLocation = BangladeshLocation.divisions.firstWhere(
-      (d) => d.id == locationId,
-      orElse: () => BangladeshLocation.defaultLocation,
-    );
-    _isHanafi = prefs.getBool('prayer_is_hanafi') ?? true;
+    _currentCount = 0;
+    _completedCycles = 0;
+    _todayTotal = 0;
+    _lifetimeTotal = 0;
+    _zikirLifetimeCounts.clear();
+    _zikirDailyCounts.clear();
+
+    final locationId = prefs.getString(_userKey('prayer_location_id', uid)) ?? 'dhaka';
+    _selectedLocation = BangladeshLocation.findById(locationId);
+    _isHanafi = prefs.getBool(_userKey('prayer_is_hanafi', uid)) ?? true;
     _recalculatePrayerTimes();
 
-    _isVibrationEnabled = prefs.getBool('tasbih_vibrate') ?? true;
-    _isSoundEnabled = prefs.getBool('tasbih_sound') ?? true;
-    _lifetimeTotal = prefs.getInt('tasbih_lifetime_total') ?? 0;
+    _isVibrationEnabled = prefs.getBool(_userKey('tasbih_vibrate', uid)) ?? true;
+    _isSoundEnabled = prefs.getBool(_userKey('tasbih_sound', uid)) ?? true;
+    _isCountHidden = prefs.getBool(_userKey('tasbih_hide_count', uid)) ?? false;
+    _isZikirCardHidden = prefs.getBool(_userKey('tasbih_hide_zikir_card', uid)) ?? true;
+    _isProhibitedAlertOn = prefs.getBool(_userKey('prohibited_alert_on', uid)) ?? true;
+    _prohibitedBufferMinutes = prefs.getInt(_userKey('prohibited_buffer_minutes', uid)) ?? 15;
+
+    // Backward compatibility: If user-keyed is not found and un-keyed exists, migrate
+    if (uid.isNotEmpty && !prefs.containsKey(_userKey('tasbih_lifetime_total', uid))) {
+      final oldLifetime = prefs.getInt('tasbih_lifetime_total');
+      if (oldLifetime != null && oldLifetime > 0) {
+        _lifetimeTotal = oldLifetime;
+        final oldDaily = prefs.getString('tasbih_zikir_daily_counts');
+        if (oldDaily != null) {
+          try {
+            final decoded = jsonDecode(oldDaily) as Map<String, dynamic>;
+            decoded.forEach((dateKey, map) {
+              if (map is Map) {
+                final inner = <String, int>{};
+                map.forEach((k, v) => inner[k.toString()] = (v as num).toInt());
+                _zikirDailyCounts[dateKey] = inner;
+              }
+            });
+          } catch (_) {}
+        }
+        final oldLifetimeZikirs = prefs.getString('tasbih_zikir_lifetime_counts');
+        if (oldLifetimeZikirs != null) {
+          try {
+            final decoded = jsonDecode(oldLifetimeZikirs) as Map<String, dynamic>;
+            decoded.forEach((k, v) => _zikirLifetimeCounts[k] = (v as num).toInt());
+          } catch (_) {}
+        }
+        await _persistTasbihData(uid);
+        // Remove legacy un-keyed prefs so they never bleed to other accounts
+        await prefs.remove('tasbih_lifetime_total');
+        await prefs.remove('tasbih_zikir_daily_counts');
+        await prefs.remove('tasbih_zikir_lifetime_counts');
+        await prefs.remove('tasbih_today_total');
+        await prefs.remove('tasbih_last_date');
+        _scheduleFirestoreSync();
+      } else {
+        _lifetimeTotal = 0;
+      }
+    } else {
+      _lifetimeTotal = prefs.getInt(_userKey('tasbih_lifetime_total', uid)) ?? 0;
+    }
 
     // Load per-zikir lifetime counts
-    final lifetimeJsonStr = prefs.getString('tasbih_zikir_lifetime_counts');
+    final lifetimeJsonStr = prefs.getString(_userKey('tasbih_zikir_lifetime_counts', uid));
     if (lifetimeJsonStr != null) {
       try {
         final decoded = jsonDecode(lifetimeJsonStr) as Map<String, dynamic>;
         _zikirLifetimeCounts.clear();
         decoded.forEach((k, v) => _zikirLifetimeCounts[k] = (v as num).toInt());
       } catch (_) {}
+    } else if (uid.isNotEmpty && !prefs.containsKey(_userKey('tasbih_lifetime_total', uid))) {
+      // migrated above
+    } else {
+      _zikirLifetimeCounts.clear();
     }
 
     // Load per-zikir daily counts
-    final dailyJsonStr = prefs.getString('tasbih_zikir_daily_counts');
+    final dailyJsonStr = prefs.getString(_userKey('tasbih_zikir_daily_counts', uid));
     if (dailyJsonStr != null) {
       try {
         final decoded = jsonDecode(dailyJsonStr) as Map<String, dynamic>;
@@ -750,40 +1083,57 @@ class PrayerTasbihController extends GetxController {
           }
         });
       } catch (_) {}
+    } else if (uid.isNotEmpty && !prefs.containsKey(_userKey('tasbih_lifetime_total', uid))) {
+      // migrated above
+    } else {
+      _zikirDailyCounts.clear();
     }
 
     // Check if today's count is for today
     final todayKey = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    final savedDate = prefs.getString('tasbih_last_date') ?? '';
+    final savedDate = prefs.getString(_userKey('tasbih_last_date', uid)) ?? '';
     if (savedDate == todayKey) {
-      _todayTotal = prefs.getInt('tasbih_today_total') ?? 0;
+      _todayTotal = prefs.getInt(_userKey('tasbih_today_total', uid)) ?? 0;
     } else {
       _todayTotal = 0;
-      await prefs.setString('tasbih_last_date', todayKey);
-      await prefs.setInt('tasbih_today_total', 0);
+      await prefs.setString(_userKey('tasbih_last_date', uid), todayKey);
+      await prefs.setInt(_userKey('tasbih_today_total', uid), 0);
     }
     update();
   }
 
-  Future<void> _persistTasbihData() async {
-    final prefs = await SharedPreferences.getInstance();
+  Future<void> _persistTasbihData([String? uidOverride]) async {
+    final uid = uidOverride ?? _currentUid;
     final todayKey = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    await prefs.setString('tasbih_last_date', todayKey);
-    await prefs.setInt('tasbih_today_total', _todayTotal);
-    await prefs.setInt('tasbih_lifetime_total', _lifetimeTotal);
-    await prefs.setString('tasbih_zikir_lifetime_counts', jsonEncode(_zikirLifetimeCounts));
-    await prefs.setString('tasbih_zikir_daily_counts', jsonEncode(_zikirDailyCounts));
+    final snapToday = _todayTotal;
+    final snapLife = _lifetimeTotal;
+    final snapLifetimeZikirs = jsonEncode(_zikirLifetimeCounts);
+    final snapDailyZikirs = jsonEncode(_zikirDailyCounts);
+
+    final prefs = _prefs ?? await SharedPreferences.getInstance();
+    _prefs = prefs;
+
+    await prefs.setString(_userKey('tasbih_last_date', uid), todayKey);
+    await prefs.setInt(_userKey('tasbih_today_total', uid), snapToday);
+    await prefs.setInt(_userKey('tasbih_lifetime_total', uid), snapLife);
+    await prefs.setString(_userKey('tasbih_zikir_lifetime_counts', uid), snapLifetimeZikirs);
+    await prefs.setString(_userKey('tasbih_zikir_daily_counts', uid), snapDailyZikirs);
   }
 
-  Future<void> _persistSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('tasbih_vibrate', _isVibrationEnabled);
-    await prefs.setBool('tasbih_sound', _isSoundEnabled);
+  Future<void> _persistSettings([String? uidOverride]) async {
+    final uid = uidOverride ?? _currentUid;
+    final prefs = _prefs ?? await SharedPreferences.getInstance();
+    _prefs = prefs;
+    await prefs.setBool(_userKey('tasbih_vibrate', uid), _isVibrationEnabled);
+    await prefs.setBool(_userKey('tasbih_sound', uid), _isSoundEnabled);
+    await prefs.setBool(_userKey('tasbih_hide_count', uid), _isCountHidden);
+    await prefs.setBool(_userKey('tasbih_hide_zikir_card', uid), _isZikirCardHidden);
   }
 
-  Future<void> _saveLocation() async {
+  Future<void> _saveLocation([String? uidOverride]) async {
+    final uid = uidOverride ?? _currentUid;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('prayer_location_id', _selectedLocation.id);
-    await prefs.setBool('prayer_is_hanafi', _isHanafi);
+    await prefs.setString(_userKey('prayer_location_id', uid), _selectedLocation.id);
+    await prefs.setBool(_userKey('prayer_is_hanafi', uid), _isHanafi);
   }
 }

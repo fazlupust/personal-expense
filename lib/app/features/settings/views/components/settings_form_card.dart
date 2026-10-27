@@ -232,6 +232,68 @@ class SettingsFormCard extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(height: 8),
+
+          // Show prayer & tasbih toggle
+          Container(
+            decoration: BoxDecoration(
+              color: context.pal.bg,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: context.pal.line),
+            ),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () => s.setShowPrayerCard(!s.showPrayerCard),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: Checkbox(
+                        value: s.showPrayerCard,
+                        activeColor: context.pal.income,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                        onChanged: (v) {
+                          if (v != null) s.setShowPrayerCard(v);
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Show prayer & tasbih'.tr,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: context.pal.ink,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Display prayer times and zikir card on dashboard'.tr,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: context.pal.mute,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      s.showPrayerCard ? Icons.visibility_rounded : Icons.visibility_off_rounded,
+                      size: 20,
+                      color: s.showPrayerCard ? context.pal.income : context.pal.mute,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
           const SizedBox(height: 16),
           AppButton('Save settings', onPressed: s.saveProfile),
 
