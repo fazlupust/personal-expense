@@ -425,6 +425,26 @@ class AppTranslations extends Translations {
     'Items': 'টি',
     'Search zikir or meaning...': 'জিকির বা অর্থ খুঁজুন...',
     'No zikir found': 'কোনো জিকির পাওয়া যায়নি',
+
+    // Tasbih History & Filters
+    'Tasbih History & Filter': 'তাসবীহ হিস্ট্রি ও ফিল্টার',
+    'Recitation Statistics': 'জিকির গণনার পরিসংখ্যান',
+    'Time Filter': 'সময় ফিল্টার',
+    'Prayer / Category': 'নামাজ ও ক্যাটাগরি',
+    'After Prayer': 'নামাজ পরবর্তী',
+    'Morning & Evening': 'সকাল-সন্ধ্যা',
+    'Forgiveness': 'তওবা ও ইস্তিগফার',
+    'Salawat': 'দুরুদ শরীফ',
+    'Duas': 'দোয়া ও মুনাজাত',
+    'This Month': 'এই মাস',
+    'All Time': 'সর্বমোট',
+    'Today': 'আজ',
+    'Recited': 'পঠিত',
+    'This Zikir Recited': 'এই জিকির পড়া হয়েছে',
+    'Tap a zikir to start counting': 'জিকির নির্বাচন করে পড়া শুরু করতে চাপুন',
+    'Total in this filter:': 'এই ফিল্টারে মোট পঠিত:',
+    'No zikir recited in this period': 'এই সময়ে কোনো জিকির পড়া হয়নি',
+    'View History': 'হিস্ট্রি দেখুন',
   };
 }
 

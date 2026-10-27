@@ -609,6 +609,19 @@ class PrayerTasbihView extends StatelessWidget {
             title: 'Prayer & Tasbih'.tr,
             showBackButton: true,
             actions: [
+              if (c.activeTab == 1) ...[
+                IconButton(
+                  icon: Icon(Icons.query_stats_rounded, color: p.income, size: 22),
+                  tooltip: 'Tasbih History & Filter'.tr,
+                  onPressed: () => const TasbihCounterView().showAnalyticsSheet(context, c, p),
+                ),
+              ] else ...[
+                IconButton(
+                  icon: Icon(Icons.location_on_rounded, color: p.income, size: 20),
+                  tooltip: 'Select Division / Location'.tr,
+                  onPressed: () => _showLocationPicker(context, c, p),
+                ),
+              ],
               // Shortcut to open Tasbih directly
               IconButton(
                 icon: Icon(Icons.fingerprint_rounded, color: p.income, size: 22),
@@ -715,7 +728,7 @@ class PrayerTasbihView extends StatelessWidget {
                 Expanded(
                   child: c.activeTab == 0
                       ? _buildPrayerTimesTab(context, c, p)
-                      : const TasbihCounterView(),
+                      : const TasbihCounterView(isEmbedded: true),
                 ),
               ],
             ),

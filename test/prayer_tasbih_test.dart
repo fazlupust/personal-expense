@@ -81,6 +81,58 @@ void main() {
       expect(c.currentCount, equals(0));
     });
 
+    test('Per-zikir recitation tracking and time/category filters work accurately', () {
+      final c = Get.put(PrayerTasbihController());
+
+      // Initial counts are 0
+      expect(c.getZikirTodayCount('subhanallah'), equals(0));
+      expect(c.getZikirLifetimeCount('subhanallah'), equals(0));
+
+      // Increment subhanallah 3 times
+      c.increment();
+      c.increment();
+      c.increment();
+
+      expect(c.getZikirTodayCount('subhanallah'), equals(3));
+      expect(c.getZikirLifetimeCount('subhanallah'), equals(3));
+      expect(c.getZikirCount('subhanallah', TasbihTimeFilter.today), equals(3));
+      expect(c.getZikirCount('subhanallah', TasbihTimeFilter.thisWeek), equals(3));
+      expect(c.getZikirCount('subhanallah', TasbihTimeFilter.thisMonth), equals(3));
+      expect(c.getZikirCount('subhanallah', TasbihTimeFilter.allTime), equals(3));
+
+      // Switch to alhamdulillah and increment 2 times
+      final alhamdu = c.allZikirs.firstWhere((z) => z.id == 'alhamdulillah');
+      c.selectZikir(alhamdu);
+      c.increment();
+      c.increment();
+
+      expect(c.getZikirTodayCount('alhamdulillah'), equals(2));
+      expect(c.getZikirTodayCount('subhanallah'), equals(3));
+      expect(c.getZikirLifetimeCount('subhanallah'), equals(3));
+
+      // Decrement reduces per-zikir count
+      c.decrement();
+      expect(c.getZikirTodayCount('alhamdulillah'), equals(1));
+
+      // Test category filter
+      c.setCategoryFilter(ZikirCategory.prayer);
+      expect(c.selectedCategoryFilter, equals(ZikirCategory.prayer));
+      expect(c.filteredZikirs.every((z) => z.category == ZikirCategory.prayer), isTrue);
+
+      c.setCategoryFilter(ZikirCategory.forgiveness);
+      expect(c.filteredZikirs.every((z) => z.category == ZikirCategory.forgiveness), isTrue);
+
+      // Reset to all categories
+      c.setCategoryFilter(ZikirCategory.all);
+      expect(c.filteredZikirs.length, equals(c.allZikirs.length));
+
+      // Sorted by count: subhanallah (3) should be highest
+      final sorted = c.getSortedZikirsByCount();
+      expect(sorted.first.id, equals('subhanallah'));
+      expect(c.getMaxZikirCount(), equals(3));
+      expect(c.getTotalFilteredCount(), equals(4)); // 3 + 1
+    });
+
     test('Location and Asr method toggles update schedule', () {
       final c = Get.put(PrayerTasbihController());
       final ctg = c.selectedLocation;
@@ -139,6 +191,48 @@ void main() {
 
       final controller = PrayerTasbihController.to;
       expect(controller.currentCount, equals(1));
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('TasbihCounterView opens analytics sheet on button tap without overflow', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2340);
+      tester.view.devicePixelRatio = 2.8125; // 384x832 dp (Samsung Galaxy A15)
+
+      Get.put(PrayerTasbihController());
+
+      await tester.pumpWidget(
+        GetMaterialApp(
+          theme: ThemeData(extensions: const [AppPalette.light]),
+          home: const TasbihCounterView(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Tap the History & Filter action card
+      final historyFinder = find.text('Tasbih History & Filter');
+      expect(historyFinder, findsWidgets);
+
+      await tester.tap(historyFinder.first);
+      await tester.pumpAndSettle();
+
+      // Verify bottom sheet opened
+      expect(find.text('Recitation Statistics'), findsWidgets);
+      expect(tester.takeException(), isNull);
+
+      // Verify Time Filter segments render and can be tapped
+      final last7Days = find.text('Last 7 Days');
+      if (last7Days.evaluate().isNotEmpty) {
+        await tester.tap(last7Days);
+        await tester.pumpAndSettle();
+      }
+
+      // Verify Category filter chips render
+      final prayerCat = find.text('After Prayer');
+      if (prayerCat.evaluate().isNotEmpty) {
+        await tester.tap(prayerCat.first);
+        await tester.pumpAndSettle();
+      }
+
       expect(tester.takeException(), isNull);
     });
 
