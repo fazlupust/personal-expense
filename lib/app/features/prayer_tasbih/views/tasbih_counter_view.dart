@@ -164,6 +164,203 @@ class TasbihCounterView extends StatelessWidget {
     );
   }
 
+  void _showAllZikirsSheet(BuildContext context, PrayerTasbihController c, AppPalette p) {
+    final searchCtrl = TextEditingController();
+    final isBn = Get.locale?.languageCode == 'bn';
+    final query = ''.obs;
+
+    Get.bottomSheet(
+      Container(
+        height: MediaQuery.of(context).size.height * 0.78,
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+        decoration: BoxDecoration(
+          color: p.card,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          border: Border.all(color: p.line),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: p.mute.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            Row(
+              children: [
+                Icon(Icons.auto_stories_rounded, size: 20, color: p.income),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'All Zikirs & Duas'.tr,
+                    style: TextStyle(
+                      fontSize: 16.5,
+                      fontWeight: FontWeight.w800,
+                      color: p.ink,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: p.income.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '${c.allZikirs.length} ${'Items'.tr}',
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                      color: p.income,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: searchCtrl,
+              onChanged: (v) => query.value = v.trim().toLowerCase(),
+              decoration: InputDecoration(
+                hintText: 'Search zikir or meaning...'.tr,
+                prefixIcon: Icon(Icons.search, size: 18, color: p.mute),
+                isDense: true,
+                filled: true,
+                fillColor: p.bg,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: p.line),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: p.line),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Expanded(
+              child: Obx(() {
+                final q = query.value;
+                final filtered = c.allZikirs.where((item) {
+                  if (q.isEmpty) return true;
+                  return item.titleBn.toLowerCase().contains(q) ||
+                      item.titleEn.toLowerCase().contains(q) ||
+                      item.arabic.contains(q) ||
+                      item.meaningBn.toLowerCase().contains(q);
+                }).toList();
+
+                if (filtered.isEmpty) {
+                  return Center(
+                    child: Text('No zikir found'.tr, style: TextStyle(color: p.mute)),
+                  );
+                }
+
+                return ListView.separated(
+                  itemCount: filtered.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  itemBuilder: (ctx, i) {
+                    final item = filtered[i];
+                    final isSelected = item.id == c.selectedZikir.id;
+
+                    return Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(14),
+                        onTap: () {
+                          Get.back();
+                          c.selectZikir(item);
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: isSelected ? p.income.withOpacity(0.08) : p.bg,
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: isSelected ? p.income : p.line,
+                              width: isSelected ? 1.4 : 1.0,
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      isBn ? item.titleBn : item.titleEn,
+                                      style: TextStyle(
+                                        fontSize: 14.5,
+                                        fontWeight: FontWeight.w700,
+                                        color: isSelected ? p.income : p.ink,
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: p.income.withOpacity(0.12),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      '${item.defaultTarget}x',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        color: p.income,
+                                      ),
+                                    ),
+                                  ),
+                                  if (isSelected) ...[
+                                    const SizedBox(width: 6),
+                                    Icon(Icons.check_circle_rounded, size: 16, color: p.income),
+                                  ],
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                item.arabic,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  color: p.income,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                isBn ? item.meaningBn : item.meaningEn,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  color: p.mute,
+                                  height: 1.3,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              }),
+            ),
+          ],
+        ),
+      ),
+      isScrollControlled: true,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = context.pal;
@@ -184,6 +381,12 @@ class TasbihCounterView extends StatelessWidget {
             title: 'Digital Tasbih'.tr,
             showBackButton: true,
             actions: [
+              // All Zikirs Catalog Sheet
+              IconButton(
+                icon: Icon(Icons.auto_stories_rounded, size: 20, color: p.income),
+                tooltip: 'All Zikirs & Duas'.tr,
+                onPressed: () => _showAllZikirsSheet(context, c, p),
+              ),
               // Vibration toggle
               IconButton(
                 icon: Icon(
@@ -208,59 +411,97 @@ class TasbihCounterView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Zikir Selector Carousel / Horizontal List
-                  SizedBox(
-                    height: 42,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: c.allZikirs.length,
-                      separatorBuilder: (_, __) => const SizedBox(width: 8),
-                      itemBuilder: (ctx, i) {
-                        final item = c.allZikirs[i];
-                        final isSelected = item.id == zikir.id;
-                        final isBn = Get.locale?.languageCode == 'bn';
-                        final title = isBn ? item.titleBn : item.titleEn;
-
-                        return Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(20),
-                            onTap: () => c.selectZikir(item),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: isSelected ? p.income : p.card,
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: isSelected ? p.income : p.line,
-                                  width: 1.2,
+                  // Zikir Selector Row (Browse All Button + Horizontal List)
+                  Row(
+                    children: [
+                      // Browse All Button
+                      InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () => _showAllZikirsSheet(context, c, p),
+                        child: Container(
+                          height: 40,
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          decoration: BoxDecoration(
+                            color: p.card,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: p.income.withOpacity(0.4)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.auto_stories_rounded, size: 16, color: p.income),
+                              const SizedBox(width: 4),
+                              Text(
+                                'All'.tr,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: p.income,
                                 ),
-                                boxShadow: isSelected
-                                    ? [
-                                        BoxShadow(
-                                          color: p.income.withOpacity(0.28),
-                                          blurRadius: 8,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ]
-                                    : null,
                               ),
-                              child: Center(
-                                child: Text(
-                                  title,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                                    color: isSelected ? Colors.white : p.ink,
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+
+                      // Horizontal Scrollable Chips
+                      Expanded(
+                        child: SizedBox(
+                          height: 40,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: c.allZikirs.length,
+                            separatorBuilder: (_, __) => const SizedBox(width: 8),
+                            itemBuilder: (ctx, i) {
+                              final item = c.allZikirs[i];
+                              final isSelected = item.id == zikir.id;
+                              final isBn = Get.locale?.languageCode == 'bn';
+                              final title = isBn ? item.titleBn : item.titleEn;
+
+                              return Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(20),
+                                  onTap: () => c.selectZikir(item),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 200),
+                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                    decoration: BoxDecoration(
+                                      color: isSelected ? p.income : p.card,
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(
+                                        color: isSelected ? p.income : p.line,
+                                        width: 1.2,
+                                      ),
+                                      boxShadow: isSelected
+                                          ? [
+                                              BoxShadow(
+                                                color: p.income.withOpacity(0.28),
+                                                blurRadius: 8,
+                                                offset: const Offset(0, 2),
+                                              ),
+                                            ]
+                                          : null,
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        title,
+                                        style: TextStyle(
+                                          fontSize: 12.5,
+                                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                                          color: isSelected ? Colors.white : p.ink,
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      ),
+                    ],
                   ),
 
                   const SizedBox(height: 14),

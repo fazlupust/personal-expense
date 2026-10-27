@@ -419,6 +419,12 @@ class AppTranslations extends Translations {
     'Highest:': 'সর্বোচ্চ:',
     'Tap again to reset': 'রিসেট করতে আবার ট্যাপ করুন',
     'Tap bar to see details': 'বারে ট্যাপ করে বিস্তারিত দেখুন',
+
+    // Zikir Catalog Sheet
+    'All Zikirs & Duas': 'সকল জিকির ও দোয়া',
+    'Items': 'টি',
+    'Search zikir or meaning...': 'জিকির বা অর্থ খুঁজুন...',
+    'No zikir found': 'কোনো জিকির পাওয়া যায়নি',
   };
 }
 
