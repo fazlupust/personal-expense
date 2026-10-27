@@ -218,6 +218,9 @@ class AppTranslations extends Translations {
     'Please enter a title': 'দয়া করে একটি শিরোনাম লিখুন',
     'Note saved successfully': 'নোটটি সংরক্ষিত হয়েছে',
     'Note deleted': 'নোটটি মুছে ফেলা হয়েছে',
+    'Loading notes...': 'নোট লোড হচ্ছে...',
+    'Voice typing': 'ভয়েস টাইপিং',
+    'Refresh': 'রিফ্রেশ',
     // Expense visibility & Password change
     'Show expense': 'ব্যয় দেখান',
     'Display expense on dashboard': 'ড্যাশবোর্ডে ব্যয় প্রদর্শন করুন',

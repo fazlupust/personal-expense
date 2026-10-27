@@ -191,6 +191,37 @@ void main() {
       expect(reconstructed.longitude, 90.4125);
     });
 
+    test('NoteModel toJson and fromJson round-trip for local caching', () {
+      final now = DateTime(2026, 10, 26, 12, 0, 0);
+      final note = NoteModel(
+        id: 'json-1',
+        userId: 'user-abc',
+        title: 'Office Loan',
+        date: now,
+        notes: 'Monthly lunch contribution',
+        amount: 2500.0,
+        personName: 'Shakil',
+        latitude: 23.81,
+        longitude: 90.41,
+        deviceInfo: 'Pixel 9 Pro',
+        createdAt: now,
+      );
+
+      final json = note.toJson();
+      expect(json['id'], 'json-1');
+      expect(json['user_id'], 'user-abc');
+      expect(json['title'], 'Office Loan');
+      expect(json['amount'], 2500.0);
+      expect(json['date'], now.toIso8601String());
+
+      final restored = NoteModel.fromJson(json);
+      expect(restored.id, 'json-1');
+      expect(restored.userId, 'user-abc');
+      expect(restored.title, 'Office Loan');
+      expect(restored.amount, 2500.0);
+      expect(restored.personName, 'Shakil');
+    });
+
     test('NoteModel copyWith updates fields properly', () {
       final now = DateTime(2026, 10, 26);
       final note = NoteModel(
@@ -319,6 +350,24 @@ void main() {
       expect(controller.notes.first.title, 'New Test Note');
       expect(controller.notes.first.amount, 3500.0);
       expect(controller.notes.first.personName, 'Bablu');
+    });
+
+    test('stopAllVoice() resets all listening flags', () {
+      controller.isListeningTitle = true;
+      controller.isListeningPerson = true;
+      controller.isListeningAmount = true;
+      controller.isListeningNote = true;
+
+      controller.stopAllVoice();
+      expect(controller.isListeningTitle, isFalse);
+      expect(controller.isListeningPerson, isFalse);
+      expect(controller.isListeningAmount, isFalse);
+      expect(controller.isListeningNote, isFalse);
+    });
+
+    test('refreshNotes() does not throw and maintains state', () async {
+      await controller.refreshNotes();
+      expect(controller.isLoading, isFalse);
     });
   });
 }

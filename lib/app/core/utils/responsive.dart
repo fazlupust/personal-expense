@@ -26,15 +26,17 @@ class Responsive {
 
 /// Scrollable page body with centered, width-limited content.
 class ContentWrap extends StatelessWidget {
-  const ContentWrap({super.key, required this.child, this.bottomSpace = 96});
+  const ContentWrap({super.key, required this.child, this.bottomSpace = 96, this.physics});
   final Widget child;
   final double bottomSpace;
+  final ScrollPhysics? physics;
 
   @override
   Widget build(BuildContext context) {
     final s = Responsive.sizeOf(context);
     final pad = Responsive.pagePadding(s);
     return SingleChildScrollView(
+      physics: physics,
       padding: EdgeInsets.fromLTRB(pad, 14, pad, bottomSpace),
       child: Align(
         alignment: Alignment.topCenter,

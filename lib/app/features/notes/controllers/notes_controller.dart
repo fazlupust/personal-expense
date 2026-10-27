@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../data/models/note_model.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../data/services/note_service.dart';
+import '../../../data/services/voice_service.dart';
 
 class NotesController extends GetxController {
   static NotesController get to => Get.find<NotesController>();
@@ -19,10 +22,22 @@ class NotesController extends GetxController {
   String? titleError;
 
   List<NoteModel> notes = [];
+  bool isLoading = true;
+  bool isSaving = false;
   String searchQuery = '';
   String selectedPerson = 'All';
 
+  // Voice recognition states
+  bool isListeningTitle = false;
+  bool isListeningPerson = false;
+  bool isListeningAmount = false;
+  bool isListeningNote = false;
+
   StreamSubscription<List<NoteModel>>? _sub;
+  static const _cacheKey = 'personal_expense_notes_cache';
+
+  SharedPreferences? get _prefs =>
+      Get.isRegistered<SharedPreferences>() ? Get.find<SharedPreferences>() : null;
 
   @override
   void onInit() {
@@ -32,6 +47,7 @@ class NotesController extends GetxController {
 
   @override
   void onClose() {
+    stopAllVoice();
     titleCtrl.dispose();
     personCtrl.dispose();
     amountCtrl.dispose();
@@ -40,7 +56,41 @@ class NotesController extends GetxController {
     super.onClose();
   }
 
+  void _loadCachedNotes() {
+    try {
+      final p = _prefs;
+      if (p == null) return;
+      final raw = p.getString(_cacheKey);
+      if (raw != null && raw.isNotEmpty) {
+        final decoded = jsonDecode(raw) as List<dynamic>;
+        notes = decoded
+            .map((e) => NoteModel.fromJson(Map<String, dynamic>.from(e as Map)))
+            .toList();
+        notes.sort((a, b) => b.date.compareTo(a.date));
+      }
+    } catch (e) {
+      debugPrint('Error loading cached notes: $e');
+    }
+  }
+
+  void _saveCachedNotes(List<NoteModel> list) {
+    try {
+      final p = _prefs;
+      if (p == null) return;
+      final encoded = jsonEncode(list.map((n) => n.toJson()).toList());
+      p.setString(_cacheKey, encoded);
+    } catch (e) {
+      debugPrint('Error saving cached notes: $e');
+    }
+  }
+
   void _initNotes() {
+    _loadCachedNotes();
+    if (notes.isNotEmpty) {
+      isLoading = false;
+      update();
+    }
+
     if (Get.isRegistered<NoteService>() && Get.isRegistered<AuthService>()) {
       final auth = Get.find<AuthService>();
       final service = Get.find<NoteService>();
@@ -48,28 +98,169 @@ class NotesController extends GetxController {
       ever(auth.firebaseUser, (user) {
         _sub?.cancel();
         if (user != null) {
-          _sub = service.streamUserNotes(user.uid).listen((list) {
-            notes = list;
-            update();
-          }, onError: (err) {
-            debugPrint('Notes stream error: $err');
-          });
+          _subscribeToUser(user.uid, service);
         } else {
-          notes = [];
+          _loadCachedNotes();
+          isLoading = false;
           update();
         }
       });
 
-      if (auth.isLoggedIn && auth.currentUid != null) {
-        _sub = service.streamUserNotes(auth.currentUid!).listen((list) {
-          notes = list;
-          update();
-        }, onError: (err) {
-          debugPrint('Notes stream error: $err');
-        });
+      final currentUid = auth.currentUid ?? auth.currentUser?.uid;
+      if (currentUid != null && currentUid.isNotEmpty) {
+        _subscribeToUser(currentUid, service);
+      } else {
+        isLoading = false;
+        update();
       }
+    } else {
+      isLoading = false;
+      update();
     }
   }
+
+  void _subscribeToUser(String uid, NoteService service) {
+    _sub?.cancel();
+    if (notes.isEmpty) {
+      isLoading = true;
+      update();
+    }
+    _sub = service.streamUserNotes(uid).listen(
+      (list) {
+        notes = list;
+        _saveCachedNotes(list);
+        isLoading = false;
+        update();
+      },
+      onError: (err) {
+        debugPrint('Notes stream error: $err');
+        _loadCachedNotes();
+        isLoading = false;
+        update();
+      },
+    );
+  }
+
+  Future<void> refreshNotes() async {
+    if (Get.isRegistered<NoteService>() && Get.isRegistered<AuthService>()) {
+      final auth = Get.find<AuthService>();
+      final service = Get.find<NoteService>();
+      final currentUid = auth.currentUid ?? auth.currentUser?.uid;
+      if (currentUid != null && currentUid.isNotEmpty) {
+        _subscribeToUser(currentUid, service);
+        await Future.delayed(const Duration(milliseconds: 400));
+        return;
+      }
+    }
+    _loadCachedNotes();
+    isLoading = false;
+    update();
+  }
+
+  // --- Voice Input Controls ---
+
+  void toggleVoiceTitle() {
+    if (isListeningTitle) {
+      VoiceService.stop();
+      isListeningTitle = false;
+      update();
+      return;
+    }
+    stopAllVoice();
+    VoiceService.startListening(
+      onResult: (words) {
+        if (words.isNotEmpty) {
+          titleCtrl.text = words;
+          titleError = null;
+          update();
+        }
+      },
+      onListeningChange: (listening) {
+        isListeningTitle = listening;
+        update();
+      },
+    );
+  }
+
+  void toggleVoicePerson() {
+    if (isListeningPerson) {
+      VoiceService.stop();
+      isListeningPerson = false;
+      update();
+      return;
+    }
+    stopAllVoice();
+    VoiceService.startListening(
+      onResult: (words) {
+        if (words.isNotEmpty) {
+          personCtrl.text = words;
+          update();
+        }
+      },
+      onListeningChange: (listening) {
+        isListeningPerson = listening;
+        update();
+      },
+    );
+  }
+
+  void toggleVoiceAmount() {
+    if (isListeningAmount) {
+      VoiceService.stop();
+      isListeningAmount = false;
+      update();
+      return;
+    }
+    stopAllVoice();
+    VoiceService.startListening(
+      onResult: (words) {
+        final parsed = VoiceService.parseSpokenAmount(words);
+        if (parsed.isNotEmpty) {
+          amountCtrl.text = parsed;
+          update();
+        }
+      },
+      onListeningChange: (listening) {
+        isListeningAmount = listening;
+        update();
+      },
+    );
+  }
+
+  void toggleVoiceNote() {
+    if (isListeningNote) {
+      VoiceService.stop();
+      isListeningNote = false;
+      update();
+      return;
+    }
+    stopAllVoice();
+    VoiceService.startListening(
+      onResult: (words) {
+        if (words.isNotEmpty) {
+          notesCtrl.text = words;
+          update();
+        }
+      },
+      onListeningChange: (listening) {
+        isListeningNote = listening;
+        update();
+      },
+    );
+  }
+
+  void stopAllVoice() {
+    if (isListeningTitle || isListeningPerson || isListeningAmount || isListeningNote) {
+      VoiceService.stop();
+      isListeningTitle = false;
+      isListeningPerson = false;
+      isListeningAmount = false;
+      isListeningNote = false;
+      update();
+    }
+  }
+
+  // --- End Voice Input Controls ---
 
   /// All unique persons present in notes
   List<String> get uniquePersons {
@@ -135,6 +326,7 @@ class NotesController extends GetxController {
   }
 
   void openCreate() {
+    stopAllVoice();
     editingNote = null;
     titleCtrl.clear();
     personCtrl.text = selectedPerson != 'All' ? selectedPerson : '';
@@ -142,10 +334,12 @@ class NotesController extends GetxController {
     notesCtrl.clear();
     formDate = DateTime.now();
     titleError = null;
+    isSaving = false;
     update();
   }
 
   void openEdit(NoteModel note) {
+    stopAllVoice();
     editingNote = note;
     titleCtrl.text = note.title;
     personCtrl.text = note.personName;
@@ -153,6 +347,7 @@ class NotesController extends GetxController {
     notesCtrl.text = note.notes;
     formDate = note.date;
     titleError = null;
+    isSaving = false;
     update();
   }
 
@@ -164,6 +359,8 @@ class NotesController extends GetxController {
       return false;
     }
     titleError = null;
+    isSaving = true;
+    update();
 
     final person = personCtrl.text.trim();
     final amountText = amountCtrl.text.trim();
@@ -171,6 +368,11 @@ class NotesController extends GetxController {
     final noteDesc = notesCtrl.text.trim();
 
     try {
+      final auth = Get.isRegistered<AuthService>() ? Get.find<AuthService>() : null;
+      final service = Get.isRegistered<NoteService>() ? Get.find<NoteService>() : null;
+      final uid = auth?.currentUid ?? auth?.currentUser?.uid;
+      final canCloudSave = auth != null && auth.isLoggedIn && service != null && uid != null && uid.isNotEmpty;
+
       if (editingNote != null) {
         final updated = editingNote!.copyWith(
           title: title,
@@ -181,38 +383,51 @@ class NotesController extends GetxController {
           updatedAt: DateTime.now(),
         );
 
-        if (Get.isRegistered<NoteService>() && Get.isRegistered<AuthService>() && Get.find<AuthService>().isLoggedIn) {
-          await Get.find<NoteService>().updateNote(updated);
-        } else {
-          final idx = notes.indexWhere((n) => n.id == editingNote!.id);
-          if (idx != -1) {
-            notes[idx] = updated;
+        if (canCloudSave && updated.id.isNotEmpty) {
+          try {
+            await service.updateNote(updated);
+          } catch (e) {
+            debugPrint('Cloud update failed, updating locally: $e');
           }
         }
-      } else {
-        if (Get.isRegistered<NoteService>() && Get.isRegistered<AuthService>() && Get.find<AuthService>().isLoggedIn) {
-          await Get.find<NoteService>().addNote(
-            title: title,
-            date: formDate,
-            personName: person,
-            amount: amount,
-            notes: noteDesc,
-          );
+        final idx = notes.indexWhere((n) => n.id == editingNote!.id);
+        if (idx != -1) {
+          notes[idx] = updated;
         } else {
-          final newNote = NoteModel(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            title: title,
-            date: formDate,
-            personName: person,
-            amount: amount,
-            notes: noteDesc,
-            createdAt: DateTime.now(),
-            updatedAt: DateTime.now(),
-          );
-          notes.insert(0, newNote);
+          notes.insert(0, updated);
         }
+        _saveCachedNotes(notes);
+      } else {
+        String newId = DateTime.now().millisecondsSinceEpoch.toString();
+        if (canCloudSave) {
+          try {
+            newId = await service.addNote(
+              title: title,
+              date: formDate,
+              personName: person,
+              amount: amount,
+              notes: noteDesc,
+            );
+          } catch (e) {
+            debugPrint('Cloud add failed, saving locally: $e');
+          }
+        }
+        final newNote = NoteModel(
+          id: newId,
+          userId: uid ?? '',
+          title: title,
+          date: formDate,
+          personName: person,
+          amount: amount,
+          notes: noteDesc,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+        notes.insert(0, newNote);
+        _saveCachedNotes(notes);
       }
 
+      isSaving = false;
       update();
       if (Get.context != null) {
         Get.snackbar(
@@ -225,6 +440,8 @@ class NotesController extends GetxController {
       return true;
     } catch (e) {
       debugPrint('Save note error: $e');
+      isSaving = false;
+      update();
       if (Get.context != null) {
         Get.snackbar(
           'Alert'.tr,
@@ -238,11 +455,20 @@ class NotesController extends GetxController {
 
   Future<void> delete(NoteModel note) async {
     try {
-      if (Get.isRegistered<NoteService>() && Get.isRegistered<AuthService>() && Get.find<AuthService>().isLoggedIn && note.id.isNotEmpty) {
-        await Get.find<NoteService>().deleteNote(note.id);
-      } else {
-        notes.removeWhere((n) => n.id == note.id);
+      final auth = Get.isRegistered<AuthService>() ? Get.find<AuthService>() : null;
+      final service = Get.isRegistered<NoteService>() ? Get.find<NoteService>() : null;
+      final uid = auth?.currentUid ?? auth?.currentUser?.uid;
+      final canCloudDelete = auth != null && auth.isLoggedIn && service != null && uid != null && uid.isNotEmpty;
+
+      if (canCloudDelete && note.id.isNotEmpty) {
+        try {
+          await service.deleteNote(note.id);
+        } catch (e) {
+          debugPrint('Cloud delete error: $e');
+        }
       }
+      notes.removeWhere((n) => n.id == note.id);
+      _saveCachedNotes(notes);
       update();
       if (Get.context != null) {
         Get.snackbar(

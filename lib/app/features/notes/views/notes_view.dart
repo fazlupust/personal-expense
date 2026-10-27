@@ -20,6 +20,17 @@ class NotesView extends StatelessWidget {
       appBar: CustomAppBar(
         title: 'Personal Notes & Debts'.tr,
         showBackButton: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh_rounded),
+            tooltip: 'Refresh'.tr,
+            onPressed: () {
+              if (Get.isRegistered<NotesController>()) {
+                Get.find<NotesController>().refreshNotes();
+              }
+            },
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
@@ -39,8 +50,12 @@ class NotesView extends StatelessWidget {
             final persons = c.uniquePersons;
             final isFilteredPerson = c.selectedPerson != 'All';
 
-            return ContentWrap(
-              bottomSpace: 80,
+            return RefreshIndicator(
+              onRefresh: c.refreshNotes,
+              color: p.income,
+              child: ContentWrap(
+                physics: const AlwaysScrollableScrollPhysics(),
+                bottomSpace: 80,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -212,7 +227,35 @@ class NotesView extends StatelessWidget {
                   ],
 
                   // 4. Notes List Table / Cards
-                  if (list.isEmpty) ...[
+                  if (c.isLoading && c.notes.isEmpty) ...[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 60),
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              width: 38,
+                              height: 38,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 3,
+                                valueColor: AlwaysStoppedAnimation<Color>(p.income),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Loading notes...'.tr,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: p.mute,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ] else if (list.isEmpty) ...[
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 48),
                       child: Center(
@@ -264,6 +307,7 @@ class NotesView extends StatelessWidget {
                   ],
                 ],
               ),
+            ),
             );
           },
         ),

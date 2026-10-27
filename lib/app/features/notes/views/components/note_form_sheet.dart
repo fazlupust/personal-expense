@@ -16,7 +16,11 @@ Future<void> showNoteFormSheet(BuildContext context) {
     backgroundColor: Colors.transparent,
     constraints: const BoxConstraints(maxWidth: 520),
     builder: (_) => const NoteFormSheet(),
-  );
+  ).whenComplete(() {
+    if (Get.isRegistered<NotesController>()) {
+      Get.find<NotesController>().stopAllVoice();
+    }
+  });
 }
 
 class NoteFormSheet extends StatelessWidget {
@@ -65,7 +69,10 @@ class NoteFormSheet extends StatelessWidget {
                           ),
                           const Spacer(),
                           InkWell(
-                            onTap: () => Navigator.of(context).pop(),
+                            onTap: () {
+                              c.stopAllVoice();
+                              Navigator.of(context).pop();
+                            },
                             borderRadius: BorderRadius.circular(20),
                             child: Container(
                               padding: const EdgeInsets.all(6),
@@ -86,7 +93,7 @@ class NoteFormSheet extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          // 1. Note Title
+                          // 1. Note Title with Voice Input
                           TextField(
                             controller: c.titleCtrl,
                             textCapitalization: TextCapitalization.sentences,
@@ -95,11 +102,24 @@ class NoteFormSheet extends StatelessWidget {
                               hintText: 'e.g. Loan given, Borrowed money, Due...'.tr,
                               errorText: c.titleError,
                               prefixIcon: Icon(Icons.title_rounded, color: p.income, size: 20),
+                              suffixIcon: _VoiceMicButton(
+                                isListening: c.isListeningTitle,
+                                onTap: c.toggleVoiceTitle,
+                                tooltip: 'Voice Input'.tr,
+                              ),
                             ),
                           ),
+                          if (c.isListeningTitle)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4, left: 12),
+                              child: Text(
+                                'Listening...'.tr,
+                                style: TextStyle(fontSize: 11, color: p.expense, fontWeight: FontWeight.w600),
+                              ),
+                            ),
                           const SizedBox(height: 12),
 
-                          // 2. Person Name
+                          // 2. Person Name with Voice Input
                           TextField(
                             controller: c.personCtrl,
                             textCapitalization: TextCapitalization.words,
@@ -107,8 +127,21 @@ class NoteFormSheet extends StatelessWidget {
                               labelText: 'Person Name (Lender/Borrower)'.tr,
                               hintText: 'e.g. Rahim, Uncle, XYZ...'.tr,
                               prefixIcon: Icon(Icons.person_outline_rounded, color: p.income, size: 20),
+                              suffixIcon: _VoiceMicButton(
+                                isListening: c.isListeningPerson,
+                                onTap: c.toggleVoicePerson,
+                                tooltip: 'Voice Input'.tr,
+                              ),
                             ),
                           ),
+                          if (c.isListeningPerson)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4, left: 12),
+                              child: Text(
+                                'Listening...'.tr,
+                                style: TextStyle(fontSize: 11, color: p.expense, fontWeight: FontWeight.w600),
+                              ),
+                            ),
 
                           // Quick suggestion chips for existing person names
                           if (c.uniquePersons.isNotEmpty) ...[
@@ -133,33 +166,51 @@ class NoteFormSheet extends StatelessWidget {
                           ],
                           const SizedBox(height: 12),
 
-                          // 3. Amount & Date Row
+                          // 3. Amount & Date Row (with Voice Input on Amount)
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Amount Field (Optional)
+                              // Amount Field (Optional) with Voice Input
                               Expanded(
                                 flex: 3,
-                                child: TextField(
-                                  controller: c.amountCtrl,
-                                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
-                                  decoration: InputDecoration(
-                                    labelText: 'Amount (Optional)'.tr,
-                                    hintText: '0.00',
-                                    prefixIcon: Container(
-                                      width: 40,
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        AppConstants.currency,
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w700,
-                                          color: p.income,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    TextField(
+                                      controller: c.amountCtrl,
+                                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
+                                      decoration: InputDecoration(
+                                        labelText: 'Amount (Optional)'.tr,
+                                        hintText: '0.00',
+                                        prefixIcon: Container(
+                                          width: 38,
+                                          alignment: Alignment.center,
+                                          child: Text(
+                                            AppConstants.currency,
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w700,
+                                              color: p.income,
+                                            ),
+                                          ),
+                                        ),
+                                        suffixIcon: _VoiceMicButton(
+                                          isListening: c.isListeningAmount,
+                                          onTap: c.toggleVoiceAmount,
+                                          tooltip: 'Voice Input'.tr,
                                         ),
                                       ),
                                     ),
-                                  ),
+                                    if (c.isListeningAmount)
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 4, left: 12),
+                                        child: Text(
+                                          'Listening...'.tr,
+                                          style: TextStyle(fontSize: 11, color: p.expense, fontWeight: FontWeight.w600),
+                                        ),
+                                      ),
+                                  ],
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -223,13 +274,61 @@ class NoteFormSheet extends StatelessWidget {
                           ),
                           const SizedBox(height: 12),
 
-                          // 4. Description / Note Details
+                          // 4. Description Header with Voice Typing Button
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Note description / details'.tr,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: p.ink,
+                                ),
+                              ),
+                              InkWell(
+                                onTap: c.toggleVoiceNote,
+                                borderRadius: BorderRadius.circular(14),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: c.isListeningNote ? p.expense.withOpacity(0.12) : p.bg,
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(
+                                      color: c.isListeningNote ? p.expense : p.line,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        c.isListeningNote ? Icons.mic : Icons.mic_none,
+                                        size: 13,
+                                        color: c.isListeningNote ? p.expense : p.income,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        c.isListeningNote ? 'Listening...'.tr : 'Voice typing'.tr,
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                          color: c.isListeningNote ? p.expense : p.income,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+
+                          // Note Description Field
                           TextField(
                             controller: c.notesCtrl,
                             maxLines: 3,
                             textCapitalization: TextCapitalization.sentences,
                             decoration: InputDecoration(
-                              labelText: 'Note description / details'.tr,
                               hintText: 'Add details, repayment promises, or notes...'.tr,
                               alignLabelWithHint: true,
                             ),
@@ -258,7 +357,10 @@ class NoteFormSheet extends StatelessWidget {
                                 child: AppButton(
                                   'Cancel',
                                   style: AppButtonStyle.outlined,
-                                  onPressed: () => Navigator.of(context).pop(),
+                                  onPressed: () {
+                                    c.stopAllVoice();
+                                    Navigator.of(context).pop();
+                                  },
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -267,6 +369,7 @@ class NoteFormSheet extends StatelessWidget {
                                 child: AppButton(
                                   'Save Note',
                                   onPressed: () async {
+                                    c.stopAllVoice();
                                     final ok = await c.save();
                                     if (ok && context.mounted) {
                                       Navigator.of(context).pop();
@@ -283,6 +386,7 @@ class NoteFormSheet extends StatelessWidget {
                               'Delete Note',
                               style: AppButtonStyle.danger,
                               onPressed: () {
+                                c.stopAllVoice();
                                 if (c.editingNote != null) {
                                   c.delete(c.editingNote!);
                                   Navigator.of(context).pop();
@@ -300,6 +404,40 @@ class NoteFormSheet extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _VoiceMicButton extends StatelessWidget {
+  const _VoiceMicButton({
+    required this.isListening,
+    required this.onTap,
+    required this.tooltip,
+  });
+
+  final bool isListening;
+  final VoidCallback onTap;
+  final String tooltip;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.pal;
+    return IconButton(
+      tooltip: tooltip,
+      onPressed: onTap,
+      icon: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(5),
+        decoration: BoxDecoration(
+          color: isListening ? p.expense.withOpacity(0.15) : Colors.transparent,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          isListening ? Icons.mic : Icons.mic_none,
+          color: isListening ? p.expense : p.mute,
+          size: 20,
+        ),
+      ),
     );
   }
 }

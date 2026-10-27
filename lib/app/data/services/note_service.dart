@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
 import '../models/note_model.dart';
@@ -17,6 +16,9 @@ class NoteService extends GetxService {
 
   /// Stream of active notes for a given user
   Stream<List<NoteModel>> streamUserNotes(String userId) {
+    if (userId.isEmpty) {
+      return Stream.value(<NoteModel>[]);
+    }
     return _collection
         .where('user_id', isEqualTo: userId)
         .where('is_active', isEqualTo: true)
@@ -28,9 +30,6 @@ class NoteService extends GetxService {
       // Client-side sort by date descending
       list.sort((a, b) => b.date.compareTo(a.date));
       return list;
-    }).handleError((e) {
-      debugPrint('Notes stream error: $e');
-      return <NoteModel>[];
     });
   }
 
@@ -45,21 +44,30 @@ class NoteService extends GetxService {
     double? longitude,
     String? deviceInfo,
   }) async {
-    final uid = _auth.currentUid ?? '';
+    final uid = _auth.currentUid ?? _auth.currentUser?.uid;
+    if (uid == null || uid.isEmpty) {
+      throw Exception('User not logged in');
+    }
 
-    // Fetch location safely if not provided
+    // Fetch location safely if not provided (with 2s timeout so it never blocks)
     double? lat = latitude;
     double? lng = longitude;
     if (lat == null && lng == null) {
-      final loc = await DeviceLocationService.getCurrentLocation();
-      lat = loc.latitude;
-      lng = loc.longitude;
+      try {
+        final loc = await DeviceLocationService.getCurrentLocation()
+            .timeout(const Duration(seconds: 2), onTimeout: () => const LocationResult());
+        lat = loc.latitude;
+        lng = loc.longitude;
+      } catch (_) {}
     }
 
     // Fetch device info safely if not provided
     String? dev = deviceInfo;
     if (dev == null || dev.isEmpty) {
-      dev = await DeviceLocationService.getDeviceSummary();
+      try {
+        dev = await DeviceLocationService.getDeviceSummary()
+            .timeout(const Duration(seconds: 2), onTimeout: () => 'Unknown device');
+      } catch (_) {}
     }
 
     final docRef = _collection.doc();

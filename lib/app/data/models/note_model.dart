@@ -53,6 +53,27 @@ class NoteModel {
     };
   }
 
+  /// JSON serialization for local caching (SharedPreferences)
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'user_id': userId,
+      'title': title,
+      'date': date.toIso8601String(),
+      'notes': notes,
+      'amount': amount,
+      'person_name': personName,
+      'latitude': latitude,
+      'longitude': longitude,
+      'device_info': deviceInfo,
+      'is_active': isActive,
+      'created_at': createdAt?.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
+    };
+  }
+
+  factory NoteModel.fromJson(Map<String, dynamic> json) => NoteModel.fromMap(json);
+
   factory NoteModel.fromMap(Map<String, dynamic> map, [String docId = '']) {
     DateTime parseDate(dynamic val) {
       if (val is Timestamp) return val.toDate();
