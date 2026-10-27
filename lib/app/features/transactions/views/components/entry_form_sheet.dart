@@ -59,15 +59,19 @@ class EntryFormSheet extends StatelessWidget {
                         size: 24,
                       ),
                       const SizedBox(width: 10),
-                      Text(
-                        (f.isEdit ? 'Edit entry' : 'New entry').tr,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                      Expanded(
+                        child: Text(
+                          (f.isEdit ? 'Edit entry' : 'New entry').tr,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
-                      const Spacer(),
+                      const SizedBox(width: 8),
                       InkWell(
                         onTap: () => Navigator.of(context).pop(),
                         borderRadius: BorderRadius.circular(20),

@@ -127,15 +127,19 @@ class _BudgetManagementSheetState extends State<BudgetManagementSheet> {
                     children: [
                       const Icon(Icons.account_balance_wallet_outlined, color: Colors.white, size: 22),
                       const SizedBox(width: 10),
-                      Text(
-                        'Manage Budgets'.tr,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                      Expanded(
+                        child: Text(
+                          'Manage Budgets'.tr,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
-                      const Spacer(),
+                      const SizedBox(width: 8),
                       InkWell(
                         onTap: () => Navigator.of(context).pop(),
                         borderRadius: BorderRadius.circular(20),
@@ -173,13 +177,22 @@ class _BudgetManagementSheetState extends State<BudgetManagementSheet> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              'Total Monthly Budget'.tr,
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: p.ink),
+                            Flexible(
+                              child: Text(
+                                'Total Monthly Budget'.tr,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: p.ink),
+                              ),
                             ),
-                            Text(
-                              '${'Current Spent:'.tr} ${Fmt.money(totalExpense)}',
-                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: p.mute),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                '${'Current Spent:'.tr} ${Fmt.money(totalExpense)}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: p.mute),
+                              ),
                             ),
                           ],
                         ),
@@ -223,12 +236,19 @@ class _BudgetManagementSheetState extends State<BudgetManagementSheet> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Category Budgets'.tr,
-                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: p.ink),
+                      Expanded(
+                        child: Text(
+                          'Category Budgets'.tr,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: p.ink),
+                        ),
                       ),
+                      const SizedBox(width: 8),
                       Text(
                         'Set budget per category'.tr,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(fontSize: 12, color: p.mute),
                       ),
                     ],

@@ -163,15 +163,19 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                   children: [
                     const Icon(Icons.person_outline_rounded, color: Colors.white, size: 22),
                     const SizedBox(width: 10),
-                    Text(
-                      'Edit Profile'.tr,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                    Expanded(
+                      child: Text(
+                        'Edit Profile'.tr,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
-                    const Spacer(),
+                    const SizedBox(width: 8),
                     InkWell(
                       onTap: () => Navigator.of(context).pop(),
                       borderRadius: BorderRadius.circular(20),
@@ -349,6 +353,8 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
       children: [
         Text(
           label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: p.ink),
         ),
         const SizedBox(height: 5),

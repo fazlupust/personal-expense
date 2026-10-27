@@ -58,15 +58,19 @@ class NoteFormSheet extends StatelessWidget {
                           size: 24,
                         ),
                         const SizedBox(width: 10),
-                        Text(
-                          (isEdit ? 'Edit Note' : 'New Note').tr,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
+                        Expanded(
+                          child: Text(
+                            (isEdit ? 'Edit Note' : 'New Note').tr,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
-                        const Spacer(),
+                        const SizedBox(width: 8),
                         InkWell(
                           onTap: () {
                             c.stopAllVoice();
@@ -279,14 +283,19 @@ class NoteFormSheet extends StatelessWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                'Note description / details'.tr,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: p.ink,
+                              Expanded(
+                                child: Text(
+                                  'Note description / details'.tr,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: p.ink,
+                                  ),
                                 ),
                               ),
+                              const SizedBox(width: 8),
                               InkWell(
                                 onTap: c.toggleVoiceNote,
                                 borderRadius: BorderRadius.circular(14),
