@@ -24,7 +24,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     line: Color(0xFFE1E6E0),
     income: Color(0xFF1F8A5B),
     expense: Color(0xFFC2492F),
-    acc: Color(0xFF1D2A24),
+    acc: Color(0xFF1F8A5B), // Primary Emerald Green
     onAcc: Colors.white,
   );
 
@@ -36,7 +36,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     line: Color(0xFF2A362F),
     income: Color(0xFF4FCF94),
     expense: Color(0xFFF0866C),
-    acc: Color(0xFFE8EFE9),
+    acc: Color(0xFF4FCF94),
     onAcc: Color(0xFF121815),
   );
 
@@ -101,6 +101,31 @@ class AppTheme {
       colorScheme: ColorScheme.fromSeed(seedColor: p.income, brightness: b)
           .copyWith(primary: p.income, surface: p.card, onSurface: p.ink),
       dividerColor: p.line,
+      textTheme: TextTheme(
+        bodyLarge: TextStyle(fontSize: 16.5, color: p.ink),
+        bodyMedium: TextStyle(fontSize: 15, color: p.ink),
+        bodySmall: TextStyle(fontSize: 13.5, color: p.mute),
+        labelLarge: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w600, color: p.ink),
+        labelMedium: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w500, color: p.mute),
+        labelSmall: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: p.mute),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: p.income,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          textStyle: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w600),
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: p.income,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          textStyle: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w600),
+        ),
+      ),
       appBarTheme: AppBarTheme(
         backgroundColor: p.bg,
         foregroundColor: p.ink,

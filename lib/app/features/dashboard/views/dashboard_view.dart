@@ -84,12 +84,12 @@ class DashboardView extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Icon(icon, size: 14, color: iconColor),
-                    const SizedBox(width: 4),
+                    Icon(icon, size: 16, color: iconColor),
+                    const SizedBox(width: 5),
                     Text(
                       greetingText,
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: p.mute,
                       ),
@@ -97,7 +97,7 @@ class DashboardView extends StatelessWidget {
                     Text(
                       ' · ',
                       style: TextStyle(
-                        fontSize: 11,
+                        fontSize: 13,
                         color: p.mute.withOpacity(0.5),
                       ),
                     ),
@@ -107,39 +107,21 @@ class DashboardView extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 13,
                           fontWeight: FontWeight.w500,
                           color: p.mute.withOpacity(0.85),
                         ),
                       ),
                     ),
-                    if (user?.userNo != null) ...[
-                      const SizedBox(width: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                        decoration: BoxDecoration(
-                          color: p.income.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          '#${user!.userNo}',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            color: p.income,
-                          ),
-                        ),
-                      ),
-                    ],
                   ],
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 3),
                 Text(
                   displayName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 20,
                     fontWeight: FontWeight.w800,
                     color: p.ink,
                   ),

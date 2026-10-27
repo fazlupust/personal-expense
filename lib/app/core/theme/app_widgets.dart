@@ -32,7 +32,7 @@ class FieldLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.only(bottom: 4),
-        child: Text(text.tr, style: TextStyle(fontSize: 12, color: context.pal.mute)),
+        child: Text(text.tr, style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w500, color: context.pal.mute)),
       );
 }
 
@@ -77,12 +77,12 @@ class AppCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(title!.tr,
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: p.ink)),
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: p.ink)),
                   ),
                   if (action != null)
                     InkWell(
                       onTap: onAction,
-                      child: Text(action!.tr, style: TextStyle(fontSize: 12, color: p.income)),
+                      child: Text(action!.tr, style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: p.income)),
                     ),
                 ],
               ),
@@ -126,13 +126,13 @@ class StatGrid extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(i.label.tr, style: TextStyle(fontSize: 12, color: p.mute)),
+                  Text(i.label.tr, style: TextStyle(fontSize: 13, color: p.mute)),
                   const SizedBox(height: 2),
                   Text(
                     i.value,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: i.color ?? p.ink),
+                    style: TextStyle(fontSize: 17.5, fontWeight: FontWeight.w700, color: i.color ?? p.ink),
                   ),
                 ],
               ),
@@ -223,7 +223,7 @@ class AppButton extends StatelessWidget {
       AppButtonStyle.filled => FilledButton(
           onPressed: onPressed,
           style: FilledButton.styleFrom(
-              backgroundColor: p.acc, foregroundColor: p.onAcc, shape: shape, textStyle: textStyle),
+              backgroundColor: p.income, foregroundColor: Colors.white, shape: shape, textStyle: textStyle),
           child: child,
         ),
       AppButtonStyle.outlined => OutlinedButton(

@@ -119,7 +119,7 @@ class BalanceCard extends StatelessWidget {
                           Text(
                             'Balance this month'.tr,
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 13.5,
                               fontWeight: FontWeight.w600,
                               color: Colors.white.withOpacity(0.95),
                               letterSpacing: 0.2,
@@ -150,14 +150,14 @@ class BalanceCard extends StatelessWidget {
                                   children: [
                                     Icon(
                                       hidden ? Icons.visibility_off_rounded : Icons.visibility_rounded,
-                                      size: 13,
+                                      size: 14,
                                       color: hidden ? const Color(0xFFFFB3A7) : const Color(0xFF5DFFB2),
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
                                       hidden ? 'Show'.tr : 'Hide'.tr,
                                       style: TextStyle(
-                                        fontSize: 11,
+                                        fontSize: 12,
                                         fontWeight: FontWeight.w700,
                                         color: Colors.white.withOpacity(0.95),
                                       ),
@@ -306,9 +306,9 @@ class BalanceCard extends StatelessWidget {
                             Text(
                               'Monthly budget (0 = none)'.tr,
                               style: TextStyle(
-                                fontSize: 11,
+                                fontSize: 13,
                                 fontWeight: FontWeight.w500,
-                                color: Colors.white.withOpacity(0.85),
+                                color: Colors.white.withOpacity(0.88),
                               ),
                             ),
                             Text(
@@ -316,7 +316,7 @@ class BalanceCard extends StatelessWidget {
                                   ? '${'Over budget by'.tr} ${Fmt.money(expense - budget)}'
                                   : '${Fmt.money(budget - expense)} ${'left of'.tr} ${Fmt.money(budget)}',
                               style: TextStyle(
-                                fontSize: 11,
+                                fontSize: 13,
                                 fontWeight: FontWeight.w700,
                                 color: over ? const Color(0xFFFF9488) : const Color(0xFF5DFFB2),
                               ),
@@ -408,9 +408,9 @@ class _GlassMetricBox extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 13,
                           fontWeight: FontWeight.w500,
-                          color: Colors.white.withOpacity(0.8),
+                          color: Colors.white.withOpacity(0.85),
                         ),
                       ),
                     ),
@@ -423,7 +423,7 @@ class _GlassMetricBox extends StatelessWidget {
                           padding: const EdgeInsets.all(2.0),
                           child: Icon(
                             isHidden ? Icons.visibility_off_rounded : Icons.visibility_rounded,
-                            size: 13,
+                            size: 14,
                             color: isHidden
                                 ? const Color(0xFFFFB3A7)
                                 : Colors.white.withOpacity(0.85),
@@ -439,7 +439,7 @@ class _GlassMetricBox extends StatelessWidget {
                   child: Text(
                     isHidden ? '••••••' : Fmt.money(amount),
                     style: TextStyle(
-                      fontSize: isHidden ? 16 : 15,
+                      fontSize: isHidden ? 17.5 : 16.5,
                       fontWeight: FontWeight.w800,
                       letterSpacing: isHidden ? 1.5 : 0,
                       color: Colors.white,

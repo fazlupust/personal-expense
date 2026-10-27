@@ -49,7 +49,7 @@ class TransactionTile extends StatelessWidget {
                     entry.note.isEmpty ? entry.category.tr : entry.note,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: p.ink),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: p.ink),
                   ),
                   Text(
                     [
@@ -63,7 +63,7 @@ class TransactionTile extends StatelessWidget {
                     ].join(' · '),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 12, color: p.mute),
+                    style: TextStyle(fontSize: 13.5, color: p.mute),
                   ),
                 ],
               ),
@@ -72,6 +72,7 @@ class TransactionTile extends StatelessWidget {
             Text(
               '${isIncome ? '+' : '−'}${Fmt.money(entry.amount)}',
               style: TextStyle(
+                fontSize: 16,
                 fontWeight: FontWeight.w700,
                 color: isIncome ? p.income : p.expense,
               ),

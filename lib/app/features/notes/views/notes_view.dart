@@ -420,17 +420,17 @@ class _NoteCardItem extends StatelessWidget {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // S.L Badge
+                    // S.L Badge (clean number without #)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
                         color: p.income.withOpacity(0.12),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        '#$serial',
+                        '$serial',
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 12,
                           fontWeight: FontWeight.w700,
                           color: p.income,
                         ),
@@ -446,7 +446,7 @@ class _NoteCardItem extends StatelessWidget {
                           Text(
                             note.title,
                             style: TextStyle(
-                              fontSize: 15,
+                              fontSize: 16.5,
                               fontWeight: FontWeight.w700,
                               color: p.ink,
                             ),
@@ -456,12 +456,12 @@ class _NoteCardItem extends StatelessWidget {
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.person_outline_rounded, size: 13, color: p.income),
+                                Icon(Icons.person_outline_rounded, size: 14, color: p.income),
                                 const SizedBox(width: 4),
                                 Text(
                                   note.personName,
                                   style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 13.5,
                                     fontWeight: FontWeight.w600,
                                     color: p.income,
                                   ),
@@ -485,7 +485,7 @@ class _NoteCardItem extends StatelessWidget {
                         child: Text(
                           Fmt.money(note.amount),
                           style: TextStyle(
-                            fontSize: 15,
+                            fontSize: 16,
                             fontWeight: FontWeight.w800,
                             color: p.income,
                           ),
@@ -501,9 +501,9 @@ class _NoteCardItem extends StatelessWidget {
                   Text(
                     note.notes,
                     style: TextStyle(
-                      fontSize: 13,
-                      color: p.ink.withOpacity(0.85),
-                      height: 1.35,
+                      fontSize: 14.5,
+                      color: p.ink.withOpacity(0.88),
+                      height: 1.4,
                     ),
                   ),
                 ],
@@ -513,19 +513,19 @@ class _NoteCardItem extends StatelessWidget {
                 // Bottom row: Date, Location, and Action Buttons
                 Row(
                   children: [
-                    Icon(Icons.calendar_today_rounded, size: 12, color: p.mute),
+                    Icon(Icons.calendar_today_rounded, size: 13, color: p.mute),
                     const SizedBox(width: 4),
                     Text(
                       Fmt.date(note.date, 'd MMM yyyy'),
-                      style: TextStyle(fontSize: 11, color: p.mute),
+                      style: TextStyle(fontSize: 12.5, color: p.mute),
                     ),
                     if (note.hasLocation) ...[
                       const SizedBox(width: 10),
-                      Icon(Icons.location_on_outlined, size: 12, color: p.income),
+                      Icon(Icons.location_on_outlined, size: 13, color: p.income),
                       const SizedBox(width: 2),
                       Text(
                         '${note.latitude!.toStringAsFixed(2)}, ${note.longitude!.toStringAsFixed(2)}',
-                        style: TextStyle(fontSize: 11, color: p.mute),
+                        style: TextStyle(fontSize: 12.5, color: p.mute),
                       ),
                     ],
                     const Spacer(),
