@@ -16,6 +16,7 @@ import '../../transactions/controllers/transactions_controller.dart';
 import '../../transactions/views/components/entry_form_sheet.dart';
 import '../../transactions/views/components/transaction_tile.dart';
 import 'components/balance_card.dart';
+import 'components/dashboard_prayer_card.dart';
 import 'components/dashboard_stats_card.dart';
 
 class DashboardView extends StatelessWidget {
@@ -284,6 +285,7 @@ class DashboardView extends StatelessWidget {
                   totalOver: expense - s.budget,
                   exceededCategories: exceededCategories,
                 ),
+              const DashboardPrayerCard(),
               AdaptiveColumns(
                 left: [
                   BalanceCard(

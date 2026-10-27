@@ -359,5 +359,48 @@ class AppTranslations extends Translations {
         'ক্লিপবোর্ডে কপি করা হয়েছে! এটি এক্সেল বা গুগল শিটে পেস্ট করতে পারেন।',
     'Copied to clipboard!': 'ক্লিপবোর্ডে কপি করা হয়েছে!',
     'Enter your name': 'আপনার নাম লিখুন',
+
+    // Prayer Times & Digital Tasbih
+    'Prayer Times & Digital Tasbih': 'নামাজের সময়সূচি ও ডিজিটাল তাসবীহ',
+    'Daily prayer schedule, next waqt & interactive digital tasbih':
+        'দৈনিক নামাজের সময়সূচি, পরবর্তী ওয়াক্ত ও ডিজিটাল তাসবীহ',
+    'Prayer & Tasbih': 'নামাজ ও তাসবীহ',
+    'Prayer Times': 'নামাজের সময়সূচি',
+    'Daily Prayer Times': 'দৈনিক নামাজের সময়সূচি',
+    'Digital Tasbih': 'ডিজিটাল তাসবীহ',
+    'Active Waqt': 'বর্তমান ওয়াক্ত',
+    'Waqt': 'ওয়াক্ত',
+    'Now': 'চলছে',
+    'Next:': 'পরবর্তী:',
+    'left': 'বাকি',
+    'Open Digital Tasbih Counter': 'ডিজিটাল তাসবীহ ও জিকির কাউন্টারে যান',
+    'View Prayer Times Schedule': 'নামাজের সময়সূচি দেখুন',
+    'Select Division / Location': 'বিভাগ বা অবস্থান নির্বাচন করুন',
+    'Prayer times are calculated accurately based on geographic coordinates.':
+        'ভৌগোলিক স্থানাঙ্কের ভিত্তিতে সঠিক নামাজের সময় হিসাব করা হয়েছে।',
+    'Asr:': 'আসর:',
+    'Hanafi': 'হানাফী',
+    'Shafi': 'শাফেয়ী',
+    'Sehri Ends': 'সাহরী শেষ',
+    'Iftar Time': 'ইফতারের সময়',
+    'Next': 'পরবর্তী',
+    'Tahajjud best time starts at 1/3 of the night before Fajr. Ishraq starts 15 minutes after sunrise.':
+        'তাহাজ্জুদের সর্বোত্তম সময় রাতের শেষ তৃতীয়াংশে শুরু হয়। সূর্যোদয়ের ১৫ মিনিট পর ইশরাকের সময় শুরু হয়।',
+    'Reset Tasbih Counter?': 'তাসবীহ কাউন্টার রিসেট করবেন?',
+    'This will reset your current count and cycles for this zikir.':
+        'এটি এই জিকিরের বর্তমান গণনা ও রাউন্ড সংখ্যা রিসেট করবে।',
+    'Select Target Count': 'গণনার লক্ষ্য নির্ধারণ করুন',
+    'Times': 'বার',
+    '∞ Unlimited': '∞ সীমাহীন',
+    'Target:': 'লক্ষ্য:',
+    'Round:': 'রাউন্ড:',
+    'Tap to count': 'গণনা করতে চাপুন',
+    'Undo -1': '১ বিয়োগ (-১)',
+    'Count': 'গণনা',
+    'Today\'s Count': 'আজকের মোট',
+    'Lifetime Total': 'সর্বমোট জিকির',
+    'Zikir': 'জিকির',
+    'Vibration': 'ভাইব্রেশন',
   };
 }
+

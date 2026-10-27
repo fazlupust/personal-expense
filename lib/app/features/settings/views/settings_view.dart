@@ -283,6 +283,41 @@ class SettingsView extends StatelessWidget {
                     ),
                   ),
 
+                  // Prayer Times & Digital Tasbih Link
+                  AppCard(
+                    flush: true,
+                    child: InkWell(
+                      onTap: () => Get.toNamed(AppRoutes.prayerAndTasbih),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                        child: Row(
+                          children: [
+                            Icon(Icons.nightlight_round, color: p.income),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Prayer Times & Digital Tasbih'.tr,
+                                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: p.ink),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Daily prayer schedule, next waqt & interactive digital tasbih'.tr,
+                                    style: TextStyle(fontSize: 12, color: p.mute),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Icon(Icons.chevron_right, color: p.mute),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
+
                   // Category Management Link
                   AppCard(
                     flush: true,

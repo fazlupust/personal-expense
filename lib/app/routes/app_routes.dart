@@ -8,4 +8,6 @@ abstract class AppRoutes {
   static const String login = '/login';
   static const String register = '/register';
   static const String registeredUsers = '/registered-users';
+  static const String prayerAndTasbih = '/prayer-and-tasbih';
+  static const String tasbihCounter = '/tasbih-counter';
 }

@@ -9,6 +9,9 @@ import '../features/navigation/bindings/navigation_binding.dart';
 import '../features/navigation/views/navigation_view.dart';
 import '../features/notes/bindings/notes_binding.dart';
 import '../features/notes/views/notes_view.dart';
+import '../features/prayer_tasbih/bindings/prayer_tasbih_binding.dart';
+import '../features/prayer_tasbih/views/prayer_tasbih_view.dart';
+import '../features/prayer_tasbih/views/tasbih_counter_view.dart';
 import '../features/reports/views/generate_report_view.dart';
 import '../features/settings/views/registered_users_view.dart';
 import '../features/splash/views/splash_view.dart';
@@ -26,5 +29,16 @@ class AppPages {
     GetPage(name: AppRoutes.login, page: () => const LoginView(), binding: AuthBinding()),
     GetPage(name: AppRoutes.register, page: () => const RegisterView(), binding: AuthBinding()),
     GetPage(name: AppRoutes.registeredUsers, page: () => const RegisteredUsersView()),
+    GetPage(
+      name: AppRoutes.prayerAndTasbih,
+      page: () => const PrayerTasbihView(),
+      binding: PrayerTasbihBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.tasbihCounter,
+      page: () => const TasbihCounterView(),
+      binding: PrayerTasbihBinding(),
+    ),
   ];
 }
+
