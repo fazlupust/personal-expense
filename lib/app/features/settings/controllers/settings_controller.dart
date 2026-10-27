@@ -18,6 +18,7 @@ class SettingsController extends GetxController {
   String langCode = 'en';
   String name = '';
   double budget = 0;
+  Map<String, double> categoryBudgets = {};
   String defaultAccount = AppConstants.accounts.first;
   String? budgetError;
   bool showIncome = true;
@@ -61,6 +62,7 @@ class SettingsController extends GetxController {
       isIncomeHidden = false;
       showExpense = true;
       isExpenseHidden = false;
+      categoryBudgets = {};
       return;
     }
     try {
@@ -75,6 +77,13 @@ class SettingsController extends GetxController {
       isBalanceHidden = (m['is_balance_hidden'] as bool?) ?? !showIncome;
       isIncomeHidden = (m['is_income_hidden'] as bool?) ?? !showIncome;
       isExpenseHidden = (m['is_expense_hidden'] as bool?) ?? !showExpense;
+
+      if (m['category_budgets'] is Map) {
+        final bMap = m['category_budgets'] as Map<String, dynamic>;
+        categoryBudgets = bMap.map((k, v) => MapEntry(k, (v as num).toDouble()));
+      } else {
+        categoryBudgets = {};
+      }
     } catch (_) {
       // Corrupt data: fall back to defaults.
     }
@@ -93,8 +102,34 @@ class SettingsController extends GetxController {
           'is_balance_hidden': isBalanceHidden,
           'is_income_hidden': isIncomeHidden,
           'is_expense_hidden': isExpenseHidden,
+          'category_budgets': categoryBudgets,
         }),
       );
+
+  double getCategoryBudget(String category) => categoryBudgets[category] ?? 0.0;
+
+  void setTotalBudget(double val) {
+    budget = val >= 0 ? val : 0;
+    budgetCtrl.text = budget > 0 ? _plain(budget) : '';
+    _persist();
+    update();
+  }
+
+  void setCategoryBudget(String category, double amount) {
+    if (amount <= 0) {
+      categoryBudgets.remove(category);
+    } else {
+      categoryBudgets[category] = amount;
+    }
+    _persist();
+    update();
+  }
+
+  void setCategoryBudgets(Map<String, double> map) {
+    categoryBudgets = Map.from(map);
+    _persist();
+    update();
+  }
 
   void setTheme(ThemeMode mode) {
     themeMode = mode;

@@ -454,5 +454,79 @@ void main() {
       expect(controller.isLoading, isFalse);
     });
   });
+
+  group('Budget and Profile Management tests', () {
+    test('SettingsController sets, gets, and persists category budgets and total budget', () async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+      final controller = SettingsController(prefs);
+      controller.onInit();
+
+      expect(controller.budget, 0.0);
+      expect(controller.categoryBudgets, isEmpty);
+
+      // Set total budget
+      controller.setTotalBudget(15000);
+      expect(controller.budget, 15000.0);
+      expect(controller.budgetCtrl.text, '15000');
+
+      // Set category budgets
+      controller.setCategoryBudget('Food', 5000);
+      controller.setCategoryBudget('Groceries', 3000);
+      controller.setCategoryBudget('Transport', 2000);
+
+      expect(controller.getCategoryBudget('Food'), 5000.0);
+      expect(controller.getCategoryBudget('Groceries'), 3000.0);
+      expect(controller.getCategoryBudget('Transport'), 2000.0);
+      expect(controller.getCategoryBudget('NonExistent'), 0.0);
+      expect(controller.categoryBudgets.length, 3);
+
+      // Remove category budget by setting 0
+      controller.setCategoryBudget('Transport', 0);
+      expect(controller.getCategoryBudget('Transport'), 0.0);
+      expect(controller.categoryBudgets.length, 2);
+
+      // Reload controller from prefs to verify persistence
+      final reloaded = SettingsController(prefs);
+      reloaded.onInit();
+      expect(reloaded.budget, 15000.0);
+      expect(reloaded.getCategoryBudget('Food'), 5000.0);
+      expect(reloaded.getCategoryBudget('Groceries'), 3000.0);
+      expect(reloaded.getCategoryBudget('Transport'), 0.0);
+
+      controller.dispose();
+      reloaded.dispose();
+    });
+
+    test('UserModel supports profile editing with designation, email, and address', () {
+      const user = UserModel(
+        uid: 'user_123',
+        nameBn: 'ফজলু',
+        nameEn: 'Fazlu',
+        phone: '01700000000',
+        designationEn: 'Software Engineer',
+        designationBn: 'সফটওয়্যার ইঞ্জিনিয়ার',
+        email: 'fazlu@example.com',
+        addressEn: 'Dhaka, Bangladesh',
+        addressBn: 'ঢাকা, বাংলাদেশ',
+      );
+
+      expect(user.displayName(false), 'Fazlu');
+      expect(user.displayName(true), 'ফজলু');
+      expect(user.displayDesignation(false), 'Software Engineer');
+      expect(user.displayDesignation(true), 'সফটওয়্যার ইঞ্জিনিয়ার');
+      expect(user.email, 'fazlu@example.com');
+      expect(user.addressEn, 'Dhaka, Bangladesh');
+
+      final updated = user.copyWith(
+        nameEn: 'Fazlu Rahman',
+        designationEn: 'Lead Engineer',
+      );
+      expect(updated.nameEn, 'Fazlu Rahman');
+      expect(updated.designationEn, 'Lead Engineer');
+      expect(updated.nameBn, 'ফজলু'); // Preserved
+      expect(updated.email, 'fazlu@example.com'); // Preserved
+    });
+  });
 }
 

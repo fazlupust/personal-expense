@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_widgets.dart';
 import '../../../core/utils/formatters.dart';
@@ -9,6 +10,7 @@ import '../../../data/models/entry_type.dart';
 import '../../../data/services/auth_service.dart';
 import '../../reports/views/components/category_bars.dart';
 import '../../settings/controllers/settings_controller.dart';
+import '../../settings/views/components/budget_management_sheet.dart';
 import '../../navigation/controllers/navigation_controller.dart';
 import '../../transactions/controllers/transactions_controller.dart';
 import '../../transactions/views/components/entry_form_sheet.dart';
@@ -149,6 +151,102 @@ class DashboardView extends StatelessWidget {
     );
   }
 
+  Widget _buildBudgetAlertBanner(
+    BuildContext context, {
+    required AppPalette p,
+    required bool totalExceeded,
+    required double totalOver,
+    required Map<String, double> exceededCategories,
+  }) {
+    final catCount = exceededCategories.length;
+    final catNames = exceededCategories.keys.map((k) => k.tr).toList();
+
+    String title = 'Budget Limit Exceeded!'.tr;
+    String subtitle = '';
+
+    if (totalExceeded && catCount > 0) {
+      subtitle =
+          '${'Total monthly budget'.tr} & $catCount ${catCount == 1 ? '1 category budget exceeded'.tr : 'categories budget exceeded'.tr}';
+    } else if (totalExceeded) {
+      subtitle = '${'Total monthly budget exceeded by'.tr} ${AppConstants.currency}${Fmt.money(totalOver)}';
+    } else {
+      final namesStr = catNames.take(2).join(', ') + (catNames.length > 2 ? ' +${catNames.length - 2}' : '');
+      subtitle = '$namesStr ${'budget exceeded'.tr}';
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: p.expense.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: p.expense.withOpacity(0.4), width: 1.2),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () => showBudgetManagementSheet(context),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: p.expense.withOpacity(0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.warning_amber_rounded, color: p.expense, size: 22),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: p.expense,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: p.ink.withOpacity(0.85),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: p.expense,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    'View / Manage'.tr,
+                    style: const TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = context.pal;
@@ -161,12 +259,31 @@ class DashboardView extends StatelessWidget {
         final byCat = tc.group(rows, EntryType.expense);
         final recent = tc.recent;
 
+        // Calculate exceeded budgets
+        final totalBudgetExceeded = s.budget > 0 && expense > s.budget;
+        final exceededCategories = <String, double>{};
+        for (final entry in byCat.entries) {
+          final catBudget = s.getCategoryBudget(entry.key);
+          if (catBudget > 0 && entry.value > catBudget) {
+            exceededCategories[entry.key] = entry.value - catBudget;
+          }
+        }
+        final hasBudgetAlert = totalBudgetExceeded || exceededCategories.isNotEmpty;
+
         return ContentWrap(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _buildGreetingBar(context, s),
               const SizedBox(height: 6),
+              if (hasBudgetAlert)
+                _buildBudgetAlertBanner(
+                  context,
+                  p: p,
+                  totalExceeded: totalBudgetExceeded,
+                  totalOver: expense - s.budget,
+                  exceededCategories: exceededCategories,
+                ),
               AdaptiveColumns(
                 left: [
                   BalanceCard(

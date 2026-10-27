@@ -10,6 +10,7 @@ import '../../controllers/settings_controller.dart';
 
 import '../../../../data/services/app_update_service.dart';
 import '../../../../data/services/auth_service.dart';
+import 'budget_management_sheet.dart';
 import 'change_password_sheet.dart';
 
 class SettingsFormCard extends StatelessWidget {
@@ -51,6 +52,28 @@ class SettingsFormCard extends StatelessWidget {
                 ),
               ),
             ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton.icon(
+                onPressed: () => showBudgetManagementSheet(context),
+                icon: Icon(Icons.tune_rounded, size: 15, color: context.pal.income),
+                label: Text(
+                  'Manage Category Budgets'.tr,
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                    color: context.pal.income,
+                  ),
+                ),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 10),
           const FieldLabel('Language'),

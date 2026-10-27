@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_widgets.dart';
 import '../../../core/utils/formatters.dart';
@@ -10,7 +11,9 @@ import '../../../data/services/auth_service.dart';
 import '../../../routes/app_routes.dart';
 import '../../transactions/controllers/transactions_controller.dart';
 import '../controllers/settings_controller.dart';
+import 'components/budget_management_sheet.dart';
 import 'components/change_password_sheet.dart';
+import 'components/edit_profile_sheet.dart';
 import 'components/settings_form_card.dart';
 
 /// "Profile" tab: profile header, lifetime stats, settings, categories, and auth controls.
@@ -137,13 +140,26 @@ class SettingsView extends StatelessWidget {
                                   ],
                                 ),
                                 const SizedBox(height: 14),
-                                Row(
-                                  children: [
-                                    if (isLoggedIn) ...[
+                                if (isLoggedIn) ...[
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: OutlinedButton.icon(
+                                          onPressed: () => showEditProfileSheet(context),
+                                          icon: const Icon(Icons.edit_outlined, size: 17),
+                                          label: Text('Edit Profile'.tr),
+                                          style: OutlinedButton.styleFrom(
+                                            foregroundColor: p.income,
+                                            side: BorderSide(color: p.income.withOpacity(0.5)),
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
                                       Expanded(
                                         child: OutlinedButton.icon(
                                           onPressed: () => showChangePasswordSheet(context),
-                                          icon: const Icon(Icons.lock_reset_rounded, size: 18),
+                                          icon: const Icon(Icons.lock_reset_rounded, size: 17),
                                           label: Text('Change Password'.tr),
                                           style: OutlinedButton.styleFrom(
                                             foregroundColor: p.ink,
@@ -152,51 +168,92 @@ class SettingsView extends StatelessWidget {
                                           ),
                                         ),
                                       ),
-                                      const SizedBox(width: 8),
                                     ],
-                                    Expanded(
-                                      child: OutlinedButton.icon(
-                                        onPressed: () {
-                                          if (isLoggedIn) {
-                                            auth.signOut();
-                                          } else {
-                                            Get.toNamed(AppRoutes.login);
-                                          }
-                                        },
-                                        icon: Icon(isLoggedIn ? Icons.logout : Icons.login, size: 18),
-                                        label: Text(isLoggedIn ? 'Sign Out'.tr : 'Sign In with Phone'.tr),
-                                        style: OutlinedButton.styleFrom(
-                                          foregroundColor: isLoggedIn ? p.expense : p.income,
-                                          side: BorderSide(color: isLoggedIn ? p.expense.withOpacity(0.4) : p.income),
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                        ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: OutlinedButton.icon(
+                                      onPressed: () => auth.signOut(),
+                                      icon: const Icon(Icons.logout, size: 17),
+                                      label: Text('Sign Out'.tr),
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor: p.expense,
+                                        side: BorderSide(color: p.expense.withOpacity(0.4)),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                       ),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ] else ...[
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: OutlinedButton.icon(
+                                          onPressed: () => showEditProfileSheet(context),
+                                          icon: const Icon(Icons.edit_outlined, size: 17),
+                                          label: Text('Edit Profile'.tr),
+                                          style: OutlinedButton.styleFrom(
+                                            foregroundColor: p.income,
+                                            side: BorderSide(color: p.income.withOpacity(0.5)),
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: OutlinedButton.icon(
+                                          onPressed: () => Get.toNamed(AppRoutes.login),
+                                          icon: const Icon(Icons.login, size: 17),
+                                          label: Text('Sign In with Phone'.tr),
+                                          style: OutlinedButton.styleFrom(
+                                            foregroundColor: p.income,
+                                            side: BorderSide(color: p.income),
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ],
                             );
                           })
-                        : Row(
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              Container(
-                                width: 56,
-                                height: 56,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(color: p.income, shape: BoxShape.circle),
-                                child: Text(
-                                  s.name.isEmpty ? '?' : s.name.characters.first.toUpperCase(),
-                                  style: const TextStyle(
-                                      color: Colors.white, fontSize: 24, fontWeight: FontWeight.w700),
-                                ),
+                              Row(
+                                children: [
+                                  Container(
+                                    width: 56,
+                                    height: 56,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(color: p.income, shape: BoxShape.circle),
+                                    child: Text(
+                                      s.name.isEmpty ? '?' : s.name.characters.first.toUpperCase(),
+                                      style: const TextStyle(
+                                          color: Colors.white, fontSize: 24, fontWeight: FontWeight.w700),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: Text(
+                                      s.name.isEmpty ? 'Add your name'.tr : s.name,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: p.ink),
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: Text(
-                                  s.name.isEmpty ? 'Add your name'.tr : s.name,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: p.ink),
+                              const SizedBox(height: 12),
+                              OutlinedButton.icon(
+                                onPressed: () => showEditProfileSheet(context),
+                                icon: const Icon(Icons.edit_outlined, size: 17),
+                                label: Text('Edit Profile'.tr),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: p.income,
+                                  side: BorderSide(color: p.income.withOpacity(0.5)),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                 ),
                               ),
                             ],
@@ -261,6 +318,69 @@ class SettingsView extends StatelessWidget {
                             Expanded(
                               child: Text('Manage categories'.tr,
                                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: p.ink)),
+                            ),
+                            Icon(Icons.chevron_right, color: p.mute),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Budget Management Link
+                  AppCard(
+                    flush: true,
+                    child: InkWell(
+                      onTap: () => showBudgetManagementSheet(context),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: p.income.withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(Icons.account_balance_wallet_outlined, color: p.income, size: 20),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'Budget Management'.tr,
+                                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: p.ink),
+                                      ),
+                                      if (s.categoryBudgets.isNotEmpty) ...[
+                                        const SizedBox(width: 6),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: p.income.withOpacity(0.15),
+                                            borderRadius: BorderRadius.circular(10),
+                                          ),
+                                          child: Text(
+                                            '${s.categoryBudgets.length}',
+                                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: p.income),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    s.budget > 0
+                                        ? '${'Total budget'.tr}: ${AppConstants.currency}${Fmt.money(s.budget)}${s.categoryBudgets.isNotEmpty ? ' · ${s.categoryBudgets.length} ${'category budgets'.tr}' : ''}'
+                                        : (s.categoryBudgets.isNotEmpty
+                                            ? '${s.categoryBudgets.length} ${'category budgets'.tr}'
+                                            : 'Set monthly & category-wise expense limits'.tr),
+                                    style: TextStyle(fontSize: 12, color: p.mute),
+                                  ),
+                                ],
+                              ),
                             ),
                             Icon(Icons.chevron_right, color: p.mute),
                           ],

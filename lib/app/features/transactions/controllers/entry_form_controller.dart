@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/constants/app_constants.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../data/models/category_model.dart';
 import '../../../data/models/entry_type.dart';
 import '../../../data/models/transaction_model.dart';
@@ -173,8 +174,56 @@ class EntryFormController extends GetxController {
     final catNameBn = selCategory?.nameBn ?? (category ?? 'Other');
     final catNameEn = selCategory?.nameEn ?? (category ?? 'Other');
     final catId = selCategory?.id ?? 'other';
+    final txCtrl = Get.find<TransactionsController>();
 
-    Get.find<TransactionsController>().save(
+    // Budget exceeded notification check
+    if (type == EntryType.expense && Get.isRegistered<SettingsController>()) {
+      final s = SettingsController.to;
+      final txDate = date;
+      final monthExpenseEntries = txCtrl.entries.where((e) =>
+          e.date.year == txDate.year &&
+          e.date.month == txDate.month &&
+          e.type == EntryType.expense &&
+          e.id != existing?.id);
+
+      final catName = category ?? 'Other';
+      final currentCatSpent = monthExpenseEntries
+              .where((e) => e.category == catName)
+              .fold(0.0, (acc, e) => acc + e.amount) +
+          a;
+      final currentTotalSpent =
+          monthExpenseEntries.fold(0.0, (acc, e) => acc + e.amount) + a;
+
+      final catBudget = s.getCategoryBudget(catName);
+      final totalBudget = s.budget;
+
+      final catExceeded = catBudget > 0 && currentCatSpent > catBudget;
+      final totalExceeded = totalBudget > 0 && currentTotalSpent > totalBudget;
+
+      if (catExceeded && totalExceeded) {
+        _notifyBudgetAlert(
+          title: '⚠️ Budget Limits Exceeded!'.tr,
+          message:
+              '${'Category'.tr} "${catName.tr}" & ${'Total monthly budget'.tr} ${'have both been exceeded!'.tr}',
+        );
+      } else if (catExceeded) {
+        final over = currentCatSpent - catBudget;
+        _notifyBudgetAlert(
+          title: '⚠️ Category Budget Exceeded!'.tr,
+          message:
+              '${'Budget for'.tr} "${catName.tr}" ${'exceeded by'.tr} ${AppConstants.currency}${Fmt.money(over)} (${'Spent'.tr}: ${AppConstants.currency}${Fmt.money(currentCatSpent)} / ${'Budget'.tr}: ${AppConstants.currency}${Fmt.money(catBudget)})',
+        );
+      } else if (totalExceeded) {
+        final over = currentTotalSpent - totalBudget;
+        _notifyBudgetAlert(
+          title: '⚠️ Total Monthly Budget Exceeded!'.tr,
+          message:
+              '${'Total monthly budget exceeded by'.tr} ${AppConstants.currency}${Fmt.money(over)} (${'Spent'.tr}: ${AppConstants.currency}${Fmt.money(currentTotalSpent)} / ${'Budget'.tr}: ${AppConstants.currency}${Fmt.money(totalBudget)})',
+        );
+      }
+    }
+
+    txCtrl.save(
       TransactionModel(
         id: existing?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
         userId: existing?.userId ?? '',
@@ -193,6 +242,30 @@ class EntryFormController extends GetxController {
       ),
     );
     return true;
+  }
+
+  void _notifyBudgetAlert({required String title, required String message}) {
+    if (Get.context != null) {
+      Get.snackbar(
+        title,
+        message,
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: const Color(0xFFDC2626),
+        colorText: Colors.white,
+        icon: const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 28),
+        duration: const Duration(seconds: 5),
+        margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        borderRadius: 14,
+        isDismissible: true,
+        boxShadows: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.25),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      );
+    }
   }
 
   void delete() {
