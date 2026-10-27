@@ -12,6 +12,7 @@ import '../features/notes/views/notes_view.dart';
 import '../features/prayer_tasbih/bindings/prayer_tasbih_binding.dart';
 import '../features/prayer_tasbih/views/prayer_tasbih_view.dart';
 import '../features/prayer_tasbih/views/tasbih_counter_view.dart';
+import '../features/prayer_tasbih/views/tasbih_history_view.dart';
 import '../features/reports/views/generate_report_view.dart';
 import '../features/settings/views/registered_users_view.dart';
 import '../features/splash/views/splash_view.dart';
@@ -37,6 +38,11 @@ class AppPages {
     GetPage(
       name: AppRoutes.tasbihCounter,
       page: () => const TasbihCounterView(),
+      binding: PrayerTasbihBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.tasbihHistory,
+      page: () => const TasbihHistoryView(),
       binding: PrayerTasbihBinding(),
     ),
   ];

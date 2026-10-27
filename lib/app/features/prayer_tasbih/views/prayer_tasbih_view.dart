@@ -613,7 +613,7 @@ class PrayerTasbihView extends StatelessWidget {
                 IconButton(
                   icon: Icon(Icons.query_stats_rounded, color: p.income, size: 22),
                   tooltip: 'Tasbih History & Filter'.tr,
-                  onPressed: () => const TasbihCounterView().showAnalyticsSheet(context, c, p),
+                  onPressed: () => Get.toNamed(AppRoutes.tasbihHistory),
                 ),
               ] else ...[
                 IconButton(

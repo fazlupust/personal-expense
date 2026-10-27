@@ -5,7 +5,10 @@ import 'package:personal_expense/app/core/theme/app_theme.dart';
 import 'package:personal_expense/app/features/prayer_tasbih/controllers/prayer_tasbih_controller.dart';
 import 'package:personal_expense/app/features/prayer_tasbih/views/prayer_tasbih_view.dart';
 import 'package:personal_expense/app/features/prayer_tasbih/views/tasbih_counter_view.dart';
+import 'package:personal_expense/app/features/prayer_tasbih/views/tasbih_history_view.dart';
 import 'package:personal_expense/app/features/dashboard/views/components/dashboard_prayer_card.dart';
+import 'package:personal_expense/app/routes/app_pages.dart';
+import 'package:personal_expense/app/routes/app_routes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -194,7 +197,7 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('TasbihCounterView opens analytics sheet on button tap without overflow', (tester) async {
+    testWidgets('TasbihHistoryView dedicated page renders cleanly without overflow on Samsung A15', (tester) async {
       tester.view.physicalSize = const Size(1080, 2340);
       tester.view.devicePixelRatio = 2.8125; // 384x832 dp (Samsung Galaxy A15)
 
@@ -203,7 +206,42 @@ void main() {
       await tester.pumpWidget(
         GetMaterialApp(
           theme: ThemeData(extensions: const [AppPalette.light]),
-          home: const TasbihCounterView(),
+          home: const TasbihHistoryView(),
+          getPages: AppPages.pages,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(TasbihHistoryView), findsOneWidget);
+      expect(find.text('Recitation Statistics'), findsWidgets);
+      expect(tester.takeException(), isNull);
+
+      // Verify Time Filter segments render and can be tapped
+      final last7Days = find.text('Last 7 Days');
+      expect(last7Days, findsOneWidget);
+      await tester.tap(last7Days);
+      await tester.pumpAndSettle();
+
+      // Verify Category filter chips render
+      final prayerCat = find.text('After Prayer');
+      expect(prayerCat, findsWidgets);
+      await tester.tap(prayerCat.first);
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('TasbihCounterView navigates to TasbihHistoryView dedicated page on button tap', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2340);
+      tester.view.devicePixelRatio = 2.8125; // 384x832 dp (Samsung Galaxy A15)
+
+      Get.put(PrayerTasbihController());
+
+      await tester.pumpWidget(
+        GetMaterialApp(
+          initialRoute: AppRoutes.tasbihCounter,
+          theme: ThemeData(extensions: const [AppPalette.light]),
+          getPages: AppPages.pages,
         ),
       );
       await tester.pumpAndSettle();
@@ -215,24 +253,8 @@ void main() {
       await tester.tap(historyFinder.first);
       await tester.pumpAndSettle();
 
-      // Verify bottom sheet opened
-      expect(find.text('Recitation Statistics'), findsWidgets);
-      expect(tester.takeException(), isNull);
-
-      // Verify Time Filter segments render and can be tapped
-      final last7Days = find.text('Last 7 Days');
-      if (last7Days.evaluate().isNotEmpty) {
-        await tester.tap(last7Days);
-        await tester.pumpAndSettle();
-      }
-
-      // Verify Category filter chips render
-      final prayerCat = find.text('After Prayer');
-      if (prayerCat.evaluate().isNotEmpty) {
-        await tester.tap(prayerCat.first);
-        await tester.pumpAndSettle();
-      }
-
+      // Verify navigated to dedicated TasbihHistoryView page
+      expect(find.byType(TasbihHistoryView), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
