@@ -98,7 +98,7 @@ class BalanceCard extends StatelessWidget {
 
           // Main Card Content
           Padding(
-            padding: const EdgeInsets.all(22),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -106,34 +106,41 @@ class BalanceCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.white.withOpacity(0.15)),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.account_balance_wallet_outlined,
-                            size: 13,
-                            color: Colors.white.withOpacity(0.95),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            'Balance this month'.tr,
-                            style: TextStyle(
-                              fontSize: 13.5,
-                              fontWeight: FontWeight.w600,
+                    Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: Colors.white.withOpacity(0.15)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.account_balance_wallet_outlined,
+                              size: 13,
                               color: Colors.white.withOpacity(0.95),
-                              letterSpacing: 0.2,
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                'Balance this month'.tr,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white.withOpacity(0.95),
+                                  letterSpacing: 0.2,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
+                    const SizedBox(width: 8),
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -221,23 +228,25 @@ class BalanceCard extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              hidden ? '${AppConstants.currency} ••••••' : Fmt.money(net),
-                              style: TextStyle(
-                                fontSize: hidden ? 34 : 38,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: hidden ? 2.0 : -0.8,
-                                color: Colors.white,
-                                shadows: const [
-                                  Shadow(
-                                    color: Colors.black26,
-                                    blurRadius: 10,
-                                    offset: Offset(0, 3),
-                                  ),
-                                ],
+                          Flexible(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                hidden ? '${AppConstants.currency} ••••••' : Fmt.money(net),
+                                style: TextStyle(
+                                  fontSize: hidden ? 34 : 38,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: hidden ? 2.0 : -0.8,
+                                  color: Colors.white,
+                                  shadows: const [
+                                    Shadow(
+                                      color: Colors.black26,
+                                      blurRadius: 10,
+                                      offset: Offset(0, 3),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -309,22 +318,32 @@ class BalanceCard extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              'Monthly budget (0 = none)'.tr,
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.white.withOpacity(0.88),
+                            Flexible(
+                              child: Text(
+                                'Monthly budget (0 = none)'.tr,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.white.withOpacity(0.88),
+                                ),
                               ),
                             ),
-                            Text(
-                              over
-                                  ? '${'Over budget by'.tr} ${Fmt.money(expense - budget)}'
-                                  : '${Fmt.money(budget - expense)} ${'left of'.tr} ${Fmt.money(budget)}',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: over ? const Color(0xFFFF9488) : const Color(0xFF5DFFB2),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                over
+                                    ? '${'Over budget by'.tr} ${Fmt.money(expense - budget)}'
+                                    : '${Fmt.money(budget - expense)} ${'left of'.tr} ${Fmt.money(budget)}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.end,
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: over ? const Color(0xFFFF9488) : const Color(0xFF5DFFB2),
+                                ),
                               ),
                             ),
                           ],
