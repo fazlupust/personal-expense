@@ -608,6 +608,9 @@ class PrayerTasbihView extends StatelessWidget {
           appBar: CustomAppBar(
             title: 'Prayer & Tasbih'.tr,
             showBackButton: true,
+            showLanguageToggle: false,
+            showThemeToggle: false,
+            showLogout: false,
             actions: [
               if (c.activeTab == 1) ...[
                 IconButton(

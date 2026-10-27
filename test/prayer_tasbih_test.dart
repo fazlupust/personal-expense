@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
+import 'package:personal_expense/app/core/localization/app_translations.dart';
 import 'package:personal_expense/app/core/theme/app_theme.dart';
 import 'package:personal_expense/app/features/prayer_tasbih/controllers/prayer_tasbih_controller.dart';
 import 'package:personal_expense/app/features/prayer_tasbih/views/prayer_tasbih_view.dart';
@@ -22,6 +23,7 @@ void main() {
       Get.delete<PrayerTasbihController>();
     }
     Get.reset();
+    Get.locale = const Locale('en', 'US');
   });
 
   group('PrayerTasbihController Tests', () {
@@ -194,6 +196,27 @@ void main() {
 
       final controller = PrayerTasbihController.to;
       expect(controller.currentCount, equals(1));
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('TasbihCounterView renders cleanly with Bengali locale and 360x800 size without AppBar overflow', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 3.0; // 360x800 dp (compact phone screen)
+
+      Get.put(PrayerTasbihController());
+
+
+      await tester.pumpWidget(
+        GetMaterialApp(
+          translations: AppTranslations(),
+          locale: const Locale('bn', 'BD'),
+          theme: ThemeData(extensions: const [AppPalette.light]),
+          home: const TasbihCounterView(),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(TasbihCounterView), findsOneWidget);
+      expect(find.text('سُبْحَانَ اللَّهِ'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 

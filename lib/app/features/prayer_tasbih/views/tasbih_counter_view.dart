@@ -461,7 +461,7 @@ class TasbihCounterView extends StatelessWidget {
         final zikir = c.selectedZikir;
 
         final content = SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -498,596 +498,618 @@ class TasbihCounterView extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
               ],
-                  // Zikir Selector Row (Browse All Button + Horizontal List)
-                  Row(
-                    children: [
-                      // Browse All Button
-                      InkWell(
+              // Zikir Selector Row (Browse All Button + Horizontal List)
+              Row(
+                children: [
+                  // Browse All Button
+                  InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () => _showAllZikirsSheet(context, c, p),
+                    child: Container(
+                      height: 34,
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      decoration: BoxDecoration(
+                        color: p.card,
                         borderRadius: BorderRadius.circular(12),
-                        onTap: () => _showAllZikirsSheet(context, c, p),
-                        child: Container(
-                          height: 40,
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          decoration: BoxDecoration(
-                            color: p.card,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: p.income.withOpacity(0.4)),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.auto_stories_rounded, size: 16, color: p.income),
-                              const SizedBox(width: 4),
-                              Text(
-                                'All'.tr,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  color: p.income,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        border: Border.all(color: p.income.withOpacity(0.4)),
                       ),
-                      const SizedBox(width: 8),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.auto_stories_rounded, size: 15, color: p.income),
+                          const SizedBox(width: 4),
+                          Text(
+                            'All'.tr,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: p.income,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
 
-                      // Horizontal Scrollable Chips
-                      Expanded(
-                        child: SizedBox(
-                          height: 40,
-                          child: ListView.separated(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: c.allZikirs.length,
-                            separatorBuilder: (_, __) => const SizedBox(width: 8),
-                            itemBuilder: (ctx, i) {
-                              final item = c.allZikirs[i];
-                              final isSelected = item.id == zikir.id;
-                              final isBn = Get.locale?.languageCode == 'bn';
-                              final title = isBn ? item.titleBn : item.titleEn;
+                  // Horizontal Scrollable Chips
+                  Expanded(
+                    child: SizedBox(
+                      height: 34,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: c.allZikirs.length,
+                        separatorBuilder: (_, __) => const SizedBox(width: 6),
+                        itemBuilder: (ctx, i) {
+                          final item = c.allZikirs[i];
+                          final isSelected = item.id == zikir.id;
+                          final isBn = Get.locale?.languageCode == 'bn';
+                          final title = isBn ? item.titleBn : item.titleEn;
 
-                              return Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  borderRadius: BorderRadius.circular(20),
-                                  onTap: () => c.selectZikir(item),
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 200),
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                    decoration: BoxDecoration(
-                                      color: isSelected ? p.income : p.card,
-                                      borderRadius: BorderRadius.circular(20),
-                                      border: Border.all(
-                                        color: isSelected ? p.income : p.line,
-                                        width: 1.2,
-                                      ),
-                                      boxShadow: isSelected
-                                          ? [
-                                              BoxShadow(
-                                                color: p.income.withOpacity(0.28),
-                                                blurRadius: 8,
-                                                offset: const Offset(0, 2),
-                                              ),
-                                            ]
-                                          : null,
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        title,
-                                        style: TextStyle(
-                                          fontSize: 12.5,
-                                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                                          color: isSelected ? Colors.white : p.ink,
-                                        ),
-                                      ),
+                          return Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(17),
+                              onTap: () => c.selectZikir(item),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: isSelected ? p.income : p.card,
+                                  borderRadius: BorderRadius.circular(17),
+                                  border: Border.all(
+                                    color: isSelected ? p.income : p.line,
+                                    width: 1.1,
+                                  ),
+                                  boxShadow: isSelected
+                                      ? [
+                                          BoxShadow(
+                                            color: p.income.withOpacity(0.25),
+                                            blurRadius: 6,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ]
+                                      : null,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    title,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                                      color: isSelected ? Colors.white : p.ink,
                                     ),
                                   ),
                                 ),
-                              );
-                            },
-                          ),
-                        ),
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  // Selected Zikir Card (Arabic, Pronunciation, Meaning, Virtue)
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: p.card,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: p.line),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.04),
-                          blurRadius: 10,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 10),
+
+              // Selected Zikir Card (Arabic, Pronunciation, Meaning, Virtue)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: p.card,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: p.line),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.03),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Arabic
+                    Text(
+                      zikir.arabic,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 21,
+                        fontWeight: FontWeight.w700,
+                        color: p.income,
+                        height: 1.3,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    // Bengali Pronunciation & Meaning
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 6,
+                      runSpacing: 2,
                       children: [
-                        // Arabic
-                        Text(
-                          zikir.arabic,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w700,
-                            color: p.income,
-                            height: 1.5,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        // Bengali Pronunciation
                         Text(
                           zikir.titleBn,
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 14.5,
                             fontWeight: FontWeight.w700,
                             color: p.ink,
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        // Meaning
+                        Text('•', style: TextStyle(color: p.mute, fontSize: 11)),
                         Text(
                           Get.locale?.languageCode == 'bn' ? zikir.meaningBn : zikir.meaningEn,
                           textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 12.5,
+                            fontSize: 12,
                             fontWeight: FontWeight.w500,
                             color: p.mute,
-                            height: 1.3,
                           ),
                         ),
-                        if (zikir.benefitBn != null && zikir.benefitBn!.isNotEmpty) ...[
-                          const SizedBox(height: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: p.income.withOpacity(0.08),
-                              borderRadius: BorderRadius.circular(8),
+                      ],
+                    ),
+                    if (zikir.benefitBn != null && zikir.benefitBn!.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
+                        decoration: BoxDecoration(
+                          color: p.income.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.stars_rounded, size: 13, color: p.income),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                zikir.benefitBn!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: p.income,
+                                ),
+                              ),
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.stars_rounded, size: 14, color: p.income),
-                                const SizedBox(width: 5),
-                                Flexible(
-                                  child: Text(
-                                    zikir.benefitBn!,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontSize: 11.5,
-                                      fontWeight: FontWeight.w600,
-                                      color: p.income,
+                          ],
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 6),
+                    // Compact Per-Zikir Recitation Count & Filter Shortcut
+                    InkWell(
+                      borderRadius: BorderRadius.circular(8),
+                      onTap: () => _showTasbihAnalyticsSheet(context, c, p),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: p.income.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: p.income.withOpacity(0.2)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.query_stats_rounded, size: 14, color: p.income),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                '${c.getZikirTodayCount(zikir.id)} ${'Times'.tr} (${'Today'.tr}) · ${c.getZikirLifetimeCount(zikir.id)} ${'Times'.tr} (${'All Time'.tr})',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: p.income,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Icon(Icons.chevron_right_rounded, size: 14, color: p.income),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // Interactive Digital Tasbih Counter Dial
+              Center(
+                child: GestureDetector(
+                  onTap: c.increment,
+                  behavior: HitTestBehavior.opaque,
+                  child: Container(
+                    width: 200,
+                    height: 200,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: p.card,
+                      boxShadow: [
+                        BoxShadow(
+                          color: p.income.withOpacity(0.18),
+                          blurRadius: 20,
+                          offset: const Offset(0, 6),
+                        ),
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Outer Circular Progress Ring
+                        SizedBox(
+                          width: 186,
+                          height: 186,
+                          child: CircularProgressIndicator(
+                            value: target > 0 ? progress : 1.0,
+                            strokeWidth: 9,
+                            backgroundColor: p.line,
+                            valueColor: AlwaysStoppedAnimation<Color>(p.income),
+                            strokeCap: StrokeCap.round,
+                          ),
+                        ),
+
+                        // Inside Dial Info & Touch Surface
+                        Container(
+                          width: 164,
+                          height: 164,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: RadialGradient(
+                              colors: [
+                                p.income.withOpacity(0.12),
+                                p.card,
+                              ],
+                              center: Alignment.center,
+                              radius: 0.8,
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // Target Badge (Tap to change target)
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(10),
+                                  onTap: () => _showTargetSelector(context, c, p),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: p.income.withOpacity(0.15),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          target > 0 ? 'Target: $target'.tr : 'Target: ∞'.tr,
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w700,
+                                            color: p.income,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 3),
+                                        Icon(Icons.arrow_drop_down, size: 14, color: p.income),
+                                      ],
                                     ),
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
-                        ],
-                        const SizedBox(height: 10),
-                        // Per-Zikir Recitation Count & Filter Shortcut
-                        InkWell(
-                          borderRadius: BorderRadius.circular(10),
-                          onTap: () => _showTasbihAnalyticsSheet(context, c, p),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                            decoration: BoxDecoration(
-                              color: p.income.withOpacity(0.08),
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: p.income.withOpacity(0.25)),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(Icons.query_stats_rounded, size: 16, color: p.income),
-                                const SizedBox(width: 8),
-                                Expanded(
+                              ),
+                              const SizedBox(height: 4),
+
+                              // Huge Counter Number
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10),
                                   child: Text(
-                                    '${'This Zikir Recited'.tr}: ${c.getZikirTodayCount(zikir.id)} ${'Times'.tr} (${'Today'.tr}) · ${c.getZikirLifetimeCount(zikir.id)} ${'Times'.tr} (${'All Time'.tr})',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                                    NumberFormat('#,###').format(current),
                                     style: TextStyle(
-                                      fontSize: 11.5,
+                                      fontSize: 48,
+                                      fontWeight: FontWeight.w900,
+                                      color: p.ink,
+                                      letterSpacing: -1,
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              // Completed cycles indicator
+                              if (c.completedCycles > 0) ...[
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    '${'Round:'.tr} ${c.completedCycles}',
+                                    style: TextStyle(
+                                      fontSize: 11,
                                       fontWeight: FontWeight.w700,
                                       color: p.income,
                                     ),
                                   ),
                                 ),
-                                const SizedBox(width: 4),
-                                Icon(Icons.chevron_right_rounded, size: 16, color: p.income),
                               ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                              const SizedBox(height: 2),
 
-                  const SizedBox(height: 20),
-
-                  // Giant Interactive Digital Tasbih Counter Dial
-                  Center(
-                    child: GestureDetector(
-                      onTap: c.increment,
-                      behavior: HitTestBehavior.opaque,
-                      child: Container(
-                        width: 220,
-                        height: 220,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: p.card,
-                          boxShadow: [
-                            BoxShadow(
-                              color: p.income.withOpacity(0.2),
-                              blurRadius: 24,
-                              offset: const Offset(0, 8),
-                            ),
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.06),
-                              blurRadius: 10,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            // Outer Circular Progress Ring
-                            SizedBox(
-                              width: 204,
-                              height: 204,
-                              child: CircularProgressIndicator(
-                                value: target > 0 ? progress : 1.0,
-                                strokeWidth: 10,
-                                backgroundColor: p.line,
-                                valueColor: AlwaysStoppedAnimation<Color>(p.income),
-                                strokeCap: StrokeCap.round,
-                              ),
-                            ),
-
-                            // Inside Dial Info & Touch Surface
-                            Container(
-                              width: 175,
-                              height: 175,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                gradient: RadialGradient(
-                                  colors: [
-                                    p.income.withOpacity(0.12),
-                                    p.card,
-                                  ],
-                                  center: Alignment.center,
-                                  radius: 0.8,
-                                ),
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  // Target Badge (Tap to change target)
-                                  InkWell(
-                                    borderRadius: BorderRadius.circular(10),
-                                    onTap: () => _showTargetSelector(context, c, p),
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                      decoration: BoxDecoration(
-                                        color: p.income.withOpacity(0.15),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            target > 0 ? 'Target: $target'.tr : 'Target: ∞'.tr,
-                                            style: TextStyle(
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.w700,
-                                              color: p.income,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 3),
-                                          Icon(Icons.arrow_drop_down, size: 14, color: p.income),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-
-                                  // Huge Counter Number
-                                  FittedBox(
-                                    fit: BoxFit.scaleDown,
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                                      child: Text(
-                                        NumberFormat('#,###').format(current),
-                                        style: TextStyle(
-                                          fontSize: 54,
-                                          fontWeight: FontWeight.w900,
-                                          color: p.ink,
-                                          letterSpacing: -1,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-
-                                  // Completed cycles indicator
-                                  if (c.completedCycles > 0) ...[
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      '${'Round:'.tr} ${c.completedCycles}',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w700,
-                                        color: p.income,
-                                      ),
-                                    ),
-                                  ],
-                                  const SizedBox(height: 4),
-
-                                  // Tap Hint
-                                  Row(
+                              // Tap Hint (scaled down cleanly in any language)
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                                  child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(Icons.touch_app_rounded, size: 13, color: p.mute),
+                                      Icon(Icons.touch_app_rounded, size: 12, color: p.mute),
                                       const SizedBox(width: 3),
                                       Text(
                                         'Tap to count'.tr,
                                         style: TextStyle(
-                                          fontSize: 11,
+                                          fontSize: 10.5,
                                           fontWeight: FontWeight.w500,
                                           color: p.mute,
                                         ),
                                       ),
                                     ],
                                   ),
-                                ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // Quick Action Buttons (Undo -1, +1 Count, Reset)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Undo -1
+                  IconButton.filledTonal(
+                    onPressed: current > 0 ? c.decrement : null,
+                    icon: const Icon(Icons.remove, size: 20),
+                    tooltip: 'Undo -1'.tr,
+                    style: IconButton.styleFrom(
+                      backgroundColor: p.card,
+                      foregroundColor: p.ink,
+                      side: BorderSide(color: p.line),
+                      padding: const EdgeInsets.all(10),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+
+                  // Large Tap CTA button
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: c.increment,
+                      icon: const Icon(Icons.add_rounded, size: 22),
+                      label: Text(
+                        '+1 ${'Count'.tr}',
+                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                      ),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: p.income,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                     ),
                   ),
+                  const SizedBox(width: 12),
 
-                  const SizedBox(height: 20),
-
-                  // Quick Action Buttons (Undo -1, Reset, Target switch)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Undo -1
-                      IconButton.filledTonal(
-                        onPressed: current > 0 ? c.decrement : null,
-                        icon: const Icon(Icons.remove, size: 20),
-                        tooltip: 'Undo -1'.tr,
-                        style: IconButton.styleFrom(
-                          backgroundColor: p.card,
-                          foregroundColor: p.ink,
-                          side: BorderSide(color: p.line),
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-
-                      // Large Tap CTA button
-                      Expanded(
-                        child: FilledButton.icon(
-                          onPressed: c.increment,
-                          icon: const Icon(Icons.add_rounded, size: 22),
-                          label: Text(
-                            '+1 ${'Count'.tr}',
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                          ),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: p.income,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-
-                      // Reset
-                      IconButton.filledTonal(
-                        onPressed: () => _showResetConfirmDialog(context, c, p),
-                        icon: const Icon(Icons.restart_alt_rounded, size: 20),
-                        tooltip: 'Reset'.tr,
-                        style: IconButton.styleFrom(
-                          backgroundColor: p.card,
-                          foregroundColor: p.expense,
-                          side: BorderSide(color: p.line),
-                        ),
-                      ),
-                    ],
+                  // Reset
+                  IconButton.filledTonal(
+                    onPressed: () => _showResetConfirmDialog(context, c, p),
+                    icon: const Icon(Icons.restart_alt_rounded, size: 20),
+                    tooltip: 'Reset'.tr,
+                    style: IconButton.styleFrom(
+                      backgroundColor: p.card,
+                      foregroundColor: p.expense,
+                      side: BorderSide(color: p.line),
+                      padding: const EdgeInsets.all(10),
+                    ),
                   ),
+                ],
+              ),
 
-                  const SizedBox(height: 20),
+              const SizedBox(height: 14),
 
-                  // Today & Lifetime Statistics Cards
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(
-                            color: p.card,
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: p.line),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(Icons.today_rounded, size: 16, color: p.income),
-                                  const SizedBox(width: 6),
-                                  Flexible(
-                                    child: Text(
-                                      'Today\'s Count'.tr,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: p.mute,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                NumberFormat('#,###').format(c.todayTotal),
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w800,
-                                  color: p.ink,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(
-                            color: p.card,
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: p.line),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(Icons.all_inclusive_rounded, size: 16, color: p.income),
-                                  const SizedBox(width: 6),
-                                  Flexible(
-                                    child: Text(
-                                      'Lifetime Total'.tr,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: p.mute,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                NumberFormat('#,###').format(c.lifetimeTotal),
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w800,
-                                  color: p.ink,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // Tasbih History & Filter Action Card
-                  InkWell(
-                    borderRadius: BorderRadius.circular(14),
-                    onTap: () => _showTasbihAnalyticsSheet(context, c, p),
+              // Today & Lifetime Statistics Cards
+              Row(
+                children: [
+                  Expanded(
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: p.card,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: p.income.withOpacity(0.3)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.03),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: p.line),
                       ),
-                      child: Row(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: p.income.withOpacity(0.12),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Icon(Icons.query_stats_rounded, size: 20, color: p.income),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Tasbih History & Filter'.tr,
+                          Row(
+                            children: [
+                              Icon(Icons.today_rounded, size: 15, color: p.income),
+                              const SizedBox(width: 5),
+                              Flexible(
+                                child: Text(
+                                  'Today\'s Count'.tr,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    fontSize: 13.5,
-                                    fontWeight: FontWeight.w700,
-                                    color: p.ink,
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: p.mute,
                                   ),
                                 ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'Recitation Statistics'.tr,
-                                  style: TextStyle(fontSize: 11, color: p.mute),
-                                ),
-                              ],
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            NumberFormat('#,###').format(c.todayTotal),
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              color: p.ink,
                             ),
                           ),
-                          Icon(Icons.arrow_forward_ios_rounded, size: 14, color: p.income),
                         ],
                       ),
                     ),
                   ),
-
-                  const SizedBox(height: 14),
-
-                  // Quick switch to Prayer Times
-                  OutlinedButton.icon(
-                    onPressed: () {
-                      if (isEmbedded) {
-                        c.setActiveTab(0);
-                      } else {
-                        Get.back();
-                      }
-                    },
-                    icon: Icon(Icons.access_time_filled_rounded, size: 18, color: p.income),
-                    label: Text(
-                      'View Prayer Times Schedule'.tr,
-                      style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: p.income),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: p.income.withOpacity(0.4)),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: p.card,
                         borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: p.line),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.all_inclusive_rounded, size: 15, color: p.income),
+                              const SizedBox(width: 5),
+                              Flexible(
+                                child: Text(
+                                  'Lifetime Total'.tr,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: p.mute,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            NumberFormat('#,###').format(c.lifetimeTotal),
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              color: p.ink,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ],
               ),
-            );
+
+              const SizedBox(height: 10),
+
+              // Tasbih History & Filter Action Card
+              InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () => _showTasbihAnalyticsSheet(context, c, p),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: p.card,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: p.income.withOpacity(0.3)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.02),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(7),
+                        decoration: BoxDecoration(
+                          color: p.income.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(Icons.query_stats_rounded, size: 18, color: p.income),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Tasbih History & Filter'.tr,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: p.ink,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Recitation Statistics'.tr,
+                              style: TextStyle(fontSize: 10.5, color: p.mute),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(Icons.arrow_forward_ios_rounded, size: 13, color: p.income),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              // Quick switch to Prayer Times
+              OutlinedButton.icon(
+                onPressed: () {
+                  if (isEmbedded) {
+                    c.setActiveTab(0);
+                  } else {
+                    Get.back();
+                  }
+                },
+                icon: Icon(Icons.access_time_filled_rounded, size: 16, color: p.income),
+                label: Text(
+                  'View Prayer Times Schedule'.tr,
+                  style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: p.income),
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: p.income.withOpacity(0.4)),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
 
         if (isEmbedded) {
           return content;
@@ -1098,18 +1120,15 @@ class TasbihCounterView extends StatelessWidget {
           appBar: CustomAppBar(
             title: 'Digital Tasbih'.tr,
             showBackButton: true,
+            showLanguageToggle: false,
+            showThemeToggle: false,
+            showLogout: false,
             actions: [
               // Tasbih History & Analytics
               IconButton(
-                icon: Icon(Icons.query_stats_rounded, size: 22, color: p.income),
+                icon: Icon(Icons.query_stats_rounded, size: 21, color: p.income),
                 tooltip: 'Tasbih History & Filter'.tr,
                 onPressed: () => _showTasbihAnalyticsSheet(context, c, p),
-              ),
-              // All Zikirs Catalog Sheet
-              IconButton(
-                icon: Icon(Icons.auto_stories_rounded, size: 20, color: p.income),
-                tooltip: 'All Zikirs & Duas'.tr,
-                onPressed: () => _showAllZikirsSheet(context, c, p),
               ),
               // Vibration toggle
               IconButton(
@@ -1123,7 +1142,7 @@ class TasbihCounterView extends StatelessWidget {
               ),
               // Reset button
               IconButton(
-                icon: Icon(Icons.refresh_rounded, size: 22, color: p.expense),
+                icon: Icon(Icons.refresh_rounded, size: 21, color: p.expense),
                 tooltip: 'Reset'.tr,
                 onPressed: () => _showResetConfirmDialog(context, c, p),
               ),
