@@ -47,7 +47,7 @@ class CategoriesController extends GetxController {
         _sub?.cancel();
         if (user != null) {
           service.seedDefaultsIfEmpty();
-          _sub = service.streamCategories().listen((list) {
+          _sub = service.streamCategories(user.uid).listen((list) {
             if (list.isNotEmpty) {
               categories = list;
               update();
@@ -55,12 +55,15 @@ class CategoriesController extends GetxController {
           }, onError: (err) {
             debugPrint('Categories stream error: $err');
           });
+        } else {
+          categories = List.of(AppConstants.defaultCategories);
+          update();
         }
       });
 
       if (auth.isLoggedIn) {
         service.seedDefaultsIfEmpty();
-        _sub = service.streamCategories().listen((list) {
+        _sub = service.streamCategories(auth.currentUid).listen((list) {
           if (list.isNotEmpty) {
             categories = list;
             update();

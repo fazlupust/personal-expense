@@ -78,14 +78,16 @@ class _BudgetManagementSheetState extends State<BudgetManagementSheet> {
     s.setCategoryBudgets(newCatBudgets);
 
     Navigator.of(context).pop();
-    if (Get.context != null) {
-      Get.snackbar(
-        AppConstants.appName.tr,
-        'Budgets saved successfully'.tr,
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 2),
-      );
-    }
+    Future.delayed(const Duration(milliseconds: 250), () {
+      if (Get.context != null) {
+        Get.snackbar(
+          AppConstants.appName.tr,
+          'Budgets saved successfully'.tr,
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 2),
+        );
+      }
+    });
   }
 
   @override
@@ -236,7 +238,7 @@ class _BudgetManagementSheetState extends State<BudgetManagementSheet> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Expanded(
+                      Flexible(
                         child: Text(
                           'Category Budgets'.tr,
                           maxLines: 1,
@@ -245,11 +247,13 @@ class _BudgetManagementSheetState extends State<BudgetManagementSheet> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Text(
-                        'Set budget per category'.tr,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 12, color: p.mute),
+                      Flexible(
+                        child: Text(
+                          'Set budget per category'.tr,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: 12, color: p.mute),
+                        ),
                       ),
                     ],
                   ),

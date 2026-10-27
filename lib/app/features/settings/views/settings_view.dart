@@ -403,47 +403,52 @@ class _DeveloperAppUsersCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Header
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(7),
-                      decoration: BoxDecoration(
-                        color: p.income.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(Icons.people_alt_rounded, color: p.income, size: 20),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Registered App Users'.tr,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: p.ink,
-                        ),
-                      ),
-                    ),
-                    if (users.isNotEmpty)
+              // Header (Tapping opens full Registered Users Page)
+              InkWell(
+                onTap: () => Get.toNamed(AppRoutes.registeredUsers),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  child: Row(
+                    children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        padding: const EdgeInsets.all(7),
                         decoration: BoxDecoration(
-                          color: p.income.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(12),
+                          color: p.income.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(8),
                         ),
+                        child: Icon(Icons.people_alt_rounded, color: p.income, size: 20),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
                         child: Text(
-                          '${users.length}',
+                          'Registered App Users'.tr,
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 15,
                             fontWeight: FontWeight.w700,
-                            color: p.income,
+                            color: p.ink,
                           ),
                         ),
                       ),
-                  ],
+                      if (users.isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: p.income.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${users.length}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: p.income,
+                            ),
+                          ),
+                        ),
+                      const SizedBox(width: 6),
+                      Icon(Icons.chevron_right_rounded, color: p.mute, size: 20),
+                    ],
+                  ),
                 ),
               ),
               Divider(height: 1, color: p.line),
@@ -482,10 +487,12 @@ class _DeveloperAppUsersCard extends StatelessWidget {
                     final desig = u.displayDesignation(isBn);
                     final phone = u.phone ?? '';
 
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      child: Row(
-                        children: [
+                    return InkWell(
+                      onTap: () => Get.toNamed(AppRoutes.registeredUsers),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        child: Row(
+                          children: [
                           // Avatar
                           CircleAvatar(
                             radius: 20,
@@ -568,8 +575,9 @@ class _DeveloperAppUsersCard extends StatelessWidget {
                           ),
                         ],
                       ),
-                    );
-                  },
+                    ),
+                  );
+                },
                 ),
             ],
           ),

@@ -7,4 +7,5 @@ abstract class AppRoutes {
   static const String generateReport = '/generate-report';
   static const String login = '/login';
   static const String register = '/register';
+  static const String registeredUsers = '/registered-users';
 }

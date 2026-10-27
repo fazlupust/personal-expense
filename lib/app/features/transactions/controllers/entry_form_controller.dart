@@ -6,6 +6,7 @@ import '../../../core/utils/formatters.dart';
 import '../../../data/models/category_model.dart';
 import '../../../data/models/entry_type.dart';
 import '../../../data/models/transaction_model.dart';
+import '../../../data/services/auth_service.dart';
 import '../../../data/services/voice_service.dart';
 import '../../categories/controllers/categories_controller.dart';
 import '../../settings/controllers/settings_controller.dart';
@@ -201,32 +202,39 @@ class EntryFormController extends GetxController {
       final totalExceeded = totalBudget > 0 && currentTotalSpent > totalBudget;
 
       if (catExceeded && totalExceeded) {
-        _notifyBudgetAlert(
-          title: '⚠️ Budget Limits Exceeded!'.tr,
-          message:
-              '${'Category'.tr} "${catName.tr}" & ${'Total monthly budget'.tr} ${'have both been exceeded!'.tr}',
-        );
+        final alertTitle = '⚠️ Budget Limits Exceeded!'.tr;
+        final alertMessage =
+            '${'Category'.tr} "${catName.tr}" & ${'Total monthly budget'.tr} ${'have both been exceeded!'.tr} (${'Spent'.tr}: ${AppConstants.currency}${Fmt.money(currentCatSpent)} / ${'Budget'.tr}: ${AppConstants.currency}${Fmt.money(catBudget)})';
+        Future.delayed(const Duration(milliseconds: 350), () {
+          _notifyBudgetAlert(title: alertTitle, message: alertMessage);
+        });
       } else if (catExceeded) {
         final over = currentCatSpent - catBudget;
-        _notifyBudgetAlert(
-          title: '⚠️ Category Budget Exceeded!'.tr,
-          message:
-              '${'Budget for'.tr} "${catName.tr}" ${'exceeded by'.tr} ${AppConstants.currency}${Fmt.money(over)} (${'Spent'.tr}: ${AppConstants.currency}${Fmt.money(currentCatSpent)} / ${'Budget'.tr}: ${AppConstants.currency}${Fmt.money(catBudget)})',
-        );
+        final alertTitle = '⚠️ Category Budget Exceeded!'.tr;
+        final alertMessage =
+            '${'Budget for'.tr} "${catName.tr}" ${'exceeded by'.tr} ${AppConstants.currency}${Fmt.money(over)} (${'Spent'.tr}: ${AppConstants.currency}${Fmt.money(currentCatSpent)} / ${'Budget'.tr}: ${AppConstants.currency}${Fmt.money(catBudget)})';
+        Future.delayed(const Duration(milliseconds: 350), () {
+          _notifyBudgetAlert(title: alertTitle, message: alertMessage);
+        });
       } else if (totalExceeded) {
         final over = currentTotalSpent - totalBudget;
-        _notifyBudgetAlert(
-          title: '⚠️ Total Monthly Budget Exceeded!'.tr,
-          message:
-              '${'Total monthly budget exceeded by'.tr} ${AppConstants.currency}${Fmt.money(over)} (${'Spent'.tr}: ${AppConstants.currency}${Fmt.money(currentTotalSpent)} / ${'Budget'.tr}: ${AppConstants.currency}${Fmt.money(totalBudget)})',
-        );
+        final alertTitle = '⚠️ Total Monthly Budget Exceeded!'.tr;
+        final alertMessage =
+            '${'Total monthly budget exceeded by'.tr} ${AppConstants.currency}${Fmt.money(over)} (${'Spent'.tr}: ${AppConstants.currency}${Fmt.money(currentTotalSpent)} / ${'Budget'.tr}: ${AppConstants.currency}${Fmt.money(totalBudget)})';
+        Future.delayed(const Duration(milliseconds: 350), () {
+          _notifyBudgetAlert(title: alertTitle, message: alertMessage);
+        });
       }
     }
+
+    final effectiveUid = (existing != null && existing!.userId.isNotEmpty)
+        ? existing!.userId
+        : (Get.isRegistered<AuthService>() ? (Get.find<AuthService>().currentUid ?? '') : '');
 
     txCtrl.save(
       TransactionModel(
         id: existing?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
-        userId: existing?.userId ?? '',
+        userId: effectiveUid,
         categoryId: catId,
         categoryNameBn: catNameBn,
         categoryNameEn: catNameEn,

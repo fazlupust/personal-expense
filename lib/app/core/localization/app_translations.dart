@@ -311,8 +311,13 @@ class AppTranslations extends Translations {
     'have both been exceeded!': 'উভয় বাজেটই অতিক্রম করেছে!',
     'have exceeded their limits!': 'তাদের নির্ধারিত সীমা অতিক্রম করেছে!',
     '1 category budget exceeded': '১টি খাতের বাজেট সীমা অতিক্রম করেছে',
-    'categories budget exceeded': 'টি খাতের বাজেট সীমা অতিক্রম করেছে',
     'budget exceeded': 'বাজেট অতিক্রম করেছে',
     'View / Manage': 'বাজেট দেখুন',
+    'Alert': 'সতর্কতা',
+    'Spent:': 'খরচ হয়েছে:',
+    'Current Spent:': 'বর্তমান খরচ:',
+    'Set budget per category': 'প্রতিটি খাতের বাজেট নির্ধারণ করুন',
+    'over': 'অতিরিক্ত',
+    '0 (No budget limit)': '০ (কোনো বাজেট সীমা নেই)',
   };
 }

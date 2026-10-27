@@ -5,9 +5,12 @@ import 'package:personal_expense/app/data/models/entry_type.dart';
 import 'package:personal_expense/app/data/models/note_model.dart';
 import 'package:personal_expense/app/data/models/user_model.dart';
 import 'package:personal_expense/app/data/services/app_update_service.dart';
+import 'package:get/get.dart';
 import 'package:personal_expense/app/features/categories/controllers/categories_controller.dart';
 import 'package:personal_expense/app/features/notes/controllers/notes_controller.dart';
 import 'package:personal_expense/app/features/settings/controllers/settings_controller.dart';
+import 'package:personal_expense/app/features/transactions/controllers/entry_form_controller.dart';
+import 'package:personal_expense/app/features/transactions/controllers/transactions_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -559,6 +562,80 @@ void main() {
       expect(normalUser.displayName(true), 'সাধারণ ইউজার');
       expect(normalUser.displayDesignation(true), 'হিসাবরক্ষক');
       expect(normalUser.phone, '01811111111');
+    });
+
+    test('User data isolation: User A and User B have completely independent budgets', () async {
+      final prefs = await SharedPreferences.getInstance();
+
+      // User A saves their budget
+      final userASettings = SettingsController(prefs);
+      userASettings.loadForUserForTesting('user_A');
+      userASettings.setTotalBudget(10000);
+      userASettings.setCategoryBudget('Food', 3000);
+
+      expect(userASettings.budget, 10000);
+      expect(userASettings.getCategoryBudget('Food'), 3000);
+
+      // User B logs in and should NOT see User A's budgets
+      final userBSettings = SettingsController(prefs);
+      userBSettings.loadForUserForTesting('user_B');
+      expect(userBSettings.budget, 0);
+      expect(userBSettings.getCategoryBudget('Food'), 0);
+
+      // User B sets their own budget
+      userBSettings.setTotalBudget(25000);
+      userBSettings.setCategoryBudget('Food', 8000);
+
+      expect(userBSettings.budget, 25000);
+      expect(userBSettings.getCategoryBudget('Food'), 8000);
+
+      // Reload User A and verify User A's budget is intact and unmodified by User B
+      final reloadA = SettingsController(prefs);
+      reloadA.loadForUserForTesting('user_A');
+      expect(reloadA.budget, 10000);
+      expect(reloadA.getCategoryBudget('Food'), 3000);
+
+      userASettings.dispose();
+      userBSettings.dispose();
+      reloadA.dispose();
+    });
+
+    test('Budget Alert does not block user: user can spend 20 tk with 10 tk budget', () async {
+      final prefs = await SharedPreferences.getInstance();
+      final settings = SettingsController(prefs);
+      Get.put<SettingsController>(settings);
+      settings.setCategoryBudget('Food', 10);
+      settings.setTotalBudget(10);
+
+      final txCtrl = TransactionsController();
+      Get.put<TransactionsController>(txCtrl);
+
+      final catCtrl = CategoriesController();
+      Get.put<CategoriesController>(catCtrl);
+
+      final entryFormCtrl = EntryFormController(null);
+      entryFormCtrl.onInit();
+      entryFormCtrl.type = EntryType.expense;
+      entryFormCtrl.category = 'Food';
+      entryFormCtrl.amountCtrl.text = '20';
+      entryFormCtrl.noteCtrl.text = 'Lunch with 20 tk';
+
+      // Saving should succeed (return true) without blocking
+      final success = entryFormCtrl.save();
+      expect(success, isTrue, reason: 'Expense saving must never be blocked even if budget is exceeded');
+
+      // Verify transaction was added to entries
+      expect(txCtrl.entries.length, 1);
+      expect(txCtrl.entries.first.amount, 20);
+      expect(txCtrl.entries.first.category, 'Food');
+
+      settings.dispose();
+      txCtrl.dispose();
+      catCtrl.dispose();
+      entryFormCtrl.dispose();
+      Get.delete<SettingsController>();
+      Get.delete<TransactionsController>();
+      Get.delete<CategoriesController>();
     });
   });
 }

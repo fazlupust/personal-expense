@@ -14,13 +14,20 @@ class CategoryService extends GetxService {
   CollectionReference<Map<String, dynamic>> get _collection =>
       _db.collection('categories');
 
-  /// Real-time stream of all active categories
-  Stream<List<CategoryModel>> streamCategories() {
+  /// Real-time stream of categories (default categories + user-created categories for current user)
+  Stream<List<CategoryModel>> streamCategories([String? currentUid]) {
     return _collection
         .where('is_active', isEqualTo: true)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs.map((doc) => CategoryModel.fromFirestore(doc)).toList();
+      final list = snapshot.docs.map((doc) => CategoryModel.fromFirestore(doc)).toList();
+      final uid = currentUid ?? (_auth.isLoggedIn ? _auth.currentUid : null);
+      final isDev = _auth.isDeveloper;
+      if (isDev) return list;
+      return list.where((c) {
+        if (c.isDefaultCategory || c.isDefault || c.createdBy.isEmpty) return true;
+        return uid != null && c.createdBy == uid;
+      }).toList();
     }).handleError((e) {
       debugPrint('Categories stream error: $e');
       return <CategoryModel>[];

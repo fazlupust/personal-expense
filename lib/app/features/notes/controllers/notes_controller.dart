@@ -56,29 +56,38 @@ class NotesController extends GetxController {
     super.onClose();
   }
 
-  void _loadCachedNotes() {
+  String _effectiveCacheKey([String? uidOverride]) {
+    final uid = uidOverride ?? (Get.isRegistered<AuthService>() ? (Get.find<AuthService>().currentUid ?? '') : '');
+    return uid.isNotEmpty ? '${_cacheKey}_$uid' : _cacheKey;
+  }
+
+  void _loadCachedNotes([String? uidOverride]) {
     try {
       final p = _prefs;
       if (p == null) return;
-      final raw = p.getString(_cacheKey);
+      final key = _effectiveCacheKey(uidOverride);
+      final raw = p.getString(key);
       if (raw != null && raw.isNotEmpty) {
         final decoded = jsonDecode(raw) as List<dynamic>;
         notes = decoded
             .map((e) => NoteModel.fromJson(Map<String, dynamic>.from(e as Map)))
             .toList();
         notes.sort((a, b) => b.date.compareTo(a.date));
+      } else {
+        notes = [];
       }
     } catch (e) {
       debugPrint('Error loading cached notes: $e');
     }
   }
 
-  void _saveCachedNotes(List<NoteModel> list) {
+  void _saveCachedNotes(List<NoteModel> list, [String? uidOverride]) {
     try {
       final p = _prefs;
       if (p == null) return;
+      final key = _effectiveCacheKey(uidOverride);
       final encoded = jsonEncode(list.map((n) => n.toJson()).toList());
-      p.setString(_cacheKey, encoded);
+      p.setString(key, encoded);
     } catch (e) {
       debugPrint('Error saving cached notes: $e');
     }
@@ -98,9 +107,12 @@ class NotesController extends GetxController {
       ever(auth.firebaseUser, (user) {
         _sub?.cancel();
         if (user != null) {
+          _loadCachedNotes(user.uid);
+          isLoading = notes.isEmpty;
+          update();
           _subscribeToUser(user.uid, service);
         } else {
-          _loadCachedNotes();
+          notes = [];
           isLoading = false;
           update();
         }
@@ -128,13 +140,13 @@ class NotesController extends GetxController {
     _sub = service.streamUserNotes(uid).listen(
       (list) {
         notes = list;
-        _saveCachedNotes(list);
+        _saveCachedNotes(list, uid);
         isLoading = false;
         update();
       },
       onError: (err) {
         debugPrint('Notes stream error: $err');
-        _loadCachedNotes();
+        _loadCachedNotes(uid);
         isLoading = false;
         update();
       },

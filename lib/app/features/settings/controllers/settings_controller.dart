@@ -1,10 +1,12 @@
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/constants/app_constants.dart';
+import '../../../data/services/auth_service.dart';
 
 class SettingsController extends GetxController {
   static SettingsController get to => Get.find<SettingsController>();
@@ -35,12 +37,63 @@ class SettingsController extends GetxController {
     return WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark;
   }
 
+  String? _overrideUid;
+
+  String get _currentUid =>
+      _overrideUid ?? (Get.isRegistered<AuthService>() ? (Get.find<AuthService>().currentUid ?? '') : '');
+
+  String _userPrefsKey(String uid) =>
+      uid.isNotEmpty ? '${AppConstants.prefsSettings}_$uid' : AppConstants.prefsSettings;
+
+  String get _prefsKey => _userPrefsKey(_currentUid);
+
+  void loadForUserForTesting(String uid) {
+    _overrideUid = uid;
+    _load(uid);
+    budgetCtrl.text = budget > 0 ? _plain(budget) : '';
+    nameCtrl.text = name;
+  }
+
   @override
   void onInit() {
     super.onInit();
     _load();
     nameCtrl.text = name;
     budgetCtrl.text = budget > 0 ? _plain(budget) : '';
+    _bindAuth();
+  }
+
+  void _bindAuth() {
+    if (Get.isRegistered<AuthService>()) {
+      final auth = Get.find<AuthService>();
+      ever(auth.firebaseUser, (user) {
+        if (user != null) {
+          _load(user.uid);
+          _syncFromFirestore(user.uid);
+        } else {
+          _resetUserScopedData();
+        }
+        nameCtrl.text = name;
+        budgetCtrl.text = budget > 0 ? _plain(budget) : '';
+        update();
+      });
+      if (auth.currentUid != null && auth.currentUid!.isNotEmpty) {
+        _syncFromFirestore(auth.currentUid!);
+      }
+    }
+  }
+
+  void _resetUserScopedData() {
+    name = '';
+    budget = 0;
+    categoryBudgets = {};
+    nameCtrl.clear();
+    budgetCtrl.clear();
+    showIncome = true;
+    showExpense = true;
+    isBalanceHidden = false;
+    isIncomeHidden = false;
+    isExpenseHidden = false;
   }
 
   @override
@@ -52,8 +105,13 @@ class SettingsController extends GetxController {
 
   String _plain(double v) => v % 1 == 0 ? v.toInt().toString() : v.toString();
 
-  void _load() {
-    final raw = _prefs.getString(AppConstants.prefsSettings);
+  void _load([String? uidOverride]) {
+    final uid = uidOverride ?? _currentUid;
+    final key = _userPrefsKey(uid);
+    var raw = _prefs.getString(key);
+    if (raw == null && uid.isEmpty) {
+      raw = _prefs.getString(AppConstants.prefsSettings);
+    }
     if (raw == null) {
       final sys = WidgetsBinding.instance.platformDispatcher.locale.languageCode;
       langCode = sys == 'bn' ? 'bn' : 'en';
@@ -62,6 +120,7 @@ class SettingsController extends GetxController {
       isIncomeHidden = false;
       showExpense = true;
       isExpenseHidden = false;
+      budget = 0;
       categoryBudgets = {};
       return;
     }
@@ -89,22 +148,89 @@ class SettingsController extends GetxController {
     }
   }
 
-  Future<void> _persist() => _prefs.setString(
-        AppConstants.prefsSettings,
-        jsonEncode({
-          'theme': themeMode.name,
-          'lang': langCode,
-          'name': name,
+  Future<void> _syncFromFirestore(String uid) async {
+    try {
+      final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      if (doc.exists && doc.data() != null) {
+        final data = doc.data()!;
+        bool changed = false;
+        if (data['budget'] is num) {
+          final b = (data['budget'] as num).toDouble();
+          if (b != budget) {
+            budget = b;
+            budgetCtrl.text = budget > 0 ? _plain(budget) : '';
+            changed = true;
+          }
+        }
+        if (data['category_budgets'] is Map) {
+          final bMap = data['category_budgets'] as Map<String, dynamic>;
+          categoryBudgets = bMap.map((k, v) => MapEntry(k, (v as num).toDouble()));
+          changed = true;
+        }
+        if (data['is_balance_hidden'] is bool) {
+          isBalanceHidden = data['is_balance_hidden'] as bool;
+          changed = true;
+        }
+        if (data['is_income_hidden'] is bool) {
+          isIncomeHidden = data['is_income_hidden'] as bool;
+          changed = true;
+        }
+        if (data['is_expense_hidden'] is bool) {
+          isExpenseHidden = data['is_expense_hidden'] as bool;
+          changed = true;
+        }
+        if (changed) {
+          await _prefs.setString(
+            _userPrefsKey(uid),
+            jsonEncode({
+              'theme': themeMode.name,
+              'lang': langCode,
+              'name': name,
+              'budget': budget,
+              'account': defaultAccount,
+              'show_income': showIncome,
+              'show_expense': showExpense,
+              'is_balance_hidden': isBalanceHidden,
+              'is_income_hidden': isIncomeHidden,
+              'is_expense_hidden': isExpenseHidden,
+              'category_budgets': categoryBudgets,
+            }),
+          );
+          update();
+        }
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _persist() async {
+    final payload = jsonEncode({
+      'theme': themeMode.name,
+      'lang': langCode,
+      'name': name,
+      'budget': budget,
+      'account': defaultAccount,
+      'show_income': showIncome,
+      'show_expense': showExpense,
+      'is_balance_hidden': isBalanceHidden,
+      'is_income_hidden': isIncomeHidden,
+      'is_expense_hidden': isExpenseHidden,
+      'category_budgets': categoryBudgets,
+    });
+    await _prefs.setString(_prefsKey, payload);
+
+    final uid = _currentUid;
+    if (uid.isNotEmpty) {
+      try {
+        await FirebaseFirestore.instance.collection('users').doc(uid).set({
           'budget': budget,
-          'account': defaultAccount,
-          'show_income': showIncome,
-          'show_expense': showExpense,
+          'category_budgets': categoryBudgets,
           'is_balance_hidden': isBalanceHidden,
           'is_income_hidden': isIncomeHidden,
           'is_expense_hidden': isExpenseHidden,
-          'category_budgets': categoryBudgets,
-        }),
-      );
+        }, SetOptions(merge: true));
+      } catch (_) {}
+    }
+  }
 
   double getCategoryBudget(String category) => categoryBudgets[category] ?? 0.0;
 
