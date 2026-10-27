@@ -411,6 +411,14 @@ class AppTranslations extends Translations {
     'Tap bar to inspect': 'বারে চাপ দিয়ে খরচ দেখুন',
     'Reset view': 'রিসেট',
     'No expense recorded yet this month': 'চলতি মাসে এখনো কোনো খরচ রেকর্ড করা হয়নি',
+    'Expense Chart': 'খরচের চিত্র',
+    'Last 7 Days': 'বিগত ৭ দিন',
+    'Weekly': 'সাপ্তাহিক',
+    'Last 7 Days Expense': 'বিগত ৭ দিনের দৈনিক খরচ',
+    'Weekly Expense Breakdown': 'সপ্তাহভিত্তিক মোট খরচ',
+    'Highest:': 'সর্বোচ্চ:',
+    'Tap again to reset': 'রিসেট করতে আবার ট্যাপ করুন',
+    'Tap bar to see details': 'বারে ট্যাপ করে বিস্তারিত দেখুন',
   };
 }
 

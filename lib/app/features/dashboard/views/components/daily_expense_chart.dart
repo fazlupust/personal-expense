@@ -24,13 +24,94 @@ class DailyExpenseChart extends StatefulWidget {
 }
 
 class _DailyExpenseChartState extends State<DailyExpenseChart> {
-  int? _selectedDayIndex;
+  // 0 = Last 7 Days (বিগত ৭ দিন), 1 = Weekly Breakdown (সাপ্তাহিক)
+  int _viewMode = 0;
+  int? _selectedBarIndex;
 
-  @override
-  void didUpdateWidget(covariant DailyExpenseChart oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.values.length != widget.values.length) {
-      _selectedDayIndex = null;
+  static const _bnMonths = [
+    'জানু',
+    'ফেব্রু',
+    'মার্চ',
+    'এপ্রিল',
+    'মে',
+    'জুন',
+    'জুলাই',
+    'আগস্ট',
+    'সেপ্টে',
+    'অক্টো',
+    'নভে',
+    'ডিসে'
+  ];
+
+  static const _bnFullDays = [
+    'সোমবার',
+    'মঙ্গলবার',
+    'বুধবার',
+    'বৃহস্পতিবার',
+    'শুক্রবার',
+    'শনিবার',
+    'রবিবার',
+  ];
+
+  String _formatShortDate(DateTime date, bool isBn) {
+    if (isBn) {
+      final dayStr = Fmt.count(date.day);
+      final mStr = _bnMonths[(date.month - 1).clamp(0, 11)];
+      return '$dayStr $mStr';
+    } else {
+      return DateFormat('d MMM').format(date);
+    }
+  }
+
+  String _getDayName(DateTime date, bool isToday, bool isYesterday, bool isBn) {
+    if (isToday) return isBn ? 'আজ' : 'Today';
+    if (isYesterday) return isBn ? 'গতকাল' : 'Yest';
+    if (isBn) {
+      switch (date.weekday) {
+        case DateTime.saturday:
+          return 'শনি';
+        case DateTime.sunday:
+          return 'রবি';
+        case DateTime.monday:
+          return 'সোম';
+        case DateTime.tuesday:
+          return 'মঙ্গল';
+        case DateTime.wednesday:
+          return 'বুধ';
+        case DateTime.thursday:
+          return 'বৃহঃ';
+        case DateTime.friday:
+          return 'শুক্র';
+        default:
+          return '';
+      }
+    } else {
+      switch (date.weekday) {
+        case DateTime.saturday:
+          return 'Sat';
+        case DateTime.sunday:
+          return 'Sun';
+        case DateTime.monday:
+          return 'Mon';
+        case DateTime.tuesday:
+          return 'Tue';
+        case DateTime.wednesday:
+          return 'Wed';
+        case DateTime.thursday:
+          return 'Thu';
+        case DateTime.friday:
+          return 'Fri';
+        default:
+          return '';
+      }
+    }
+  }
+
+  String _getFullDayName(DateTime date, bool isBn) {
+    if (isBn) {
+      return _bnFullDays[(date.weekday - 1).clamp(0, 6)];
+    } else {
+      return DateFormat('EEEE').format(date);
     }
   }
 
@@ -46,45 +127,115 @@ class _DailyExpenseChartState extends State<DailyExpenseChart> {
       return const SizedBox.shrink();
     }
 
-    // Find max expense and peak day
-    double max = 0.0;
-    int peakDayIndex = -1;
-    double totalExpense = 0.0;
-    for (int i = 0; i < values.length; i++) {
-      final v = values[i];
-      totalExpense += v;
-      if (v > max) {
-        max = v;
-        peakDayIndex = i;
-      }
-    }
-
     final today = DateTime.now();
     final isCurrentMonth = today.year == currentMonth.year && today.month == currentMonth.month;
-    final todayDay = isCurrentMonth ? today.day : -1;
+    final anchorDay = isCurrentMonth ? today.day : totalDays;
 
-    // Determine what to display in the inspect header
-    String infoTitle;
-    String infoAmount;
-    bool hasSelection = _selectedDayIndex != null && _selectedDayIndex! < totalDays;
+    // --- Prepare Last 7 Days Data ---
+    final last7DaysList = <_DayChartItem>[];
+    final startDay = math.max(1, anchorDay - 6);
+    final endDay = math.min(totalDays, startDay + 6);
+
+    for (int day = startDay; day <= endDay; day++) {
+      final date = DateTime(currentMonth.year, currentMonth.month, day);
+      final isToday = isCurrentMonth && day == today.day;
+      final isYesterday = isCurrentMonth && day == today.day - 1;
+      final dayName = _getDayName(date, isToday, isYesterday, isBn);
+      final fullDayName = _getFullDayName(date, isBn);
+      final shortDate = _formatShortDate(date, isBn);
+      final amount = (day - 1 < values.length) ? values[day - 1] : 0.0;
+
+      last7DaysList.add(_DayChartItem(
+        dayNumber: day,
+        date: date,
+        dayName: dayName,
+        fullDayName: fullDayName,
+        shortDate: shortDate,
+        amount: amount,
+        isToday: isToday,
+      ));
+    }
+
+    // --- Prepare Weekly Breakdown Data ---
+    final weeklyList = <_WeekChartItem>[];
+    // Week 1: 1-7
+    // Week 2: 8-14
+    // Week 3: 15-21
+    // Week 4: 22-28
+    // Week 5: 29-end
+    final weekRanges = [
+      {'start': 1, 'end': 7, 'labelBn': '১ম সপ্তাহ', 'labelEn': 'Week 1', 'subBn': '১-৭ তারিখ', 'subEn': '1-7'},
+      {'start': 8, 'end': 14, 'labelBn': '২য় সপ্তাহ', 'labelEn': 'Week 2', 'subBn': '৮-১৪ তারিখ', 'subEn': '8-14'},
+      {'start': 15, 'end': 21, 'labelBn': '৩য় সপ্তাহ', 'labelEn': 'Week 3', 'subBn': '১৫-২১ তারিখ', 'subEn': '15-21'},
+      {'start': 22, 'end': 28, 'labelBn': '৪র্থ সপ্তাহ', 'labelEn': 'Week 4', 'subBn': '২২-২৮ তারিখ', 'subEn': '22-28'},
+      if (totalDays > 28)
+        {
+          'start': 29,
+          'end': totalDays,
+          'labelBn': '৫ম সপ্তাহ',
+          'labelEn': 'Week 5',
+          'subBn': '২৯-$totalDays তারিখ',
+          'subEn': '29-$totalDays'
+        },
+    ];
+
+    for (int i = 0; i < weekRanges.length; i++) {
+      final r = weekRanges[i];
+      final s = r['start'] as int;
+      final e = math.min(totalDays, r['end'] as int);
+      double sum = 0.0;
+      for (int d = s; d <= e; d++) {
+        if (d - 1 < values.length) {
+          sum += values[d - 1];
+        }
+      }
+      weeklyList.add(_WeekChartItem(
+        label: isBn ? (r['labelBn'] as String) : (r['labelEn'] as String),
+        rangeText: isBn ? (r['subBn'] as String) : (r['subEn'] as String),
+        amount: sum,
+      ));
+    }
+
+    // Determine selected item inspection info
+    String bannerTitle;
+    String bannerAmount;
 
     if (widget.isExpenseHidden) {
-      infoTitle = 'Daily Expense (This Month)'.tr;
-      infoAmount = '••••••';
-    } else if (hasSelection) {
-      final day = _selectedDayIndex! + 1;
-      final val = values[_selectedDayIndex!];
-      final date = DateTime(currentMonth.year, currentMonth.month, day);
-      final dateStr = DateFormat('d MMMM').format(date);
-      infoTitle = '$dateStr (${'Day'.tr} $day)';
-      infoAmount = val > 0 ? '${AppConstants.currency}${Fmt.money(val)}' : '${AppConstants.currency}0 (${'No expense'.tr})';
-    } else if (max > 0 && peakDayIndex >= 0) {
-      final peakDay = peakDayIndex + 1;
-      infoTitle = '${'Highest Day:'.tr} $peakDay ${DateFormat('MMM').format(currentMonth)}';
-      infoAmount = '${AppConstants.currency}${Fmt.money(max)}';
+      bannerTitle = _viewMode == 0 ? 'Last 7 Days Expense'.tr : 'Weekly Expense Breakdown'.tr;
+      bannerAmount = '••••••';
+    } else if (_viewMode == 0) {
+      // Last 7 days inspect
+      if (_selectedBarIndex != null && _selectedBarIndex! < last7DaysList.length) {
+        final item = last7DaysList[_selectedBarIndex!];
+        bannerTitle = '${item.fullDayName}, ${item.shortDate}';
+        bannerAmount = item.amount > 0 ? '${AppConstants.currency}${Fmt.money(item.amount)}' : 'No expense'.tr;
+      } else {
+        // Find highest day in the 7 days or total
+        final highest = last7DaysList.reduce((a, b) => a.amount >= b.amount ? a : b);
+        if (highest.amount > 0) {
+          bannerTitle = '${'Highest:'.tr} ${highest.dayName} (${highest.shortDate})';
+          bannerAmount = '${AppConstants.currency}${Fmt.money(highest.amount)}';
+        } else {
+          bannerTitle = 'Last 7 Days Expense'.tr;
+          bannerAmount = '${AppConstants.currency}0';
+        }
+      }
     } else {
-      infoTitle = 'Daily Expense (This Month)'.tr;
-      infoAmount = '${AppConstants.currency}0';
+      // Weekly inspect
+      if (_selectedBarIndex != null && _selectedBarIndex! < weeklyList.length) {
+        final item = weeklyList[_selectedBarIndex!];
+        bannerTitle = '${item.label} (${item.rangeText})';
+        bannerAmount = item.amount > 0 ? '${AppConstants.currency}${Fmt.money(item.amount)}' : 'No expense'.tr;
+      } else {
+        final highestWeek = weeklyList.reduce((a, b) => a.amount >= b.amount ? a : b);
+        if (highestWeek.amount > 0) {
+          bannerTitle = '${'Highest:'.tr} ${highestWeek.label}';
+          bannerAmount = '${AppConstants.currency}${Fmt.money(highestWeek.amount)}';
+        } else {
+          bannerTitle = 'Weekly Expense Breakdown'.tr;
+          bannerAmount = '${AppConstants.currency}0';
+        }
+      }
     }
 
     return Container(
@@ -92,33 +243,68 @@ class _DailyExpenseChartState extends State<DailyExpenseChart> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Section Header: Chart Title & Inspection info
+          // Header Row with Title & View Mode Switcher [Last 7 Days | Weekly]
+          Row(
+            children: [
+              Expanded(
+                child: Row(
+                  children: [
+                    Icon(Icons.bar_chart_rounded, size: 17, color: p.expense),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        'Expense Chart'.tr,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: p.ink,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+
+              // Segment Switcher: [Last 7 Days | Weekly]
+              Container(
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: p.bg,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: p.line),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildModeButton(0, 'Last 7 Days'.tr, p),
+                    _buildModeButton(1, 'Weekly'.tr, p),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 10),
+
+          // Informative Banner showing Date/Day name and Amount
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
               color: p.bg,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: p.line.withOpacity(0.7)),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: p.line.withOpacity(0.8)),
             ),
             child: Row(
               children: [
-                Icon(Icons.bar_chart_rounded, size: 16, color: p.expense),
-                const SizedBox(width: 6),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Daily Expense Graph'.tr,
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: p.mute,
-                        ),
-                      ),
-                      const SizedBox(height: 1),
-                      Text(
-                        infoTitle,
+                        bannerTitle,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -127,232 +313,419 @@ class _DailyExpenseChartState extends State<DailyExpenseChart> {
                           color: p.ink,
                         ),
                       ),
+                      const SizedBox(height: 1),
+                      Text(
+                        _selectedBarIndex != null ? 'Tap again to reset'.tr : 'Tap bar to see details'.tr,
+                        style: TextStyle(fontSize: 10, color: p.mute),
+                      ),
                     ],
                   ),
                 ),
                 const SizedBox(width: 8),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      infoAmount,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        color: hasSelection && values[_selectedDayIndex!] > 0
-                            ? p.expense
-                            : (max > 0 ? p.expense : p.mute),
-                      ),
-                    ),
-                    if (hasSelection)
-                      GestureDetector(
-                        onTap: () => setState(() => _selectedDayIndex = null),
-                        child: Text(
-                          'Reset view'.tr,
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            color: p.mute,
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      )
-                    else
-                      Text(
-                        'Tap bar to inspect'.tr,
-                        style: TextStyle(fontSize: 10, color: p.mute),
-                      ),
-                  ],
+                Text(
+                  bannerAmount,
+                  style: TextStyle(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w800,
+                    color: p.expense,
+                  ),
                 ),
               ],
             ),
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
 
-          // Chart Display Area with Axis Guide
-          SizedBox(
-            height: 95,
-            child: totalExpense == 0
-                ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.info_outline, size: 15, color: p.mute),
-                          const SizedBox(width: 6),
-                          Flexible(
-                            child: Text(
-                              'No expense recorded yet this month'.tr,
-                              textAlign: TextAlign.center,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(fontSize: 12, color: p.mute),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                : Stack(
-                    children: [
-                      // Background Max Guide Line
-                      Positioned(
-                        top: 4,
-                        left: 0,
-                        right: 0,
-                        child: Row(
-                          children: [
-                            Text(
-                              widget.isExpenseHidden
-                                  ? '•••'
-                                  : 'max ${AppConstants.currency}${Fmt.money(max)}',
-                              style: TextStyle(
-                                fontSize: 9.5,
-                                fontWeight: FontWeight.w600,
-                                color: p.mute.withOpacity(0.6),
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Container(
-                                height: 1,
-                                color: p.line.withOpacity(0.6),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Baseline
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: Container(
-                          height: 1.2,
-                          color: p.line,
-                        ),
-                      ),
-
-                      // Interactive Daily Bars
-                      Positioned.fill(
-                        top: 18,
-                        bottom: 1.5,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: List.generate(totalDays, (i) {
-                            final v = values[i];
-                            final isSelected = _selectedDayIndex == i;
-                            final isToday = todayDay == (i + 1);
-                            final hasVal = v > 0;
-
-                            // Calculate height percentage (minimum 4px for non-zero, 2px faint dot for zero)
-                            final availableHeight = 75.0;
-                            final barHeight = hasVal
-                                ? math.max(6.0, (v / max) * availableHeight)
-                                : 2.5;
-
-                            return Expanded(
-                              child: GestureDetector(
-                                behavior: HitTestBehavior.opaque,
-                                onTap: () {
-                                  setState(() {
-                                    if (_selectedDayIndex == i) {
-                                      _selectedDayIndex = null;
-                                    } else {
-                                      _selectedDayIndex = i;
-                                    }
-                                  });
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 1.0),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      if (isSelected)
-                                        Container(
-                                          width: 4,
-                                          height: 4,
-                                          margin: const EdgeInsets.only(bottom: 2),
-                                          decoration: BoxDecoration(
-                                            color: p.expense,
-                                            shape: BoxShape.circle,
-                                          ),
-                                        ),
-                                      AnimatedContainer(
-                                        duration: const Duration(milliseconds: 200),
-                                        height: barHeight,
-                                        decoration: BoxDecoration(
-                                          color: hasVal
-                                              ? (isSelected
-                                                  ? p.expense
-                                                  : p.expense.withOpacity(0.85))
-                                              : (isToday
-                                                  ? p.income.withOpacity(0.5)
-                                                  : p.line.withOpacity(0.5)),
-                                          borderRadius: const BorderRadius.vertical(
-                                            top: Radius.circular(3),
-                                          ),
-                                          border: isSelected
-                                              ? Border.all(color: p.ink, width: 1.2)
-                                              : (isToday && !hasVal
-                                                  ? Border.all(color: p.income, width: 0.8)
-                                                  : null),
-                                          boxShadow: isSelected && hasVal
-                                              ? [
-                                                  BoxShadow(
-                                                    color: p.expense.withOpacity(0.4),
-                                                    blurRadius: 4,
-                                                    offset: const Offset(0, 1),
-                                                  ),
-                                                ]
-                                              : null,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            );
-                          }),
-                        ),
-                      ),
-                    ],
-                  ),
-          ),
-
-          // X-Axis Date Markers: 1, 5, 10, 15, 20, 25, (end of month)
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildAxisDayLabel('1', isBn),
-                _buildAxisDayLabel('5', isBn),
-                _buildAxisDayLabel('10', isBn),
-                _buildAxisDayLabel('15', isBn),
-                _buildAxisDayLabel('20', isBn),
-                _buildAxisDayLabel('25', isBn),
-                _buildAxisDayLabel('$totalDays', isBn),
-              ],
-            ),
-          ),
+          // Main Chart rendering based on selected view mode
+          _viewMode == 0
+              ? _buildLast7DaysChart(context, last7DaysList, p)
+              : _buildWeeklyChart(context, weeklyList, p),
         ],
       ),
     );
   }
 
-  Widget _buildAxisDayLabel(String day, bool isBn) {
-    final label = isBn ? Fmt.count(int.tryParse(day) ?? 0) : day;
-    return Text(
-      label,
-      style: const TextStyle(
-        fontSize: 10,
-        fontWeight: FontWeight.w600,
-        color: Color(0xFF8FA097),
+  Widget _buildModeButton(int index, String label, AppPalette p) {
+    final isSelected = _viewMode == index;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _viewMode = index;
+          _selectedBarIndex = null;
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
+        decoration: BoxDecoration(
+          color: isSelected ? p.income : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+            color: isSelected ? Colors.white : p.mute,
+          ),
+        ),
       ),
     );
   }
+
+  Widget _buildLast7DaysChart(
+    BuildContext context,
+    List<_DayChartItem> items,
+    AppPalette p,
+  ) {
+    double max = 1.0;
+    for (final it in items) {
+      if (it.amount > max) max = it.amount;
+    }
+
+    return Column(
+      children: [
+        // Bars Row with amount on top and rounded bars
+        SizedBox(
+          height: 96,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: List.generate(items.length, (i) {
+              final it = items[i];
+              final isSelected = _selectedBarIndex == i;
+              final hasExpense = it.amount > 0;
+              final double heightRatio = hasExpense ? (it.amount / max).clamp(0.12, 1.0) : 0.05;
+              final barHeight = heightRatio * 64.0;
+
+              String amountLabel;
+              if (widget.isExpenseHidden) {
+                amountLabel = '••';
+              } else if (!hasExpense) {
+                amountLabel = '—';
+              } else if (it.amount >= 1000) {
+                amountLabel = '${(it.amount / 1000).toStringAsFixed(1)}k';
+              } else {
+                amountLabel = Fmt.money(it.amount);
+              }
+
+              return Expanded(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    setState(() {
+                      _selectedBarIndex = (_selectedBarIndex == i) ? null : i;
+                    });
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        // Amount Label
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            amountLabel,
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: isSelected || hasExpense ? FontWeight.w800 : FontWeight.w500,
+                              color: isSelected ? p.expense : (hasExpense ? p.ink : p.mute.withOpacity(0.6)),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+
+                        // The Bar
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          height: barHeight,
+                          decoration: BoxDecoration(
+                            gradient: hasExpense
+                                ? LinearGradient(
+                                    colors: isSelected
+                                        ? [p.expense, const Color(0xFFD63031)]
+                                        : [p.expense, p.expense.withOpacity(0.75)],
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                  )
+                                : null,
+                            color: hasExpense
+                                ? null
+                                : (it.isToday ? p.income.withOpacity(0.25) : p.line.withOpacity(0.6)),
+                            borderRadius: const BorderRadius.vertical(top: Radius.circular(5)),
+                            border: isSelected
+                                ? Border.all(color: p.ink, width: 1.5)
+                                : (it.isToday && !hasExpense
+                                    ? Border.all(color: p.income, width: 1)
+                                    : null),
+                            boxShadow: isSelected && hasExpense
+                                ? [
+                                    BoxShadow(
+                                      color: p.expense.withOpacity(0.35),
+                                      blurRadius: 6,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ]
+                                : null,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ),
+        ),
+
+        // Bottom Baseline
+        Container(
+          height: 1.2,
+          color: p.line,
+        ),
+        const SizedBox(height: 6),
+
+        // Day Name & Short Date Row
+        Row(
+          children: List.generate(items.length, (i) {
+            final it = items[i];
+            final isSelected = _selectedBarIndex == i;
+
+            return Expanded(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  setState(() {
+                    _selectedBarIndex = (_selectedBarIndex == i) ? null : i;
+                  });
+                },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Day Name (e.g. 'আজ', 'গতকাল', 'বৃহঃ', 'শুক্র')
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
+                      decoration: it.isToday
+                          ? BoxDecoration(
+                              color: p.income.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(4),
+                            )
+                          : null,
+                      child: Text(
+                        it.dayName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: it.isToday || isSelected ? FontWeight.w800 : FontWeight.w600,
+                          color: it.isToday ? p.income : (isSelected ? p.ink : p.mute),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 1),
+                    // Short Date (e.g. '২৪ অক্টো')
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        it.shortDate,
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w500,
+                          color: p.mute.withOpacity(0.8),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildWeeklyChart(
+    BuildContext context,
+    List<_WeekChartItem> weeks,
+    AppPalette p,
+  ) {
+    double max = 1.0;
+    for (final w in weeks) {
+      if (w.amount > max) max = w.amount;
+    }
+
+    return Column(
+      children: [
+        // Weekly Bars
+        SizedBox(
+          height: 96,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: List.generate(weeks.length, (i) {
+              final w = weeks[i];
+              final isSelected = _selectedBarIndex == i;
+              final hasExpense = w.amount > 0;
+              final double heightRatio = hasExpense ? (w.amount / max).clamp(0.15, 1.0) : 0.06;
+              final barHeight = heightRatio * 64.0;
+
+              String amountLabel;
+              if (widget.isExpenseHidden) {
+                amountLabel = '••';
+              } else if (!hasExpense) {
+                amountLabel = '—';
+              } else if (w.amount >= 1000) {
+                amountLabel = '${(w.amount / 1000).toStringAsFixed(1)}k';
+              } else {
+                amountLabel = Fmt.money(w.amount);
+              }
+
+              return Expanded(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    setState(() {
+                      _selectedBarIndex = (_selectedBarIndex == i) ? null : i;
+                    });
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            amountLabel,
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: isSelected || hasExpense ? FontWeight.w800 : FontWeight.w500,
+                              color: isSelected ? p.expense : (hasExpense ? p.ink : p.mute.withOpacity(0.6)),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          height: barHeight,
+                          decoration: BoxDecoration(
+                            gradient: hasExpense
+                                ? LinearGradient(
+                                    colors: isSelected
+                                        ? [p.expense, const Color(0xFFD63031)]
+                                        : [p.expense, p.expense.withOpacity(0.75)],
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                  )
+                                : null,
+                            color: hasExpense ? null : p.line.withOpacity(0.6),
+                            borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
+                            border: isSelected ? Border.all(color: p.ink, width: 1.5) : null,
+                            boxShadow: isSelected && hasExpense
+                                ? [
+                                    BoxShadow(
+                                      color: p.expense.withOpacity(0.35),
+                                      blurRadius: 6,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ]
+                                : null,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ),
+        ),
+
+        // Baseline
+        Container(
+          height: 1.2,
+          color: p.line,
+        ),
+        const SizedBox(height: 6),
+
+        // Week Label & Date Range Row
+        Row(
+          children: List.generate(weeks.length, (i) {
+            final w = weeks[i];
+            final isSelected = _selectedBarIndex == i;
+
+            return Expanded(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  setState(() {
+                    _selectedBarIndex = (_selectedBarIndex == i) ? null : i;
+                  });
+                },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      w.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                        color: isSelected ? p.ink : p.mute,
+                      ),
+                    ),
+                    const SizedBox(height: 1),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        w.rangeText,
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w500,
+                          color: p.mute.withOpacity(0.8),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }),
+        ),
+      ],
+    );
+  }
+}
+
+class _DayChartItem {
+  final int dayNumber;
+  final DateTime date;
+  final String dayName;
+  final String fullDayName;
+  final String shortDate;
+  final double amount;
+  final bool isToday;
+
+  _DayChartItem({
+    required this.dayNumber,
+    required this.date,
+    required this.dayName,
+    required this.fullDayName,
+    required this.shortDate,
+    required this.amount,
+    required this.isToday,
+  });
+}
+
+class _WeekChartItem {
+  final String label;
+  final String rangeText;
+  final double amount;
+
+  _WeekChartItem({
+    required this.label,
+    required this.rangeText,
+    required this.amount,
+  });
 }
