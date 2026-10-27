@@ -213,7 +213,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(TasbihHistoryView), findsOneWidget);
-      expect(find.text('Recitation Statistics'), findsWidgets);
+      expect(find.byIcon(Icons.query_stats_rounded), findsOneWidget);
       expect(tester.takeException(), isNull);
 
       // Verify Time Filter segments render and can be tapped

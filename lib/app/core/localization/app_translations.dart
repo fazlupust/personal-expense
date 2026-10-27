@@ -427,6 +427,7 @@ class AppTranslations extends Translations {
     'No zikir found': 'কোনো জিকির পাওয়া যায়নি',
 
     // Tasbih History & Filters
+    'Tasbih History': 'তাসবীহ হিস্ট্রি',
     'Tasbih History & Filter': 'তাসবীহ হিস্ট্রি ও ফিল্টার',
     'Recitation Statistics': 'জিকির গণনার পরিসংখ্যান',
     'Time Filter': 'সময় ফিল্টার',
