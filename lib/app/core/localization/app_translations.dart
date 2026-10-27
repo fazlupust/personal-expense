@@ -322,5 +322,42 @@ class AppTranslations extends Translations {
     'Set budget per category': 'প্রতিটি খাতের বাজেট নির্ধারণ করুন',
     'over': 'অতিরিক্ত',
     '0 (No budget limit)': '০ (কোনো বাজেট সীমা নেই)',
+
+    // New Default Categories
+    'Child & Baby Care': 'বাচ্চার খরচ',
+    'Medicine': 'ওষুধ ও ফার্মেসি',
+    'Doctor & Diagnostic': 'ডাক্তার ও টেস্ট ফি',
+    'Clothing & Apparel': 'পোশাক ও কাপড়চোপড়',
+    'Relatives & Family': 'আত্মীয়-স্বজন',
+    'Electricity & Gas': 'বিদ্যুৎ ও গ্যাস বিল',
+    'Internet & WiFi': 'ইন্টারনেট ও ওয়াইফাই',
+    'Snacks & Tea': 'চা-নাস্তা ও ক্যাফে',
+    'House Help & Maid': 'কাজের লোক ও সহকারী',
+    'Travel & Vacation': 'ভ্রমণ ও ট্যুর',
+    'Insurance & Policy': 'বীমা ও প্রিমিয়াম',
+    'Fitness & Sports': 'ব্যায়াম ও খেলাধুলা',
+    'Courier & Parcel': 'কুরিয়ার ও পার্সেল',
+    'Dividends & Profit': 'লভ্যাংশ ও মুনাফা',
+    'Overtime & Extra': 'ওভারটাইম আয়',
+    'Remittance': 'রেমিট্যান্স ও প্রবাসী আয়',
+
+    // Data Export
+    'Export Data': 'ডেটা এক্সপোর্ট',
+    'Export Data (CSV / JSON)': 'ডেটা এক্সপোর্ট (CSV / JSON)',
+    'Export transactions & notes into CSV or JSON': 'লেনদেন ও নোট এক্সেল বা ব্যাকআপ ফাইলে এক্সপোর্ট করুন',
+    'Transactions (CSV)': 'লেনদেনসমূহ (CSV)',
+    'Date, Time, Type, Category, Amount, Note': 'তারিখ, সময়, ধরন, খাত, পরিমাণ, নোট',
+    'Notes & Debts (CSV)': 'নোট ও দেনা-পাওনা (CSV)',
+    'SL, Date, Time, Title, Person, Amount': 'ক্রমিক, তারিখ, সময়, শিরোনাম, ব্যক্তি, পরিমাণ',
+    'Full Data Backup (JSON)': 'সম্পূর্ণ ডেটা ব্যাকআপ (JSON)',
+    'Complete backup of all transactions, notes, settings': 'সব লেনদেন, নোট ও সেটিংসের পূর্ণাঙ্গ ব্যাকআপ',
+    'Copy': 'কপি',
+    'Copy All': 'সব কপি করুন',
+    'Close': 'বন্ধ করুন',
+    'Preview': 'প্রিভিউ',
+    'Copied to clipboard! You can paste it into Excel or Google Sheets.':
+        'ক্লিপবোর্ডে কপি করা হয়েছে! এটি এক্সেল বা গুগল শিটে পেস্ট করতে পারেন।',
+    'Copied to clipboard!': 'ক্লিপবোর্ডে কপি করা হয়েছে!',
+    'Enter your name': 'আপনার নাম লিখুন',
   };
 }

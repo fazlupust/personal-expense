@@ -11,6 +11,7 @@ import 'package:personal_expense/app/features/notes/controllers/notes_controller
 import 'package:personal_expense/app/features/settings/controllers/settings_controller.dart';
 import 'package:personal_expense/app/features/transactions/controllers/entry_form_controller.dart';
 import 'package:personal_expense/app/features/transactions/controllers/transactions_controller.dart';
+import 'package:personal_expense/app/core/constants/app_constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -137,6 +138,21 @@ void main() {
       // Verify category was deleted
       expect(controller.categories.length, equals(countWithCustom - 1));
       expect(controller.categories.contains(userCat), isFalse);
+    });
+
+    test('contains newly requested default categories', () {
+      final names = AppConstants.defaultCategories.map((c) => c.nameEn).toList();
+      expect(names, contains('Child & Baby Care'));
+      expect(names, contains('Medicine'));
+      expect(names, contains('Doctor & Diagnostic'));
+      expect(names, contains('Clothing & Apparel'));
+      expect(names, contains('Relatives & Family'));
+
+      expect(AppConstants.isDefaultCategory('Child & Baby Care', 'বাচ্চার খরচ'), isTrue);
+      expect(AppConstants.isDefaultCategory('Medicine', 'ওষুধ ও ফার্মেসি'), isTrue);
+      expect(AppConstants.isDefaultCategory('Doctor & Diagnostic', 'ডাক্তার ও টেস্ট ফি'), isTrue);
+      expect(AppConstants.isDefaultCategory('Clothing & Apparel', 'পোশাক ও কাপড়চোপড়'), isTrue);
+      expect(AppConstants.isDefaultCategory('Relatives & Family', 'আত্মীয়-স্বজন'), isTrue);
     });
   });
 

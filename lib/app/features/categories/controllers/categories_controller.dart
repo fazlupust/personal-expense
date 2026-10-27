@@ -49,7 +49,7 @@ class CategoriesController extends GetxController {
           service.seedDefaultsIfEmpty();
           _sub = service.streamCategories(user.uid).listen((list) {
             if (list.isNotEmpty) {
-              categories = list;
+              categories = _mergeWithDefaults(list);
               update();
             }
           }, onError: (err) {
@@ -65,7 +65,7 @@ class CategoriesController extends GetxController {
         service.seedDefaultsIfEmpty();
         _sub = service.streamCategories(auth.currentUid).listen((list) {
           if (list.isNotEmpty) {
-            categories = list;
+            categories = _mergeWithDefaults(list);
             update();
           }
         }, onError: (err) {
@@ -73,6 +73,22 @@ class CategoriesController extends GetxController {
         });
       }
     }
+  }
+
+  List<CategoryModel> _mergeWithDefaults(List<CategoryModel> list) {
+    final result = List<CategoryModel>.from(list);
+    for (final def in AppConstants.defaultCategories) {
+      final exists = result.any((c) =>
+          c.type == def.type &&
+          (c.nameEn.toLowerCase() == def.nameEn.toLowerCase() ||
+              c.nameBn == def.nameBn ||
+              c.name == def.nameEn ||
+              c.name == def.nameBn));
+      if (!exists) {
+        result.add(def);
+      }
+    }
+    return result;
   }
 
   List<CategoryModel> byType(EntryType t) => categories.where((c) => c.type == t).toList();

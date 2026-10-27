@@ -172,8 +172,8 @@ class SegmentBar<T> extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 3),
                 child: Builder(builder: (context) {
                   final sel = e.key == value;
-                  final selBg = colorOf?.call(e.key) ?? p.ink;
-                  final selFg = colorOf != null ? Colors.white : p.bg;
+                  final selBg = colorOf?.call(e.key) ?? p.income;
+                  const selFg = Colors.white;
                   return Material(
                     color: sel ? selBg : p.card,
                     clipBehavior: Clip.antiAlias,
@@ -190,7 +190,11 @@ class SegmentBar<T> extends StatelessWidget {
                           child: Text(
                             e.value,
                             textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 13, color: sel ? selFg : p.mute),
+                            style: TextStyle(
+                              fontSize: 13.5,
+                              fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
+                              color: sel ? selFg : p.mute,
+                            ),
                           ),
                         ),
                       ),

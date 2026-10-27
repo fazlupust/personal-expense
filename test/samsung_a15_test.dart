@@ -18,6 +18,7 @@ import 'package:personal_expense/app/features/notes/views/components/note_form_s
 import 'package:personal_expense/app/features/notes/views/notes_view.dart';
 import 'package:personal_expense/app/data/models/note_model.dart';
 import 'package:personal_expense/app/features/reports/views/generate_report_view.dart';
+import 'package:personal_expense/app/features/settings/views/components/data_export_sheet.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -309,5 +310,30 @@ void main() {
     expect(notesCtrl.searchQuery, isEmpty);
     expect(notesCtrl.searchCtrl.text, isEmpty);
     expect(find.byIcon(Icons.clear_rounded), findsNothing);
+  });
+
+  testWidgets('Samsung Galaxy A15 DataExportSheet renders cleanly without overflow', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2340);
+    tester.view.devicePixelRatio = 2.625;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        translations: AppTranslations(),
+        locale: const Locale('bn'),
+        theme: AppTheme.light,
+        home: const Scaffold(
+          body: DataExportSheet(),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull, reason: 'DataExportSheet should render cleanly without overflow');
+    expect(find.text('Export Data'.tr), findsOneWidget);
+    expect(find.text('Transactions (CSV)'.tr), findsOneWidget);
   });
 }

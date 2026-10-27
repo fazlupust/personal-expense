@@ -12,6 +12,7 @@ import '../../../../data/services/app_update_service.dart';
 import '../../../../data/services/auth_service.dart';
 import 'budget_management_sheet.dart';
 import 'change_password_sheet.dart';
+import 'data_export_sheet.dart';
 
 class SettingsFormCard extends StatelessWidget {
   const SettingsFormCard({super.key, required this.settings});
@@ -30,6 +31,10 @@ class SettingsFormCard extends StatelessWidget {
             controller: s.nameCtrl,
             textCapitalization: TextCapitalization.words,
             inputFormatters: [LengthLimitingTextInputFormatter(30)],
+            decoration: InputDecoration(
+              hintText: 'Enter your name'.tr,
+              prefixIcon: const Icon(Icons.person_outline_rounded, size: 20),
+            ),
           ),
           const SizedBox(height: 10),
           const FieldLabel('Monthly budget (0 = none)'),
@@ -229,6 +234,27 @@ class SettingsFormCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           AppButton('Save settings', onPressed: s.saveProfile),
+
+          const SizedBox(height: 4),
+          ElevatedButton.icon(
+            onPressed: () => showDataExportSheet(context),
+            icon: const Icon(Icons.file_download_outlined, size: 17, color: Colors.white),
+            label: Text(
+              'Export Data (CSV / JSON)'.tr,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 13.5,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size.fromHeight(42),
+              backgroundColor: context.pal.income,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+          ),
 
           // Change password option if logged in
           if (Get.isRegistered<AuthService>() && Get.find<AuthService>().isLoggedIn) ...[

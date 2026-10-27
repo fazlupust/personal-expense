@@ -70,6 +70,7 @@ class SettingsController extends GetxController {
         if (user != null) {
           _load(user.uid);
           _syncFromFirestore(user.uid);
+          _syncProfileName();
         } else {
           _resetUserScopedData();
         }
@@ -77,8 +78,29 @@ class SettingsController extends GetxController {
         budgetCtrl.text = budget > 0 ? _plain(budget) : '';
         update();
       });
+      ever(auth.userProfile, (u) {
+        if (u != null) {
+          _syncProfileName(u);
+        }
+      });
       if (auth.currentUid != null && auth.currentUid!.isNotEmpty) {
         _syncFromFirestore(auth.currentUid!);
+        _syncProfileName();
+      }
+    }
+  }
+
+  void _syncProfileName([dynamic uOverride]) {
+    if (!Get.isRegistered<AuthService>()) return;
+    final auth = Get.find<AuthService>();
+    final u = uOverride ?? auth.userProfile.value;
+    if (u != null) {
+      final isBn = langCode == 'bn';
+      final pName = u.displayName(isBn);
+      if (pName.isNotEmpty && (name.isEmpty || nameCtrl.text.isEmpty)) {
+        name = pName;
+        nameCtrl.text = pName;
+        update();
       }
     }
   }
@@ -325,9 +347,24 @@ class SettingsController extends GetxController {
       return;
     }
     budgetError = null;
-    name = nameCtrl.text.trim();
+    final newName = nameCtrl.text.trim();
+    name = newName;
     budget = b;
     _persist();
+
+    if (Get.isRegistered<AuthService>()) {
+      final auth = Get.find<AuthService>();
+      final u = auth.userProfile.value;
+      if (auth.isLoggedIn && u != null && newName.isNotEmpty) {
+        final isBn = langCode == 'bn';
+        final updated = u.copyWith(
+          nameBn: isBn ? newName : (u.nameBn.isEmpty ? newName : u.nameBn),
+          nameEn: !isBn ? newName : (u.nameEn.isEmpty ? newName : u.nameEn),
+        );
+        auth.updateProfile(updated);
+      }
+    }
+
     update();
     Get.snackbar(
       AppConstants.appName.tr,
