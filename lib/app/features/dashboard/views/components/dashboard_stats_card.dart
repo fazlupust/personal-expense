@@ -46,7 +46,11 @@ class DashboardStatsCard extends StatelessWidget {
             StatItem('Entries', Fmt.count(entryCount)),
           ]),
           const SizedBox(height: 10),
-          DailyExpenseChart(values: daily),
+          DailyExpenseChart(
+            values: daily,
+            month: controller.month,
+            isExpenseHidden: isExpenseHidden || isHidden,
+          ),
         ],
       ),
     );

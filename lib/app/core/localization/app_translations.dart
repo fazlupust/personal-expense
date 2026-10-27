@@ -401,6 +401,16 @@ class AppTranslations extends Translations {
     'Lifetime Total': 'সর্বমোট জিকির',
     'Zikir': 'জিকির',
     'Vibration': 'ভাইব্রেশন',
+
+    // Daily Expense Chart
+    'Daily Expense Graph': 'দৈনিক খরচের গ্রাফ',
+    'Daily Expense (This Month)': 'চলতি মাসের দৈনিক খরচ',
+    'Day': 'তারিখ',
+    'No expense': 'কোনো খরচ নেই',
+    'Highest Day:': 'সর্বোচ্চ খরচ:',
+    'Tap bar to inspect': 'বারে চাপ দিয়ে খরচ দেখুন',
+    'Reset view': 'রিসেট',
+    'No expense recorded yet this month': 'চলতি মাসে এখনো কোনো খরচ রেকর্ড করা হয়নি',
   };
 }
 
