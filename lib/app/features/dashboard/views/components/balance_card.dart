@@ -13,6 +13,8 @@ class BalanceCard extends StatelessWidget {
     required this.budget,
     this.isHidden = false,
     this.onToggleVisibility,
+    this.isIncomeHidden = false,
+    this.onToggleIncomeVisibility,
     this.isExpenseHidden = false,
     this.onToggleExpenseVisibility,
   });
@@ -22,6 +24,8 @@ class BalanceCard extends StatelessWidget {
   final double budget;
   final bool isHidden;
   final VoidCallback? onToggleVisibility;
+  final bool isIncomeHidden;
+  final VoidCallback? onToggleIncomeVisibility;
   final bool isExpenseHidden;
   final VoidCallback? onToggleExpenseVisibility;
 
@@ -29,8 +33,10 @@ class BalanceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = Get.isRegistered<SettingsController>() ? SettingsController.to : null;
     final hidden = isHidden || (s?.isBalanceHidden ?? false);
+    final incomeHidden = isIncomeHidden || (s?.isIncomeHidden ?? false);
     final expenseHidden = isExpenseHidden || (s?.isExpenseHidden ?? false);
     final toggle = onToggleVisibility ?? s?.toggleBalanceVisibility;
+    final toggleIncome = onToggleIncomeVisibility ?? s?.toggleIncomeVisibility ?? toggle;
     final toggleExpense = onToggleExpenseVisibility ?? s?.toggleExpenseVisibility;
     final net = income - expense;
     final over = budget > 0 && expense > budget;
@@ -256,13 +262,13 @@ class BalanceCard extends StatelessWidget {
                         color: Colors.transparent,
                         child: InkWell(
                           borderRadius: BorderRadius.circular(16),
-                          onTap: toggle,
+                          onTap: toggleIncome,
                           child: _GlassMetricBox(
                             label: 'Income',
                             amount: income,
                             isIncome: true,
-                            isHidden: hidden,
-                            onToggle: toggle,
+                            isHidden: incomeHidden,
+                            onToggle: toggleIncome,
                           ),
                         ),
                       ),

@@ -80,10 +80,11 @@ void main() {
 
   group('SettingsController privacy and theme tests', () {
     late SettingsController settings;
+    late SharedPreferences prefs;
 
     setUp(() async {
       SharedPreferences.setMockInitialValues({});
-      final prefs = await SharedPreferences.getInstance();
+      prefs = await SharedPreferences.getInstance();
       settings = SettingsController(prefs);
     });
 
@@ -114,6 +115,16 @@ void main() {
       expect(settings.isBalanceHidden, isFalse);
     });
 
+    test('toggleIncomeVisibility toggles isIncomeHidden independently', () {
+      expect(settings.isIncomeHidden, isFalse);
+
+      settings.toggleIncomeVisibility();
+      expect(settings.isIncomeHidden, isTrue);
+
+      settings.toggleIncomeVisibility();
+      expect(settings.isIncomeHidden, isFalse);
+    });
+
     test('setShowExpense toggles showExpense and isExpenseHidden', () {
       expect(settings.showExpense, isTrue);
       expect(settings.isExpenseHidden, isFalse);
@@ -135,6 +146,20 @@ void main() {
 
       settings.toggleExpenseVisibility();
       expect(settings.isExpenseHidden, isFalse);
+    });
+
+    test('visibility states persist to SharedPreferences across app reload', () async {
+      settings.toggleBalanceVisibility(); // isBalanceHidden = true
+      settings.toggleIncomeVisibility();  // isIncomeHidden = true
+      settings.toggleExpenseVisibility(); // isExpenseHidden = true
+
+      // Verify that re-initializing with the same SharedPreferences preserves all 3 hidden states
+      final restored = SettingsController(prefs);
+      restored.onInit();
+
+      expect(restored.isBalanceHidden, isTrue);
+      expect(restored.isIncomeHidden, isTrue);
+      expect(restored.isExpenseHidden, isTrue);
     });
 
     test('toggleTheme alternates between light and dark modes', () {

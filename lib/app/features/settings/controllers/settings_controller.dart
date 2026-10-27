@@ -22,6 +22,7 @@ class SettingsController extends GetxController {
   String? budgetError;
   bool showIncome = true;
   bool isBalanceHidden = false;
+  bool isIncomeHidden = false;
   bool showExpense = true;
   bool isExpenseHidden = false;
 
@@ -57,6 +58,7 @@ class SettingsController extends GetxController {
       langCode = sys == 'bn' ? 'bn' : 'en';
       showIncome = true;
       isBalanceHidden = false;
+      isIncomeHidden = false;
       showExpense = true;
       isExpenseHidden = false;
       return;
@@ -69,9 +71,10 @@ class SettingsController extends GetxController {
       budget = (m['budget'] as num?)?.toDouble() ?? 0;
       defaultAccount = (m['account'] as String?) ?? defaultAccount;
       showIncome = (m['show_income'] as bool?) ?? true;
-      isBalanceHidden = !showIncome;
       showExpense = (m['show_expense'] as bool?) ?? true;
-      isExpenseHidden = !showExpense;
+      isBalanceHidden = (m['is_balance_hidden'] as bool?) ?? !showIncome;
+      isIncomeHidden = (m['is_income_hidden'] as bool?) ?? !showIncome;
+      isExpenseHidden = (m['is_expense_hidden'] as bool?) ?? !showExpense;
     } catch (_) {
       // Corrupt data: fall back to defaults.
     }
@@ -87,6 +90,9 @@ class SettingsController extends GetxController {
           'account': defaultAccount,
           'show_income': showIncome,
           'show_expense': showExpense,
+          'is_balance_hidden': isBalanceHidden,
+          'is_income_hidden': isIncomeHidden,
+          'is_expense_hidden': isExpenseHidden,
         }),
       );
 
@@ -117,12 +123,21 @@ class SettingsController extends GetxController {
   void setShowIncome(bool val) {
     showIncome = val;
     isBalanceHidden = !val;
+    isIncomeHidden = !val;
     _persist();
     update();
   }
 
   void toggleBalanceVisibility() {
     isBalanceHidden = !isBalanceHidden;
+    showIncome = !isBalanceHidden;
+    _persist();
+    update();
+  }
+
+  void toggleIncomeVisibility() {
+    isIncomeHidden = !isIncomeHidden;
+    _persist();
     update();
   }
 
@@ -135,6 +150,8 @@ class SettingsController extends GetxController {
 
   void toggleExpenseVisibility() {
     isExpenseHidden = !isExpenseHidden;
+    showExpense = !isExpenseHidden;
+    _persist();
     update();
   }
 
