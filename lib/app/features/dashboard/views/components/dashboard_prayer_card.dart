@@ -30,9 +30,7 @@ class DashboardPrayerCard extends StatelessWidget {
       targetTime = targetTime.add(const Duration(days: 1));
     }
     final diff = targetTime.difference(now);
-    final hours = diff.inHours;
-    final minutes = diff.inMinutes.remainder(60);
-    final countdownStr = hours > 0 ? '$hours h $minutes m' : '$minutes m';
+    final countdownStr = PrayerTimeCalculator.formatRemainingTime(diff);
 
     final currentWaqtName = isBn ? currentWaqt.nameBn : currentWaqt.nameEn;
     final nextPrayerName = isBn ? nextPrayer.nameBn : nextPrayer.nameEn;
@@ -43,10 +41,10 @@ class DashboardPrayerCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: p.card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: p.income.withOpacity(0.25), width: 1.2),
+        border: Border.all(color: p.line, width: 1.1),
         boxShadow: [
           BoxShadow(
-            color: p.income.withOpacity(0.06),
+            color: Colors.black.withOpacity(0.035),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -66,11 +64,18 @@ class DashboardPrayerCard extends StatelessWidget {
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
-                    color: p.income.withOpacity(0.12),
+                    gradient: LinearGradient(
+                      colors: [
+                        const Color(0xFF10B981).withOpacity(0.18),
+                        const Color(0xFF0D9488).withOpacity(0.08),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
                     shape: BoxShape.circle,
                   ),
-                  child: Center(
-                    child: Icon(Icons.nightlight_round, color: p.income, size: 22),
+                  child: const Center(
+                    child: Icon(Icons.nightlight_round, color: Color(0xFF0D9488), size: 21),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -90,7 +95,7 @@ class DashboardPrayerCard extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,
-                                color: p.income,
+                                color: p.ink,
                               ),
                             ),
                           ),
@@ -98,15 +103,15 @@ class DashboardPrayerCard extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
                             decoration: BoxDecoration(
-                              color: p.income.withOpacity(0.15),
+                              color: const Color(0xFF10B981).withOpacity(0.15),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
                               'Now'.tr,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w700,
-                                color: p.income,
+                                color: Color(0xFF059669),
                               ),
                             ),
                           ),
@@ -133,17 +138,17 @@ class DashboardPrayerCard extends StatelessWidget {
                       const SizedBox(height: 2),
                       Row(
                         children: [
-                          Icon(Icons.schedule_rounded, size: 12, color: p.income.withOpacity(0.85)),
+                          const Icon(Icons.schedule_rounded, size: 12, color: Color(0xFF0D9488)),
                           const SizedBox(width: 4),
                           Flexible(
                             child: Text(
                               currentWaqt.formatRange(),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 11.5,
                                 fontWeight: FontWeight.w700,
-                                color: p.income,
+                                color: Color(0xFF0D9488),
                               ),
                             ),
                           ),
@@ -178,22 +183,48 @@ class DashboardPrayerCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
 
-                // Dedicated Zikir Button
-                FilledButton.icon(
-                  onPressed: () => Get.toNamed(AppRoutes.tasbihCounter),
-                  icon: const Icon(Icons.fingerprint_rounded, size: 16),
-                  label: Text(
-                    'Zikir'.tr,
-                    style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700),
-                  ),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: p.income,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                // Dedicated Vibrant Gradient Zikir Button
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => Get.toNamed(AppRoutes.tasbihCounter),
+                    borderRadius: BorderRadius.circular(22),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7.5),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [
+                            Color(0xFF0D9488), // Modern vibrant teal
+                            Color(0xFF10B981), // Luminous emerald
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(22),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF10B981).withOpacity(0.32),
+                            blurRadius: 7,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.fingerprint_rounded, size: 15, color: Colors.white),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Zikir'.tr,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

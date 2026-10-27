@@ -8,6 +8,9 @@ import 'package:personal_expense/app/features/prayer_tasbih/views/prayer_tasbih_
 import 'package:personal_expense/app/features/prayer_tasbih/views/tasbih_counter_view.dart';
 import 'package:personal_expense/app/features/prayer_tasbih/views/tasbih_history_view.dart';
 import 'package:personal_expense/app/features/dashboard/views/components/dashboard_prayer_card.dart';
+import 'package:intl/intl.dart';
+import 'package:personal_expense/app/data/models/tasbih_entry_model.dart';
+import 'package:personal_expense/app/data/services/prayer_time_service.dart';
 import 'package:personal_expense/app/routes/app_pages.dart';
 import 'package:personal_expense/app/routes/app_routes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -487,6 +490,143 @@ void main() {
 
       // Advance clock past the 600ms Firestore debounce timer
       await tester.pump(const Duration(milliseconds: 700));
+    });
+
+    test('PrayerTimeCalculator.formatRemainingTime never returns 0 m or 0 s', () {
+      // Hours and minutes
+      expect(
+        PrayerTimeCalculator.formatRemainingTime(const Duration(hours: 2, minutes: 15)),
+        equals('2 h 15 m'),
+      );
+      // Clean hour when minutes is 0
+      expect(
+        PrayerTimeCalculator.formatRemainingTime(const Duration(hours: 1, minutes: 0, seconds: 45)),
+        equals('1 h'),
+      );
+      // Regular minutes
+      expect(
+        PrayerTimeCalculator.formatRemainingTime(const Duration(minutes: 25)),
+        equals('25 m'),
+      );
+      expect(
+        PrayerTimeCalculator.formatRemainingTime(const Duration(minutes: 1)),
+        equals('1 m'),
+      );
+      // Final minute countdown in seconds (prevents the '0 m বাকি' bug)
+      expect(
+        PrayerTimeCalculator.formatRemainingTime(const Duration(seconds: 35)),
+        equals('35 s'),
+      );
+      expect(
+        PrayerTimeCalculator.formatRemainingTime(const Duration(seconds: 1)),
+        equals('1 s'),
+      );
+      // Boundary and zero / negative cases
+      expect(
+        PrayerTimeCalculator.formatRemainingTime(Duration.zero),
+        equals('< 1 m'),
+      );
+      expect(
+        PrayerTimeCalculator.formatRemainingTime(const Duration(seconds: -10)),
+        equals('< 1 m'),
+      );
+    });
+
+    test('PrayerTasbihController timeUntilNextPrayer is never 0 m', () {
+      final c = Get.put(PrayerTasbihController());
+      expect(c.timeUntilNextPrayer, isNotEmpty);
+      expect(c.timeUntilNextPrayer, isNot(equals('0 m')));
+      expect(c.timeUntilNextPrayer, isNot(equals('0 s')));
+    });
+
+    test('TasbihEntryModel contains all required fields for Firebase day-wise sync', () {
+      const entry = TasbihEntryModel(
+        id: '2026-10-27_subhanallah',
+        userId: 'test_user_1',
+        jikirId: 'subhanallah',
+        jikirName: 'সুবহানাল্লাহ',
+        jikirNameEn: 'Subhanallah',
+        arabic: 'سُبْحَانَ اللَّهِ',
+        category: 'prayer',
+        jikirCount: 4,
+        date: '2026-10-27',
+      );
+
+      final map = entry.toFirestore(isNew: true);
+      expect(map['id'], equals('2026-10-27_subhanallah'));
+      expect(map['user_id'], equals('test_user_1'));
+      expect(map['jikir_id'], equals('subhanallah'));
+      expect(map['jikir_name'], equals('সুবহানাল্লাহ'));
+      expect(map['jikir_count'], equals(4));
+      expect(map['jikircound'], equals(4)); // alias check
+      expect(map['date'], equals('2026-10-27'));
+      expect(map['created_at'], isNotNull);
+      expect(map['updated_at'], isNotNull);
+
+      final reconstructed = TasbihEntryModel.fromMap('2026-10-27_subhanallah', map);
+      expect(reconstructed.id, equals('2026-10-27_subhanallah'));
+      expect(reconstructed.jikirCount, equals(4));
+      expect(reconstructed.jikirName, equals('সুবহানাল্লাহ'));
+    });
+
+    test('Day-wise zikir updates on current date, and creates new entries across dates', () async {
+      final c = Get.put(PrayerTasbihController());
+      await c.loadForUserForTesting('day_wise_user');
+
+      // Select Subhanallah
+      final subhanallah = c.allZikirs.firstWhere((z) => z.id == 'subhanallah');
+      c.selectZikir(subhanallah);
+
+      // Increment 1 on current date
+      c.increment();
+      expect(c.currentCount, equals(1));
+      expect(c.getZikirTodayCount('subhanallah'), equals(1));
+      expect(c.historyEntries.any((e) => e.jikirId == 'subhanallah' && e.jikirCount == 1), isTrue);
+
+      // Same date, updates to 2, 3, 4
+      c.increment();
+      c.increment();
+      c.increment();
+      expect(c.getZikirTodayCount('subhanallah'), equals(4));
+      expect(c.historyEntries.firstWhere((e) => e.jikirId == 'subhanallah').jikirCount, equals(4));
+
+      // Test grouped history entries
+      expect(c.groupedHistoryEntries, isNotEmpty);
+      final todayKey = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      expect(c.groupedHistoryEntries.containsKey(todayKey), isTrue);
+      expect(c.dayTotals[todayKey], greaterThanOrEqualTo(4));
+    });
+
+    testWidgets('TasbihHistoryView switches between tabs cleanly on Samsung A15', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 3.0; // 360x800 dp
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final c = Get.put(PrayerTasbihController());
+      await c.loadForUserForTesting('tab_test_user');
+      c.increment();
+
+      await tester.pumpWidget(
+        GetMaterialApp(
+          translations: AppTranslations(),
+          locale: const Locale('bn', 'BD'),
+          theme: ThemeData(extensions: const [AppPalette.light]),
+          home: const TasbihHistoryView(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Tab 0: Overview is active initially
+      expect(find.text('জিকির তালিকা'), findsOneWidget);
+      expect(find.text('দৈনিক ইতিহাস (লগ)'), findsOneWidget);
+
+      // Switch to Tab 1: Daily History Logs
+      await tester.tap(find.text('দৈনিক ইতিহাস (লগ)'));
+      await tester.pumpAndSettle();
+
+      // Check header in Tab 1
+      expect(find.text('ফায়ারবেস ক্লাউড হিস্ট্রি'), findsOneWidget);
+      expect(tester.takeException(), isNull);
     });
   });
 }

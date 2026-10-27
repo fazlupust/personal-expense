@@ -353,14 +353,14 @@ class TasbihCounterView extends StatelessWidget {
                                     child: Text(
                                       isBn ? item.titleBn : item.titleEn,
                                       style: TextStyle(
-                                        fontSize: 14.5,
+                                        fontSize: 15.5,
                                         fontWeight: FontWeight.w700,
                                         color: isSelected ? p.income : p.ink,
                                       ),
                                     ),
                                   ),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
                                     decoration: BoxDecoration(
                                       color: p.income.withOpacity(0.12),
                                       borderRadius: BorderRadius.circular(6),
@@ -368,7 +368,7 @@ class TasbihCounterView extends StatelessWidget {
                                     child: Text(
                                       '${item.defaultTarget}x',
                                       style: TextStyle(
-                                        fontSize: 11,
+                                        fontSize: 11.5,
                                         fontWeight: FontWeight.w700,
                                         color: p.income,
                                       ),
@@ -380,24 +380,25 @@ class TasbihCounterView extends StatelessWidget {
                                   ],
                                 ],
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: 5),
                               Text(
                                 item.arabic,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
+                                  fontSize: 19.5,
+                                  fontWeight: FontWeight.w700,
                                   color: p.income,
+                                  height: 1.35,
                                 ),
                               ),
-                              const SizedBox(height: 2),
+                              const SizedBox(height: 4),
                               Text(
                                 isBn ? item.meaningBn : item.meaningEn,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  fontSize: 11.5,
+                                  fontSize: 12.5,
                                   color: p.mute,
                                   height: 1.3,
                                 ),

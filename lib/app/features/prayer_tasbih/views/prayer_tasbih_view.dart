@@ -482,7 +482,7 @@ class PrayerTasbihView extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(20),
@@ -498,11 +498,11 @@ class PrayerTasbihView extends StatelessWidget {
                               shape: BoxShape.circle,
                             ),
                           ),
-                          const SizedBox(width: 6),
+                          const SizedBox(width: 5),
                           Text(
                             'Active Waqt'.tr,
                             style: const TextStyle(
-                              fontSize: 11.5,
+                              fontSize: 11,
                               fontWeight: FontWeight.w700,
                               color: Colors.white,
                             ),
@@ -510,12 +510,17 @@ class PrayerTasbihView extends StatelessWidget {
                         ],
                       ),
                     ),
-                    Text(
-                      currentWaqt.arabicName,
-                      style: const TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white70,
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        currentWaqt.arabicName,
+                        style: const TextStyle(
+                          fontSize: 16.5,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white70,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
@@ -534,12 +539,16 @@ class PrayerTasbihView extends StatelessWidget {
                   children: [
                     const Icon(Icons.schedule_rounded, size: 14, color: Colors.white70),
                     const SizedBox(width: 4),
-                    Text(
-                      currentWaqt.formatRange(),
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                    Expanded(
+                      child: Text(
+                        currentWaqt.formatRange(),
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],

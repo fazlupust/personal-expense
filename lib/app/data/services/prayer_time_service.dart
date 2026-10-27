@@ -644,4 +644,26 @@ class PrayerTimeCalculator {
     final mName = islamicMonthsBn[mIdx];
     return '$day $mName $year হিজরি';
   }
+
+  /// Formats remaining time until next prayer accurately without ever displaying '0 m' or '0 s'.
+  /// Handles hours, minutes, seconds countdown (under 1 min), and transitions cleanly.
+  static String formatRemainingTime(Duration diff) {
+    if (diff.isNegative || diff.inSeconds <= 0) {
+      return '< 1 m';
+    }
+    final hours = diff.inHours;
+    final minutes = diff.inMinutes.remainder(60);
+    final seconds = diff.inSeconds.remainder(60);
+
+    if (hours > 0) {
+      return minutes > 0 ? '$hours h $minutes m' : '$hours h';
+    } else if (minutes > 0) {
+      return '$minutes m';
+    } else if (seconds > 0) {
+      return '$seconds s';
+    } else {
+      return '< 1 m';
+    }
+  }
 }
+

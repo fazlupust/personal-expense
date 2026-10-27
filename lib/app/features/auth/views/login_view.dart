@@ -76,27 +76,34 @@ class LoginView extends GetView<AuthController> {
                       Center(
                         child: Container(
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(22),
                             boxShadow: [
                               BoxShadow(
-                                color: p.income.withOpacity(0.2),
-                                blurRadius: 16,
-                                offset: const Offset(0, 4),
+                                color: const Color(0xFF10B981).withOpacity(0.28),
+                                blurRadius: 20,
+                                offset: const Offset(0, 6),
                               ),
                             ],
                           ),
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(22),
                             child: Image.asset(
                               'assets/images/logo.png',
-                              width: 72,
-                              height: 72,
+                              width: 80,
+                              height: 80,
+                              fit: BoxFit.cover,
                               errorBuilder: (_, __, ___) => Container(
-                                width: 72,
-                                height: 72,
-                                color: p.income,
+                                width: 80,
+                                height: 80,
+                                decoration: const BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [Color(0xFF0D9488), Color(0xFF10B981)],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                ),
                                 alignment: Alignment.center,
-                                child: const Icon(Icons.account_balance_wallet, size: 36, color: Colors.white),
+                                child: const Icon(Icons.account_balance_wallet_rounded, size: 40, color: Colors.white),
                               ),
                             ),
                           ),
@@ -173,13 +180,29 @@ class LoginView extends GetView<AuthController> {
                       const SizedBox(height: 24),
 
                       // Login Button
-                      Obx(() => SizedBox(
+                      Obx(() => Container(
                             height: 48,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF0D9488), Color(0xFF10B981)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFF10B981).withOpacity(0.28),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
                             child: ElevatedButton(
                               onPressed: controller.auth.isLoading.value ? null : controller.login,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: p.income,
+                                backgroundColor: Colors.transparent,
                                 foregroundColor: Colors.white,
+                                shadowColor: Colors.transparent,
                                 elevation: 0,
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               ),
@@ -191,7 +214,7 @@ class LoginView extends GetView<AuthController> {
                                     )
                                   : Text(
                                       'Log In'.tr,
-                                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                                     ),
                             ),
                           )),
@@ -206,20 +229,10 @@ class LoginView extends GetView<AuthController> {
                             onTap: () => Get.toNamed(AppRoutes.register),
                             child: Text(
                               'Register'.tr,
-                              style: TextStyle(color: p.income, fontWeight: FontWeight.w700, fontSize: 13),
+                              style: const TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.w700, fontSize: 13),
                             ),
                           ),
                         ],
-                      ),
-                      const SizedBox(height: 12),
-                      Center(
-                        child: TextButton(
-                          onPressed: () => Get.offAllNamed(AppRoutes.navigation),
-                          child: Text(
-                            'Continue as Guest'.tr,
-                            style: TextStyle(color: p.mute, fontSize: 13),
-                          ),
-                        ),
                       ),
                     ],
                   ),

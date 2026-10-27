@@ -461,6 +461,17 @@ class AppTranslations extends Translations {
     'Time Range': 'সময়সীমা',
     'Show zikir details': 'জিকির বিস্তারিত দেখান',
     'Hide zikir details': 'জিকির বিস্তারিত লুকান',
+    'Daily History Logs': 'দৈনিক ইতিহাস (লগ)',
+    'Zikir Overview': 'জিকির তালিকা',
+    'Day-wise History': 'দিনভিত্তিক ইতিহাস',
+    'Synced with Firebase': 'ফায়ারবেস ক্লাউড হিস্ট্রি',
+    'No history recorded yet': 'এখনো কোনো ইতিহাস সংরক্ষিত হয়নি',
+    'Total on this day': 'এই দিনে মোট',
+    'Select Date': 'তারিখ নির্বাচন',
+    'Reset Date': 'রিসেট',
+    'History from Firebase': 'ফায়ারবেস থেকে সংরক্ষিত ইতিহাস',
+    'All Dates': 'সব তারিখ',
+    'Yesterday': 'গতকাল',
 
     // Prohibited Prayer Times (নামাজের নিষিদ্ধ সময়)
     'Prohibited Prayer Times': 'নামাজের নিষিদ্ধ সময়',
