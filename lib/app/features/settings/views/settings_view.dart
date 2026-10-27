@@ -7,6 +7,7 @@ import '../../../core/theme/app_widgets.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../data/models/entry_type.dart';
+import '../../../data/models/user_model.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../routes/app_routes.dart';
 import '../../transactions/controllers/transactions_controller.dart';
@@ -72,31 +73,11 @@ class SettingsView extends StatelessWidget {
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Row(
-                                            children: [
-                                              Flexible(
-                                                child: Text(
-                                                  name,
-                                                  maxLines: 1,
-                                                  overflow: TextOverflow.ellipsis,
-                                                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: p.ink),
-                                                ),
-                                              ),
-                                              if (user != null && user.role != 'user') ...[
-                                                const SizedBox(width: 6),
-                                                Container(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                                  decoration: BoxDecoration(
-                                                    color: p.income.withOpacity(0.15),
-                                                    borderRadius: BorderRadius.circular(6),
-                                                  ),
-                                                  child: Text(
-                                                    user.role.toUpperCase(),
-                                                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: p.income),
-                                                  ),
-                                                ),
-                                              ],
-                                            ],
+                                          Text(
+                                            name,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: p.ink),
                                           ),
                                           if (desig.isNotEmpty) ...[
                                             const SizedBox(height: 2),
@@ -106,7 +87,7 @@ class SettingsView extends StatelessWidget {
                                             const SizedBox(height: 2),
                                             Text(phone, style: TextStyle(fontSize: 12, color: p.mute)),
                                           ],
-                                          if (user != null && (user.lastLoginDevice != null || user.lastLoginLatitude != null)) ...[
+                                          if (user != null && user.lastLoginDevice != null) ...[
                                             const SizedBox(height: 6),
                                             Row(
                                               children: [
@@ -114,23 +95,12 @@ class SettingsView extends StatelessWidget {
                                                 const SizedBox(width: 4),
                                                 Flexible(
                                                   child: Text(
-                                                    user.lastLoginDevice ?? 'Device logged in',
+                                                    user.lastLoginDevice!,
                                                     maxLines: 1,
                                                     overflow: TextOverflow.ellipsis,
                                                     style: TextStyle(fontSize: 11, color: p.mute),
                                                   ),
                                                 ),
-                                                if (user.lastLoginLatitude != null && user.lastLoginLongitude != null) ...[
-                                                  const SizedBox(width: 6),
-                                                  Text('·', style: TextStyle(color: p.mute)),
-                                                  const SizedBox(width: 6),
-                                                  Icon(Icons.location_on, size: 13, color: p.income),
-                                                  const SizedBox(width: 2),
-                                                  Text(
-                                                    '${user.lastLoginLatitude!.toStringAsFixed(2)}, ${user.lastLoginLongitude!.toStringAsFixed(2)}',
-                                                    style: TextStyle(fontSize: 11, color: p.mute),
-                                                  ),
-                                                ],
                                               ],
                                             ),
                                           ],
@@ -275,6 +245,10 @@ class SettingsView extends StatelessWidget {
                     ]),
                   ),
 
+                  // Registered App Users (Visible only to Developers)
+                  if (hasAuth && auth != null && auth.isDeveloper)
+                    _DeveloperAppUsersCard(auth: auth, p: p, isBn: isBn),
+
                   // Personal Notes & Debts Link
                   AppCard(
                     flush: true,
@@ -400,6 +374,207 @@ class SettingsView extends StatelessWidget {
           ),
         );
       }),
+    );
+  }
+}
+
+/// Developer-only card listing all registered users with Name, Designation, and Phone
+class _DeveloperAppUsersCard extends StatelessWidget {
+  const _DeveloperAppUsersCard({
+    required this.auth,
+    required this.p,
+    required this.isBn,
+  });
+
+  final AuthService auth;
+  final AppPalette p;
+  final bool isBn;
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<List<UserModel>>(
+      stream: auth.streamAllUsers(),
+      builder: (context, snapshot) {
+        final users = snapshot.data ?? [];
+        final isLoading = snapshot.connectionState == ConnectionState.waiting && users.isEmpty;
+
+        return AppCard(
+          flush: true,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Header
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(7),
+                      decoration: BoxDecoration(
+                        color: p.income.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(Icons.people_alt_rounded, color: p.income, size: 20),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Registered App Users'.tr,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: p.ink,
+                        ),
+                      ),
+                    ),
+                    if (users.isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: p.income.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '${users.length}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: p.income,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              Divider(height: 1, color: p.line),
+
+              // Content
+              if (isLoading)
+                Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Center(
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: p.income),
+                    ),
+                  ),
+                )
+              else if (users.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Center(
+                    child: Text(
+                      'No registered users found'.tr,
+                      style: TextStyle(fontSize: 13, color: p.mute),
+                    ),
+                  ),
+                )
+              else
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: users.length,
+                  separatorBuilder: (_, __) => Divider(height: 1, indent: 64, color: p.line),
+                  itemBuilder: (context, i) {
+                    final u = users[i];
+                    final name = u.displayName(isBn);
+                    final desig = u.displayDesignation(isBn);
+                    final phone = u.phone ?? '';
+
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      child: Row(
+                        children: [
+                          // Avatar
+                          CircleAvatar(
+                            radius: 20,
+                            backgroundColor: p.income.withOpacity(0.15),
+                            child: Text(
+                              name.isEmpty ? '?' : name.characters.first.toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: p.income,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+
+                          // Name, Designation, Phone
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        name.isEmpty ? 'Personal Expense User'.tr : name,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w700,
+                                          color: p.ink,
+                                        ),
+                                      ),
+                                    ),
+                                    if (u.userNo != null) ...[
+                                      const SizedBox(width: 6),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                                        decoration: BoxDecoration(
+                                          color: p.bg,
+                                          borderRadius: BorderRadius.circular(4),
+                                          border: Border.all(color: p.line),
+                                        ),
+                                        child: Text(
+                                          '#${u.userNo}',
+                                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: p.mute),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                                if (desig.isNotEmpty) ...[
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    desig,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(fontSize: 12, color: p.mute),
+                                  ),
+                                ],
+                                if (phone.isNotEmpty) ...[
+                                  const SizedBox(height: 3),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.phone_outlined, size: 12, color: p.income),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        phone,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: p.ink,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

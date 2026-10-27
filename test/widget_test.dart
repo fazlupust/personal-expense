@@ -527,6 +527,39 @@ void main() {
       expect(updated.nameBn, 'ফজলু'); // Preserved
       expect(updated.email, 'fazlu@example.com'); // Preserved
     });
+
+    test('Developer App Users model verification: name, designation, phone', () {
+      const devUser = UserModel(
+        uid: 'dev_1',
+        userNo: 1,
+        nameBn: 'ডেভেলপার ইউজার',
+        nameEn: 'Developer User',
+        phone: '01744309649',
+        designationEn: 'Lead Architect',
+        designationBn: 'লিড আর্কিটেক্ট',
+      );
+
+      const normalUser = UserModel(
+        uid: 'user_2',
+        userNo: 2,
+        nameBn: 'সাধারণ ইউজার',
+        nameEn: 'Normal User',
+        phone: '01811111111',
+        designationEn: 'Accountant',
+        designationBn: 'হিসাবরক্ষক',
+      );
+
+      expect(devUser.isDeveloper, isTrue);
+      expect(normalUser.isDeveloper, isFalse);
+
+      expect(devUser.displayName(false), 'Developer User');
+      expect(devUser.displayDesignation(false), 'Lead Architect');
+      expect(devUser.phone, '01744309649');
+
+      expect(normalUser.displayName(true), 'সাধারণ ইউজার');
+      expect(normalUser.displayDesignation(true), 'হিসাবরক্ষক');
+      expect(normalUser.phone, '01811111111');
+    });
   });
 }
 

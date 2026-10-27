@@ -41,54 +41,55 @@ class EntryFormSheet extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           child: SafeArea(
             top: false,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Primary Color Header Bar with Close Button
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                    decoration: BoxDecoration(
-                      color: p.income,
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          f.isEdit ? Icons.edit_note : Icons.add_circle_outline,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          (f.isEdit ? 'Edit entry' : 'New entry').tr,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const Spacer(),
-                        InkWell(
-                          onTap: () => Navigator.of(context).pop(),
-                          borderRadius: BorderRadius.circular(20),
-                          child: Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Icons.close, color: Colors.white, size: 18),
-                          ),
-                        ),
-                      ],
-                    ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Primary Color Header Bar with Close Button (Frozen)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: p.income,
                   ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        f.isEdit ? Icons.edit_note : Icons.add_circle_outline,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        (f.isEdit ? 'Edit entry' : 'New entry').tr,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const Spacer(),
+                      InkWell(
+                        onTap: () => Navigator.of(context).pop(),
+                        borderRadius: BorderRadius.circular(20),
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.close_rounded, color: Colors.white, size: 18),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
 
-                  // Form Content
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(18, 16, 18, 20),
-                    child: Column(
+                // Scrollable Form Content
+                Flexible(
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(18, 16, 18, 20),
+                      child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         // Type Segment Bar (Expense / Income)
@@ -313,14 +314,15 @@ class EntryFormSheet extends StatelessWidget {
                       ],
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   /// Opens an interactive searchable category bottom sheet
   void _showCategorySearchSheet(

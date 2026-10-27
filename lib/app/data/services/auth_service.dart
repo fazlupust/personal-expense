@@ -245,4 +245,22 @@ class AuthService extends GetxService {
       isLoading.value = false;
     }
   }
+
+  /// Stream all registered users (for developer view)
+  Stream<List<UserModel>> streamAllUsers() {
+    return _db.collection('users').snapshots().map((snap) {
+      final list = snap.docs.map((d) => UserModel.fromFirestore(d)).toList();
+      list.sort((a, b) {
+        if (a.userNo != null && b.userNo != null) {
+          return a.userNo!.compareTo(b.userNo!);
+        }
+        if (a.userNo != null) return -1;
+        if (b.userNo != null) return 1;
+        final aTime = a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        final bTime = b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        return bTime.compareTo(aTime);
+      });
+      return list;
+    });
+  }
 }

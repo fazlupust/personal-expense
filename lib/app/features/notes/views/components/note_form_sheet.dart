@@ -42,55 +42,56 @@ class NoteFormSheet extends StatelessWidget {
             clipBehavior: Clip.antiAlias,
             child: SafeArea(
               top: false,
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Header Bar
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                      decoration: BoxDecoration(color: p.income),
-                      child: Row(
-                        children: [
-                          Icon(
-                            isEdit ? Icons.edit_note_rounded : Icons.note_add_rounded,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Header Bar (Frozen)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                    decoration: BoxDecoration(color: p.income),
+                    child: Row(
+                      children: [
+                        Icon(
+                          isEdit ? Icons.edit_note_rounded : Icons.note_add_rounded,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          (isEdit ? 'Edit Note' : 'New Note').tr,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
                             color: Colors.white,
-                            size: 24,
                           ),
-                          const SizedBox(width: 10),
-                          Text(
-                            (isEdit ? 'Edit Note' : 'New Note').tr,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
+                        ),
+                        const Spacer(),
+                        InkWell(
+                          onTap: () {
+                            c.stopAllVoice();
+                            Navigator.of(context).pop();
+                          },
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              shape: BoxShape.circle,
                             ),
+                            child: const Icon(Icons.close_rounded, color: Colors.white, size: 18),
                           ),
-                          const Spacer(),
-                          InkWell(
-                            onTap: () {
-                              c.stopAllVoice();
-                              Navigator.of(context).pop();
-                            },
-                            borderRadius: BorderRadius.circular(20),
-                            child: Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(Icons.close, color: Colors.white, size: 18),
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
+                  ),
 
-                    // Form Fields
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(18, 16, 18, 20),
-                      child: Column(
+                  // Form Fields (Scrollable)
+                  Flexible(
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(18, 16, 18, 20),
+                        child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           // 1. Note Title with Voice Input
@@ -396,11 +397,12 @@ class NoteFormSheet extends StatelessWidget {
                         ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
+        ),
         );
       },
     );

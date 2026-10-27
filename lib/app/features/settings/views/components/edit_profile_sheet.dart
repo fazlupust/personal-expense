@@ -141,67 +141,61 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
     final user = Get.isRegistered<AuthService>() ? AuthService.to.userProfile.value : null;
     final phone = user?.phone ?? '';
 
-    return Container(
-      decoration: BoxDecoration(
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      child: Material(
         color: p.card,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      padding: EdgeInsets.only(
-        left: 20,
-        right: 20,
-        top: 20,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Handle bar
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+        clipBehavior: Clip.antiAlias,
+        child: SafeArea(
+          top: false,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Primary Color Header Bar with Close Button (Frozen)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                 decoration: BoxDecoration(
-                  color: p.line,
-                  borderRadius: BorderRadius.circular(2),
+                  color: p.income,
                 ),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Header Row
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
+                child: Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: p.income.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Icon(Icons.person_outline_rounded, color: p.income, size: 22),
-                    ),
-                    const SizedBox(width: 12),
+                    const Icon(Icons.person_outline_rounded, color: Colors.white, size: 22),
+                    const SizedBox(width: 10),
                     Text(
                       'Edit Profile'.tr,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
-                        color: p.ink,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const Spacer(),
+                    InkWell(
+                      onTap: () => Navigator.of(context).pop(),
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.close_rounded, color: Colors.white, size: 18),
                       ),
                     ),
                   ],
                 ),
-                IconButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: Icon(Icons.close_rounded, color: p.mute),
-                ),
-              ],
-            ),
-            const SizedBox(height: 18),
+              ),
+
+              // Scrollable Form Content
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
 
             // Phone indicator (Read only)
             if (phone.isNotEmpty) ...[
@@ -330,11 +324,16 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                       'Update Profile'.tr,
                       style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
                     ),
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
-    );
+    ],
+  ),
+),
+),
+);
   }
 
   Widget _buildField({
