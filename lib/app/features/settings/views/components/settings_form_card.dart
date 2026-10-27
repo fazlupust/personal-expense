@@ -254,7 +254,7 @@ class SettingsFormCard extends StatelessWidget {
               builder: (ctx, snapshot) {
                 final v = snapshot.data?.version ?? '1.0.0';
                 return Text(
-                  'Personal Expense v$v',
+                  '${AppConstants.appName} v$v',
                   style: TextStyle(fontSize: 11, color: context.pal.mute.withOpacity(0.6)),
                 );
               },

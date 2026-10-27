@@ -1,6 +1,6 @@
 {
-    "name": "personal_expense",
-    "short_name": "personal_expense",
+    "name": "My Wallet",
+    "short_name": "My Wallet",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

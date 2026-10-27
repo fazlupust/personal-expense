@@ -79,7 +79,7 @@ class AppUpdateService extends GetxService {
           minVersion: _cachedCurrentVersion,
           title: 'Update Available',
           message:
-              'A new version of Personal Expense is available with new features and improvements. Please update now to continue enjoying the best experience.',
+              'A new version of My Wallet is available with new features and improvements. Please update now to continue enjoying the best experience.',
           playStoreUrl: 'https://play.google.com/store/apps/details?id=com.fazlu.personalexpense',
         );
 

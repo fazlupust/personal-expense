@@ -4,7 +4,7 @@ import '../../data/models/entry_type.dart';
 class AppConstants {
   AppConstants._();
 
-  static const String appName = 'Personal Expense';
+  static const String appName = 'My Wallet';
   static const String currency = '৳';
 
   static const String prefsSettings = 'pe.settings.v1';

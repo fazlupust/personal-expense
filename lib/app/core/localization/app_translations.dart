@@ -6,7 +6,10 @@ class AppTranslations extends Translations {
   Map<String, Map<String, String>> get keys => {'en': const {}, 'bn': _bn};
 
   static const Map<String, String> _bn = {
-    'Personal Expense': 'ব্যক্তিগত খরচ',
+    'My Wallet': 'মাই ওয়ালেট',
+    'Personal Expense': 'মাই ওয়ালেট',
+    'Track • Save • Grow': 'স্মার্ট মানি • সহজ হিসাব',
+    'Smart Money • Effortless Control': 'স্মার্ট মানি • সহজ হিসাব',
     // Navigation
     'Dashboard': 'ড্যাশবোর্ড',
     'Transactions': 'লেনদেন',

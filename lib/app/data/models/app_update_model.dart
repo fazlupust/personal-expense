@@ -35,7 +35,7 @@ class AppUpdateModel {
       minVersion: (data['min_version'] ?? '1.0.0').toString().trim(),
       title: (data['title'] ?? 'Update Available').toString().trim(),
       message: (data['message'] ??
-              'A new version of Personal Expense is available with new features and improvements. Please update now to get the best experience.')
+              'A new version of My Wallet is available with new features and improvements. Please update now to get the best experience.')
           .toString()
           .trim(),
       playStoreUrl: (data['play_store_url'] ??

@@ -181,7 +181,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               Expanded(
                 child: titleWidget ??
                     Text(
-                      title?.tr ?? 'Personal Expense'.tr,
+                      title?.tr ?? 'My Wallet'.tr,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(

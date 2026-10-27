@@ -110,7 +110,7 @@ class NavigationView extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 10),
-                            Text('Personal Expense'.tr,
+                            Text('My Wallet'.tr,
                                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: p.ink)),
                           ],
                         )
