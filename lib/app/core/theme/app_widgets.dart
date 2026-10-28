@@ -254,10 +254,23 @@ class AppButton extends StatelessWidget {
     super.key,
     required this.onPressed,
     this.style = AppButtonStyle.filled,
+    this.icon,
+    this.isLoading = false,
+    this.height = 48,
+    this.width,
+    this.margin = const EdgeInsets.only(bottom: 8),
+    this.fontSize = 15.5,
   });
+
   final String label;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final AppButtonStyle style;
+  final IconData? icon;
+  final bool isLoading;
+  final double? height;
+  final double? width;
+  final EdgeInsetsGeometry? margin;
+  final double fontSize;
 
   @override
   Widget build(BuildContext context) {
@@ -265,8 +278,58 @@ class AppButton extends StatelessWidget {
     final shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(12),
     );
-    const textStyle = TextStyle(fontSize: 16, fontWeight: FontWeight.w700);
-    final child = Text(label.tr);
+    final textStyle = TextStyle(fontSize: fontSize, fontWeight: FontWeight.w700);
+
+    final Widget content = isLoading
+        ? Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: fontSize + 2,
+                height: fontSize + 2,
+                child: const CircularProgressIndicator(
+                  strokeWidth: 2.2,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  label.tr,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: textStyle,
+                ),
+              ),
+            ],
+          )
+        : (icon != null
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icon, size: fontSize + 2),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      label.tr,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: textStyle,
+                    ),
+                  ),
+                ],
+              )
+            : Text(
+                label.tr,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: textStyle,
+              ));
+
+    final effectiveOnPressed = isLoading ? null : onPressed;
+
     final Widget button = switch (style) {
       AppButtonStyle.filled => Container(
           decoration: BoxDecoration(
@@ -285,16 +348,17 @@ class AppButton extends StatelessWidget {
             ],
           ),
           child: ElevatedButton(
-            onPressed: onPressed,
+            onPressed: effectiveOnPressed,
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.transparent,
               foregroundColor: Colors.white,
               shadowColor: Colors.transparent,
               elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               shape: shape,
               textStyle: textStyle,
             ),
-            child: child,
+            child: content,
           ),
         ),
       AppButtonStyle.cancel => Container(
@@ -314,43 +378,46 @@ class AppButton extends StatelessWidget {
             ],
           ),
           child: ElevatedButton(
-            onPressed: onPressed,
+            onPressed: effectiveOnPressed,
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.transparent,
               foregroundColor: Colors.white,
               shadowColor: Colors.transparent,
               elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               shape: shape,
               textStyle: textStyle,
             ),
-            child: child,
+            child: content,
           ),
         ),
       AppButtonStyle.outlined => OutlinedButton(
-          onPressed: onPressed,
+          onPressed: effectiveOnPressed,
           style: OutlinedButton.styleFrom(
             foregroundColor: p.ink,
             backgroundColor: p.bg,
             side: BorderSide(color: p.line),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             shape: shape,
             textStyle: textStyle,
           ),
-          child: child,
+          child: content,
         ),
       AppButtonStyle.danger => OutlinedButton(
-          onPressed: onPressed,
+          onPressed: effectiveOnPressed,
           style: OutlinedButton.styleFrom(
             foregroundColor: p.expense,
             side: BorderSide(color: p.expense),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             shape: shape,
             textStyle: textStyle,
           ),
-          child: child,
+          child: content,
         ),
     };
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: SizedBox(width: double.infinity, height: 48, child: button),
+      padding: margin ?? EdgeInsets.zero,
+      child: SizedBox(width: width ?? double.infinity, height: height, child: button),
     );
   }
 }

@@ -298,69 +298,34 @@ class SettingsFormCard extends StatelessWidget {
           AppButton('Save settings', onPressed: s.saveProfile),
 
           const SizedBox(height: 4),
-          ElevatedButton.icon(
+          AppButton(
+            'Export Data (CSV / JSON)',
+            icon: Icons.file_download_outlined,
+            height: 44,
+            fontSize: 13.5,
+            margin: const EdgeInsets.only(bottom: 8),
             onPressed: () => showDataExportSheet(context),
-            icon: const Icon(Icons.file_download_outlined, size: 17, color: Colors.white),
-            label: Text(
-              'Export Data (CSV / JSON)'.tr,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 13.5,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            style: ElevatedButton.styleFrom(
-              minimumSize: const Size.fromHeight(42),
-              backgroundColor: context.pal.income,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            ),
           ),
 
           // Change password option if logged in
           if (Get.isRegistered<AuthService>() && Get.find<AuthService>().isLoggedIn) ...[
-            const SizedBox(height: 8),
-            ElevatedButton.icon(
+            AppButton(
+              'Change Password',
+              icon: Icons.lock_reset_rounded,
+              height: 44,
+              fontSize: 13.5,
+              margin: const EdgeInsets.only(bottom: 8),
               onPressed: () => showChangePasswordSheet(context),
-              icon: const Icon(Icons.lock_reset_rounded, size: 16, color: Colors.white),
-              label: Text(
-                'Change Password'.tr,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size.fromHeight(40),
-                backgroundColor: context.pal.income,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              ),
             ),
           ],
 
-          const SizedBox(height: 8),
-          ElevatedButton.icon(
+          AppButton(
+            'Check for Updates',
+            icon: Icons.sync_rounded,
+            height: 44,
+            fontSize: 13.5,
+            margin: const EdgeInsets.only(bottom: 8),
             onPressed: () => AppUpdateService.to.checkManually(),
-            icon: const Icon(Icons.sync_rounded, size: 16, color: Colors.white),
-            label: Text(
-              'Check for Updates'.tr,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            style: ElevatedButton.styleFrom(
-              minimumSize: const Size.fromHeight(40),
-              backgroundColor: context.pal.income,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            ),
           ),
           const SizedBox(height: 12),
           Center(

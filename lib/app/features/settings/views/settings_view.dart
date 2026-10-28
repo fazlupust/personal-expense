@@ -113,116 +113,60 @@ class SettingsView extends StatelessWidget {
                                   Row(
                                     children: [
                                       Expanded(
-                                        child: ElevatedButton.icon(
+                                        child: AppButton(
+                                          'Edit Profile',
+                                          icon: Icons.edit_outlined,
+                                          height: 42,
+                                          fontSize: 12.5,
+                                          margin: EdgeInsets.zero,
                                           onPressed: () => showEditProfileSheet(context),
-                                          icon: const Icon(Icons.edit_outlined, size: 16, color: Colors.white),
-                                          label: FittedBox(
-                                            fit: BoxFit.scaleDown,
-                                            child: Text(
-                                              'Edit Profile'.tr,
-                                              maxLines: 1,
-                                              style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
-                                            ),
-                                          ),
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: p.income,
-                                            foregroundColor: Colors.white,
-                                            elevation: 0,
-                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
-                                            minimumSize: const Size(0, 40),
-                                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                          ),
                                         ),
                                       ),
                                       const SizedBox(width: 8),
                                       Expanded(
-                                        child: ElevatedButton.icon(
+                                        child: AppButton(
+                                          'Change Password',
+                                          icon: Icons.lock_reset_rounded,
+                                          height: 42,
+                                          fontSize: 12.5,
+                                          margin: EdgeInsets.zero,
                                           onPressed: () => showChangePasswordSheet(context),
-                                          icon: const Icon(Icons.lock_reset_rounded, size: 16, color: Colors.white),
-                                          label: FittedBox(
-                                            fit: BoxFit.scaleDown,
-                                            child: Text(
-                                              'Change Password'.tr,
-                                              maxLines: 1,
-                                              style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
-                                            ),
-                                          ),
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: p.income,
-                                            foregroundColor: Colors.white,
-                                            elevation: 0,
-                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
-                                            minimumSize: const Size(0, 40),
-                                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                          ),
                                         ),
                                       ),
                                     ],
                                   ),
                                   const SizedBox(height: 8),
-                                  SizedBox(
-                                    width: double.infinity,
-                                    child: OutlinedButton.icon(
-                                      onPressed: () => auth.signOut(),
-                                      icon: const Icon(Icons.logout, size: 17),
-                                      label: Text('Sign Out'.tr),
-                                      style: OutlinedButton.styleFrom(
-                                        foregroundColor: p.expense,
-                                        side: BorderSide(color: p.expense.withOpacity(0.4)),
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                      ),
-                                    ),
+                                  AppButton(
+                                    'Sign Out',
+                                    icon: Icons.logout,
+                                    style: AppButtonStyle.cancel,
+                                    height: 42,
+                                    fontSize: 13,
+                                    margin: EdgeInsets.zero,
+                                    onPressed: () => _confirmSignOut(context, auth),
                                   ),
                                 ] else ...[
                                   Row(
                                     children: [
                                       Expanded(
-                                        child: ElevatedButton.icon(
+                                        child: AppButton(
+                                          'Edit Profile',
+                                          icon: Icons.edit_outlined,
+                                          height: 42,
+                                          fontSize: 12.5,
+                                          margin: EdgeInsets.zero,
                                           onPressed: () => showEditProfileSheet(context),
-                                          icon: const Icon(Icons.edit_outlined, size: 16, color: Colors.white),
-                                          label: FittedBox(
-                                            fit: BoxFit.scaleDown,
-                                            child: Text(
-                                              'Edit Profile'.tr,
-                                              maxLines: 1,
-                                              style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
-                                            ),
-                                          ),
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: p.income,
-                                            foregroundColor: Colors.white,
-                                            elevation: 0,
-                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
-                                            minimumSize: const Size(0, 40),
-                                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                          ),
                                         ),
                                       ),
                                       const SizedBox(width: 8),
                                       Expanded(
-                                        child: ElevatedButton.icon(
+                                        child: AppButton(
+                                          'Sign In with Phone',
+                                          icon: Icons.login,
+                                          height: 42,
+                                          fontSize: 12.5,
+                                          margin: EdgeInsets.zero,
                                           onPressed: () => Get.toNamed(AppRoutes.login),
-                                          icon: const Icon(Icons.login, size: 16, color: Colors.white),
-                                          label: FittedBox(
-                                            fit: BoxFit.scaleDown,
-                                            child: Text(
-                                              'Sign In with Phone'.tr,
-                                              maxLines: 1,
-                                              style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
-                                            ),
-                                          ),
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: p.income,
-                                            foregroundColor: Colors.white,
-                                            elevation: 0,
-                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
-                                            minimumSize: const Size(0, 40),
-                                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                          ),
                                         ),
                                       ),
                                     ],
@@ -259,16 +203,13 @@ class SettingsView extends StatelessWidget {
                                 ],
                               ),
                               const SizedBox(height: 12),
-                              ElevatedButton.icon(
+                              AppButton(
+                                'Edit Profile',
+                                icon: Icons.edit_outlined,
+                                height: 42,
+                                fontSize: 13,
+                                margin: EdgeInsets.zero,
                                 onPressed: () => showEditProfileSheet(context),
-                                icon: const Icon(Icons.edit_outlined, size: 17, color: Colors.white),
-                                label: Text('Edit Profile'.tr),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: p.income,
-                                  foregroundColor: Colors.white,
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                ),
                               ),
                             ],
                           ),
@@ -448,6 +389,87 @@ class SettingsView extends StatelessWidget {
           ),
         );
       }),
+    );
+  }
+
+  void _confirmSignOut(BuildContext context, AuthService auth) {
+    final p = context.pal;
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        backgroundColor: p.card,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(22, 22, 22, 18),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: p.expense.withOpacity(0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.logout_rounded, color: p.expense, size: 28),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                'Sign Out Confirmation'.tr,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                  color: p.ink,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Are you sure you want to sign out?'.tr,
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 13.5, color: p.mute),
+              ),
+              const SizedBox(height: 22),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Get.back(),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        side: BorderSide(color: p.line),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        'Cancel'.tr,
+                        style: TextStyle(
+                          color: p.ink,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: AppButton(
+                      'Sign Out',
+                      style: AppButtonStyle.cancel,
+                      height: 44,
+                      fontSize: 13.5,
+                      margin: EdgeInsets.zero,
+                      onPressed: () {
+                        Get.back();
+                        auth.signOut();
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_widgets.dart';
 import '../../../../data/services/auth_service.dart';
 
 Future<void> showChangePasswordSheet(BuildContext context) {
@@ -300,25 +301,13 @@ class _ChangePasswordSheetState extends State<ChangePasswordSheet> {
                           const SizedBox(width: 12),
                           Expanded(
                             flex: 2,
-                            child: ElevatedButton(
-                              onPressed: _isLoading ? null : _submit,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: p.income,
-                                foregroundColor: Colors.white,
-                                elevation: 0,
-                                padding: const EdgeInsets.symmetric(vertical: 14),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              ),
-                              child: _isLoading
-                                  ? const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                                    )
-                                  : Text(
-                                      'Update Password'.tr,
-                                      style: const TextStyle(fontWeight: FontWeight.w700),
-                                    ),
+                            child: AppButton(
+                              _isLoading ? 'Updating...' : 'Update Password',
+                              isLoading: _isLoading,
+                              height: 48,
+                              fontSize: 14.5,
+                              margin: EdgeInsets.zero,
+                              onPressed: _isLoading ? () {} : _submit,
                             ),
                           ),
                         ],

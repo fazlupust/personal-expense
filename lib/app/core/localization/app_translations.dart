@@ -520,6 +520,12 @@ class AppTranslations extends Translations {
     'Tangail': 'টাঙ্গাইল',
     'Dinajpur': 'দিনাজপুর',
     'Cox\'s Bazar': 'কক্সবাজার',
+    'Saving note, please wait...': 'নোট সংরক্ষণ হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...',
+    'Saving note...': 'নোট সংরক্ষণ হচ্ছে...',
+    'Saving...': 'সংরক্ষণ হচ্ছে...',
+    'Updating...': 'আপডেট হচ্ছে...',
+    'Sign Out Confirmation': 'লগআউট নিশ্চিতকরণ',
+    'Are you sure you want to sign out?': 'আপনি কি নিশ্চিত যে আপনি লগআউট করতে চান?',
   };
 }
 

@@ -357,29 +357,67 @@ class NoteFormSheet extends StatelessWidget {
                           const SizedBox(height: 16),
 
                           // 5. Action Buttons: Cancel and Save side-by-side
+                          if (c.isSaving) ...[
+                            Container(
+                              margin: const EdgeInsets.only(bottom: 12),
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: p.income.withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: p.income.withOpacity(0.25)),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.2,
+                                      color: p.income,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    'Saving note, please wait...'.tr,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: p.income,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                           Row(
                             children: [
                               Expanded(
                                 child: AppButton(
                                   'Cancel',
                                   style: AppButtonStyle.cancel,
-                                  onPressed: () {
-                                    c.stopAllVoice();
-                                    Navigator.of(context).pop();
-                                  },
+                                  onPressed: c.isSaving
+                                      ? () {}
+                                      : () {
+                                          c.stopAllVoice();
+                                          Navigator.of(context).pop();
+                                        },
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: AppButton(
-                                  'Submit',
-                                  onPressed: () async {
-                                    c.stopAllVoice();
-                                    final ok = await c.save();
-                                    if (ok && context.mounted) {
-                                      Navigator.of(context).pop();
-                                    }
-                                  },
+                                  c.isSaving ? 'Saving note...' : 'Submit',
+                                  isLoading: c.isSaving,
+                                  onPressed: c.isSaving
+                                      ? () {}
+                                      : () async {
+                                          c.stopAllVoice();
+                                          final ok = await c.save();
+                                          if (ok && context.mounted) {
+                                            Navigator.of(context).pop();
+                                          }
+                                        },
                                 ),
                               ),
                             ],

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_widgets.dart';
 import '../../../../data/services/auth_service.dart';
 import '../../controllers/settings_controller.dart';
 
@@ -309,26 +310,14 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
             const SizedBox(height: 22),
 
             // Submit Button
-            ElevatedButton(
-              onPressed: _isLoading ? null : _save,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: p.income,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                elevation: 0,
-              ),
-              child: _isLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                    )
-                  : Text(
-                      'Update Profile'.tr,
-                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-                    ),
-              ),
+            AppButton(
+              _isLoading ? 'Saving...' : 'Update Profile',
+              isLoading: _isLoading,
+              height: 48,
+              fontSize: 15,
+              margin: EdgeInsets.zero,
+              onPressed: _isLoading ? () {} : _save,
+            ),
             ],
           ),
         ),

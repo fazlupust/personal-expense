@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_widgets.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../data/models/entry_type.dart';
 import '../../../categories/controllers/categories_controller.dart';
@@ -273,19 +274,12 @@ class _BudgetManagementSheetState extends State<BudgetManagementSheet> {
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-                  child: ElevatedButton(
+                  child: AppButton(
+                    'Save Budgets',
+                    height: 48,
+                    fontSize: 15,
+                    margin: EdgeInsets.zero,
                     onPressed: _save,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: p.income,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      'Save Budgets'.tr,
-                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-                    ),
                   ),
                 ),
               ],
