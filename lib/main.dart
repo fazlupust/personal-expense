@@ -11,6 +11,7 @@ import 'app/core/theme/app_theme.dart';
 import 'app/data/services/app_update_service.dart';
 import 'app/data/services/auth_service.dart';
 import 'app/data/services/category_service.dart';
+import 'app/data/services/network_service.dart';
 import 'app/data/services/note_service.dart';
 import 'app/data/services/transaction_service.dart';
 import 'app/data/services/weather_service.dart';
@@ -27,6 +28,7 @@ Future<void> main() async {
   await initializeDateFormatting();
   final prefs = await SharedPreferences.getInstance();
   Get.put<SharedPreferences>(prefs, permanent: true);
+  Get.put(NetworkService(), permanent: true);
   Get.put(AppUpdateService(), permanent: true);
   Get.put(WeatherService(), permanent: true);
   Get.put(AuthService(), permanent: true);
