@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../data/services/prayer_time_service.dart';
 import '../../../../routes/app_routes.dart';
-import '../../prayer_tasbih/controllers/prayer_tasbih_controller.dart';
+import '../../../prayer_tasbih/controllers/prayer_tasbih_controller.dart';
 
 class DashboardPrayerCard extends StatelessWidget {
   const DashboardPrayerCard({super.key});
