@@ -241,6 +241,37 @@ class EntryFormSheet extends StatelessWidget {
 
                           const SizedBox(height: 12),
 
+                          // Account Selector (Cash, Due, Bank, etc.)
+                          DropdownButtonFormField<String>(
+                            value: f.accountNames.contains(f.account)
+                                ? f.account
+                                : f.accountNames.first,
+                            decoration: InputDecoration(
+                              labelText: 'Account'.tr,
+                              prefixIcon: Icon(
+                                f.account == 'Due'
+                                    ? Icons.pending_actions_outlined
+                                    : f.account == 'Cash'
+                                        ? Icons.payments_outlined
+                                        : Icons.account_balance_wallet_outlined,
+                                color: f.account == 'Due' ? p.expense : p.income,
+                                size: 20,
+                              ),
+                            ),
+                            items: [
+                              for (final a in f.accountNames)
+                                DropdownMenuItem(
+                                  value: a,
+                                  child: Text(a.tr, style: TextStyle(color: p.ink)),
+                                ),
+                            ],
+                            onChanged: (v) {
+                              if (v != null) f.setAccount(v);
+                            },
+                          ),
+
+                          const SizedBox(height: 12),
+
                           // Note Field with Voice Input (Text Area)
                           TextField(
                             controller: f.noteCtrl,

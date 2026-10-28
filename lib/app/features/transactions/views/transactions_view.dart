@@ -64,6 +64,55 @@ class TransactionsView extends StatelessWidget {
               TransactionTable(rows: rows)
             else
               ..._groupedList(context, tc, rows),
+            if (rows.isNotEmpty) ...[
+              if (tc.hasMore) ...[
+                const SizedBox(height: 16),
+                Center(
+                  child: InkWell(
+                    onTap: tc.loadMore,
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: p.income.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: p.income.withOpacity(0.35)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.expand_circle_down_outlined, size: 20, color: p.income),
+                          const SizedBox(width: 8),
+                          Text(
+                            '${'Load More'.tr} (${tc.remainingCount} ${'more'.tr})',
+                            style: TextStyle(
+                              color: p.income,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Center(
+                  child: Text(
+                    '${'Showing'.tr} ${tc.loadedCount} ${'of'.tr} ${tc.totalCount} ${'entries'.tr}',
+                    style: TextStyle(fontSize: 12, color: p.mute),
+                  ),
+                ),
+              ] else if (tc.totalCount > 40) ...[
+                const SizedBox(height: 16),
+                Center(
+                  child: Text(
+                    '${'Showing'.tr} ${tc.totalCount} ${'of'.tr} ${tc.totalCount} ${'entries'.tr}',
+                    style: TextStyle(fontSize: 12, color: p.mute),
+                  ),
+                ),
+              ],
+            ],
           ],
         ),
       );

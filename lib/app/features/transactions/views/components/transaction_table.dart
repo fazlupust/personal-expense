@@ -22,6 +22,11 @@ class TransactionTable extends StatelessWidget {
     final net = tc.sum(rows, EntryType.income) - tc.sum(rows, EntryType.expense);
     final bold = TextStyle(fontWeight: FontWeight.w700, color: p.ink);
 
+    final cashRows = rows.where((e) => e.account.trim().toLowerCase() != 'due');
+    final dueRows = rows.where((e) => e.account.trim().toLowerCase() == 'due');
+    final cashNet = tc.sum(cashRows, EntryType.income) - tc.sum(cashRows, EntryType.expense);
+    final dueNet = tc.sum(dueRows, EntryType.income) - tc.sum(dueRows, EntryType.expense);
+
     return AppCard(
       flush: true,
       child: LayoutBuilder(
@@ -31,42 +36,91 @@ class TransactionTable extends StatelessWidget {
             constraints: BoxConstraints(minWidth: c.maxWidth),
             child: DataTable(
               showCheckboxColumn: false,
-              columnSpacing: 20,
+              columnSpacing: 16,
               horizontalMargin: 12,
               headingTextStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: p.mute),
               dataTextStyle: TextStyle(fontSize: 13, color: p.ink),
               columns: [
+                DataColumn(label: Text('S.N'.tr)),
                 DataColumn(label: Text('Date'.tr)),
-                DataColumn(label: Text('Note'.tr)),
                 DataColumn(label: Text('Category'.tr)),
-                DataColumn(label: Text('Account'.tr)),
                 DataColumn(label: Text('Amount'.tr), numeric: true),
+                DataColumn(label: Text('Cash'.tr), numeric: true),
+                DataColumn(label: Text('Due'.tr), numeric: true),
               ],
               rows: [
-                for (final e in rows)
-                  DataRow(
-                    onSelectChanged: (_) => showEntrySheet(context, entry: e),
-                    cells: [
-                      DataCell(Text(Fmt.date(e.date, 'd MMM'))),
-                      DataCell(Text(e.note.isEmpty ? '–' : e.note)),
-                      DataCell(Text('${cats.emojiOf(e.type, e.category)} ${e.category.tr}')),
-                      DataCell(Text(e.account.tr)),
-                      DataCell(Text(
-                        '${e.type == EntryType.income ? '+' : '−'}${Fmt.money(e.amount)}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          color: e.type == EntryType.income ? p.income : p.expense,
-                        ),
-                      )),
-                    ],
-                  ),
-                DataRow(cells: [
-                  DataCell(Text('${'Net'.tr} (${Fmt.count(rows.length)} ${'entries'.tr})', style: bold)),
-                  const DataCell(Text('')),
-                  const DataCell(Text('')),
-                  const DataCell(Text('')),
-                  DataCell(Text('${net < 0 ? '−' : ''}${Fmt.money(net.abs())}', style: bold)),
-                ]),
+                for (var i = 0; i < rows.length; i++) ...[
+                  () {
+                    final e = rows[i];
+                    final isDue = e.account.trim().toLowerCase() == 'due';
+                    final sign = e.type == EntryType.income ? '+' : '−';
+                    final color = e.type == EntryType.income ? p.income : p.expense;
+
+                    return DataRow(
+                      onSelectChanged: (_) => showEntrySheet(context, entry: e),
+                      cells: [
+                        DataCell(Text(
+                          '${i + 1}',
+                          style: TextStyle(fontSize: 12, color: p.mute, fontWeight: FontWeight.w500),
+                        )),
+                        DataCell(Text(Fmt.date(e.date, 'd MMM'))),
+                        DataCell(Text('${cats.emojiOf(e.type, e.category)} ${e.category.tr}')),
+                        DataCell(Text(
+                          '$sign${Fmt.money(e.amount)}',
+                          style: TextStyle(fontWeight: FontWeight.w700, color: color),
+                        )),
+                        DataCell(Text(
+                          isDue ? '–' : '$sign${Fmt.money(e.amount)}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: isDue ? p.mute : color,
+                          ),
+                        )),
+                        DataCell(Text(
+                          !isDue ? '–' : '$sign${Fmt.money(e.amount)}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: !isDue ? p.mute : color,
+                          ),
+                        )),
+                      ],
+                    );
+                  }(),
+                ],
+                DataRow(
+                  color: WidgetStateProperty.all(p.bg.withOpacity(0.5)),
+                  cells: [
+                    DataCell(Text('Total'.tr, style: bold)),
+                    DataCell(Text(
+                      '${Fmt.count(rows.length)}${tc.hasMore ? '/${tc.totalCount}' : ''} ${'entries'.tr}',
+                      style: TextStyle(color: p.mute, fontSize: 11, fontWeight: FontWeight.w600),
+                    )),
+                    const DataCell(Text('')),
+                    DataCell(Text(
+                      '${net < 0 ? '−' : (net > 0 ? '+' : '')}${Fmt.money(net.abs())}',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: net < 0 ? p.expense : (net > 0 ? p.income : p.ink),
+                      ),
+                    )),
+                    DataCell(Text(
+                      '${cashNet < 0 ? '−' : (cashNet > 0 ? '+' : '')}${Fmt.money(cashNet.abs())}',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: cashNet < 0 ? p.expense : (cashNet > 0 ? p.income : p.ink),
+                      ),
+                    )),
+                    DataCell(Text(
+                      dueNet == 0
+                          ? '–'
+                          : '${dueNet < 0 ? '−' : (dueNet > 0 ? '+' : '')}${Fmt.money(dueNet.abs())}',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: dueNet < 0 ? p.expense : (dueNet > 0 ? p.income : p.ink),
+                      ),
+                    )),
+                  ],
+                ),
               ],
             ),
           ),

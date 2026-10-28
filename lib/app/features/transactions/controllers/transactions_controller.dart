@@ -25,9 +25,22 @@ class TransactionsController extends GetxController {
     return month.year == now.year && month.month == now.month;
   }
 
+  static const int pageSize = 40;
+  int currentLimit = 40;
+
+  void resetLimit() {
+    currentLimit = pageSize;
+  }
+
+  void loadMore() {
+    currentLimit += pageSize;
+    update();
+  }
+
   void resetToCurrentMonth() {
     final now = DateTime.now();
     final cur = DateTime(now.year, now.month);
+    currentLimit = pageSize;
     if (month.year != cur.year || month.month != cur.month) {
       month = cur;
       update();
@@ -80,12 +93,14 @@ class TransactionsController extends GetxController {
   void setYearAndMonth(int y, int m) {
     month = DateTime(y, m);
     isYearOnly = false;
+    currentLimit = pageSize;
     update();
   }
 
   void setYearOnly(int y) {
     month = DateTime(y, 1);
     isYearOnly = true;
+    currentLimit = pageSize;
     update();
   }
 
@@ -116,7 +131,7 @@ class TransactionsController extends GetxController {
       ..sort(_newestFirst);
   }
 
-  List<TransactionModel> get visibleRows {
+  List<TransactionModel> get allVisibleRows {
     final q = query.trim().toLowerCase();
     return monthRows.where((e) {
       final okType = switch (filter) {
@@ -128,6 +143,13 @@ class TransactionsController extends GetxController {
       return okType && okQuery;
     }).toList();
   }
+
+  List<TransactionModel> get visibleRows => allVisibleRows.take(currentLimit).toList();
+
+  bool get hasMore => allVisibleRows.length > currentLimit;
+  int get totalCount => allVisibleRows.length;
+  int get loadedCount => visibleRows.length;
+  int get remainingCount => (allVisibleRows.length - currentLimit).clamp(0, allVisibleRows.length);
 
   List<TransactionModel> get recent => (entries.toList()..sort(_newestFirst)).take(5).toList();
 
@@ -162,16 +184,19 @@ class TransactionsController extends GetxController {
   // ---- actions ----
   void shiftMonth(int delta) {
     month = DateTime(month.year, month.month + delta);
+    currentLimit = pageSize;
     update();
   }
 
   void setQuery(String v) {
     query = v;
+    currentLimit = pageSize;
     update();
   }
 
   void setFilter(TxFilter f) {
     filter = f;
+    currentLimit = pageSize;
     update();
   }
 

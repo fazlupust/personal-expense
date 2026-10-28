@@ -11,7 +11,7 @@ class AppConstants {
   static const String prefsEntries = 'pe.entries.v1';
   static const String prefsCategories = 'pe.categories.v1';
 
-  static const List<String> accounts = ['Cash', 'Bank', 'Mobile wallet', 'Card'];
+  static const List<String> accounts = ['Cash', 'Due', 'Bank', 'Mobile wallet', 'Card'];
 
   static const List<CategoryModel> defaultCategories = [
     // Expense Categories
