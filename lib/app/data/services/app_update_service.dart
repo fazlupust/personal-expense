@@ -166,6 +166,22 @@ class AppUpdateService extends GetxService {
     _showDialog(config);
   }
 
+  /// For testing/previewing the optional update dialog directly with Update Later & Update Now
+  void showTestOptionalDialog() {
+    _showDialog(
+      const AppUpdateModel(
+        isActive: true,
+        isForceUpdate: false,
+        latestVersion: '1.0.2',
+        minVersion: '1.0.0',
+        title: 'Update Available',
+        message:
+            'A new version of My Wallet is available with new features and improvements. Please update now to continue enjoying the best experience.',
+        playStoreUrl: 'https://play.google.com/store/apps/details?id=com.fazlu.personalexpense',
+      ),
+    );
+  }
+
   void _showDialog(AppUpdateModel config) {
     if (Get.isDialogOpen == true) {
       Get.back();

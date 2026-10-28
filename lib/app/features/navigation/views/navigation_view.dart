@@ -175,7 +175,7 @@ class NavigationView extends StatelessWidget {
             shadowColor: Colors.black38,
             surfaceTintColor: Colors.transparent,
             padding: const EdgeInsets.symmetric(horizontal: 4),
-            height: 68,
+            height: 70,
             child: Row(
               children: [
                 _buildNavItem(c, p, 0, _icons[0], _selectedIcons[0], _labels[0]),
@@ -238,7 +238,7 @@ class NavigationView extends StatelessWidget {
                         selectedIcon: Icon(_selectedIcons[i], color: p.income),
                         label: Text(
                           _labels[i].tr,
-                          style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
+                          style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600),
                         ),
                       ),
                   ],
@@ -297,16 +297,17 @@ class NavigationView extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(selected ? selectedIcon : icon, color: color, size: 24),
-            const SizedBox(height: 3),
+            Icon(selected ? selectedIcon : icon, color: color, size: 24.5),
+            const SizedBox(height: 2.5),
             Text(
               label.tr,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 13,
-                fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                fontSize: 14,
+                fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
                 color: color,
+                letterSpacing: -0.2,
               ),
             ),
           ],
