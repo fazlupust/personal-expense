@@ -78,8 +78,58 @@ const List<ZikirItem> _presetZikirs = [
         'Glory be to Allah and all praise is His, Glory be to Allah the Almighty',
     defaultTarget: 100,
     benefitBn:
-        'মুখে উচ্চারণে সহজ, মিজানের পাল্লায় অতি ভারী এবং রহমানের কাছে অতি প্রিয়।',
+        'মুখে উচ্চারণে সহজ, মিজানের পাল্লায় অতি ভারী এবং রহমানের কাছে অতি প্রিয় (সহীহ বুখারী: ৬৪০৬)।',
     category: ZikirCategory.morningEvening,
+  ),
+  ZikirItem(
+    id: 'hasbunallah',
+    arabic: 'حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ',
+    titleBn: 'হাসবুনাল্লাহু ওয়া নি\'মাল ওয়াকিল',
+    titleEn: 'Hasbunallahu wa ni\'mal wakeel',
+    meaningBn: 'আল্লাহই আমাদের জন্য যথেষ্ট এবং তিনিই সর্বোত্তম কর্মবিধায়ক',
+    meaningEn:
+        'Sufficient for us is Allah, and He is the best Disposer of affairs',
+    defaultTarget: 100,
+    benefitBn: 'বিপদ-আপদ, মানসিক চাপ ও শত্রুর ভয় থেকে পরম নিরাপত্তা (সূরা আলে ইমরান: ১৭৩)।',
+    category: ZikirCategory.dua,
+  ),
+  ZikirItem(
+    id: 'la_hawla',
+    arabic: 'لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ',
+    titleBn: 'লা হাওলা ওয়ালা কুওয়াতা ইল্লা বিল্লাহ',
+    titleEn: 'La hawla wa la quwwata illa billah',
+    meaningBn: 'আল্লাহর সাহায্য ছাড়া কোনো শক্তি বা ক্ষমতা নেই',
+    meaningEn: 'There is no power nor strength except with Allah',
+    defaultTarget: 100,
+    benefitBn: 'জান্নাতের অমূল্য রত্নভাণ্ডারের অন্যতম (সহীহ বুখারী: ৬৩৮৪)।',
+    category: ZikirCategory.dua,
+  ),
+  ZikirItem(
+    id: 'bismika_amootu_wa_ahya',
+    arabic: 'اللَّهُمَّ بِاسْمِكَ أَمُوتُ وَأَحْيَا',
+    titleBn: 'আল্লাহুম্মা বিসমিকা আমূতু ওয়া আহয়া (ঘুমানোর দোয়া)',
+    titleEn: 'Allahumma Bismika Amootu wa Ahya (Sleeping Dua)',
+    meaningBn:
+        'হে আল্লাহ! আপনার নাম নিয়ে আমি মৃত্যুবরণ করছি (ঘুমাচ্ছি) এবং জীবিত হচ্ছি (জাগ্রত হচ্ছি)। (উচ্চারণ: আল্লা-হুম্মা বিসমিকা আমূতু ওয়া আহ্ইয়া)',
+    meaningEn: 'O Allah, in Your name I die and I live.',
+    defaultTarget: 3,
+    benefitBn:
+        'রাতের ঘুমের পূর্বে ডান কাতে শয়ন করে এই দোয়া পাঠের সুন্নত আমল (সহীহ বুখারী: ৬৩১২, ৬৩২৪)।',
+    category: ZikirCategory.dua,
+  ),
+  ZikirItem(
+    id: 'alhamdulillah_alladhi_ahyana',
+    arabic: 'الْحَمْدُ لِلَّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ',
+    titleBn: 'ঘুম থেকে উঠার দোয়া (আলহামদুলিল্লাহিল্লাজি আহইয়ানা)',
+    titleEn: 'Dua Upon Waking Up',
+    meaningBn:
+        'সকল প্রশংসা আল্লাহর জন্য, যিনি আমাদেরকে মৃত্যু (ঘুম) দেওয়ার পর পুনরায় জীবন দান করলেন এবং তাঁরই কাছে পুনরুত্থান।',
+    meaningEn:
+        'All praise is for Allah who gave us life after having taken it from us, and unto Him is the resurrection.',
+    defaultTarget: 1,
+    benefitBn:
+        'ঘুম থেকে জাগ্রত হওয়ার পর নবীজি (সাঃ) এই দোয়া পাঠ করতেন (সহীহ বুখারী: ৬৩১২)।',
+    category: ZikirCategory.dua,
   ),
   ZikirItem(
     id: 'astaghfirullah_wa_atubu_ilaih',
@@ -274,29 +324,7 @@ const List<ZikirItem> _presetZikirs = [
     benefitBn: 'ঈমানের মূল ভিত্তি ও সর্বোত্তম জিকির।',
     category: ZikirCategory.dua,
   ),
-  ZikirItem(
-    id: 'la_hawla',
-    arabic: 'لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ',
-    titleBn: 'লা হাওলা ওয়ালা কুওয়াতা ইল্লা বিল্লাহ',
-    titleEn: 'La hawla wa la quwwata illa billah',
-    meaningBn: 'আল্লাহর সাহায্য ছাড়া কোনো শক্তি বা ক্ষমতা নেই',
-    meaningEn: 'There is no power nor strength except with Allah',
-    defaultTarget: 100,
-    benefitBn: 'জান্নাতের অমূল্য রত্নভাণ্ডারের অন্যতম।',
-    category: ZikirCategory.dua,
-  ),
-  ZikirItem(
-    id: 'hasbunallah',
-    arabic: 'حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ',
-    titleBn: 'হাসবুনাল্লাহু ওয়া নি\'মাল ওয়াকিল',
-    titleEn: 'Hasbunallahu wa ni\'mal wakeel',
-    meaningBn: 'আল্লাহই আমাদের জন্য যথেষ্ট এবং তিনিই সর্বোত্তম কর্মবিধায়ক',
-    meaningEn:
-        'Sufficient for us is Allah, and He is the best Disposer of affairs',
-    defaultTarget: 100,
-    benefitBn: 'বিপদ-আপদ, মানসিক চাপ ও শত্রুর ভয় থেকে পরম নিরাপত্তা।',
-    category: ZikirCategory.dua,
-  ),
+
   ZikirItem(
     id: 'ya_hayyu_ya_qayyum',
     arabic: 'يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَغِيثُ',
