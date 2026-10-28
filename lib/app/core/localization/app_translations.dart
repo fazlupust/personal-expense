@@ -525,7 +525,6 @@ class AppTranslations extends Translations {
     'Saving...': 'সংরক্ষণ হচ্ছে...',
     'Updating...': 'আপডেট হচ্ছে...',
     'Sign Out Confirmation': 'লগআউট নিশ্চিতকরণ',
-    'Are you sure you want to sign out?': 'আপনি কি নিশ্চিত যে আপনি লগআউট করতে চান?',
   };
 }
 
