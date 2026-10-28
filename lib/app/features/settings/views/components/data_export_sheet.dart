@@ -479,6 +479,70 @@ class DataExportSheet extends StatelessWidget {
     );
   }
 
+  Widget _buildPillButton({
+    required VoidCallback onPressed,
+    required IconData icon,
+    required String label,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF0D9488), Color(0xFF10B981)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0D9488).withOpacity(0.25),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(10),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 14, color: Colors.white),
+                const SizedBox(width: 5),
+                Text(
+                  label.tr,
+                  style: const TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildIconAction({
+    required VoidCallback onPressed,
+    required IconData icon,
+    required String tooltip,
+    Color? color,
+  }) {
+    return IconButton(
+      icon: Icon(icon, size: 19, color: color),
+      tooltip: tooltip.tr,
+      padding: const EdgeInsets.all(6),
+      constraints: const BoxConstraints(),
+      onPressed: onPressed,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = context.pal;
@@ -642,29 +706,23 @@ class DataExportSheet extends StatelessWidget {
                     ],
                   ),
                 ),
-                IconButton(
-                  icon: Icon(Icons.visibility_outlined, size: 18, color: p.mute),
-                  tooltip: 'Preview'.tr,
+                _buildIconAction(
+                  icon: Icons.visibility_outlined,
+                  tooltip: 'Preview',
+                  color: p.mute,
                   onPressed: () {
                     final csv = _generateTransactionsCsv(tc);
                     _previewData(context, csv, 'Transactions (CSV)');
                   },
                 ),
                 const SizedBox(width: 4),
-                FilledButton.icon(
+                _buildPillButton(
+                  icon: Icons.copy_rounded,
+                  label: 'Copy',
                   onPressed: () {
                     final csv = _generateTransactionsCsv(tc);
                     _copyToClipboard(context, csv, 'Transactions (CSV)');
                   },
-                  icon: const Icon(Icons.copy_rounded, size: 14, color: Colors.white),
-                  label: Text('Copy'.tr, style: const TextStyle(fontSize: 12.5)),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: p.income,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    minimumSize: Size.zero,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
                 ),
               ],
             ),
@@ -700,29 +758,23 @@ class DataExportSheet extends StatelessWidget {
                       ],
                     ),
                   ),
-                  IconButton(
-                    icon: Icon(Icons.visibility_outlined, size: 18, color: p.mute),
-                    tooltip: 'Preview'.tr,
+                  _buildIconAction(
+                    icon: Icons.visibility_outlined,
+                    tooltip: 'Preview',
+                    color: p.mute,
                     onPressed: () {
                       final csv = _generateNotesCsv(nc);
                       _previewData(context, csv, 'Notes & Debts (CSV)');
                     },
                   ),
                   const SizedBox(width: 4),
-                  FilledButton.icon(
+                  _buildPillButton(
+                    icon: Icons.copy_rounded,
+                    label: 'Copy',
                     onPressed: () {
                       final csv = _generateNotesCsv(nc);
                       _copyToClipboard(context, csv, 'Notes & Debts (CSV)');
                     },
-                    icon: const Icon(Icons.copy_rounded, size: 14, color: Colors.white),
-                    label: Text('Copy'.tr, style: const TextStyle(fontSize: 12.5)),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: p.income,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      minimumSize: Size.zero,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
                   ),
                 ],
               ),
@@ -764,37 +816,32 @@ class DataExportSheet extends StatelessWidget {
                       ],
                     ),
                   ),
-                  IconButton(
-                    icon: Icon(Icons.visibility_outlined, size: 18, color: p.mute),
-                    tooltip: 'Preview'.tr,
+                  _buildIconAction(
+                    icon: Icons.visibility_outlined,
+                    tooltip: 'Preview',
+                    color: p.mute,
                     onPressed: () {
                       final jsonStr = _generateFullJsonBackup(tc, nc ?? NotesController(), sc);
                       _previewData(context, jsonStr, 'Full Data Backup (JSON)');
                     },
                   ),
-                  IconButton(
-                    icon: Icon(Icons.share_rounded, size: 18, color: p.income),
-                    tooltip: 'Share Backup'.tr,
+                  _buildIconAction(
+                    icon: Icons.share_rounded,
+                    tooltip: 'Share Backup',
+                    color: p.income,
                     onPressed: () {
                       final jsonStr = _generateFullJsonBackup(tc, nc ?? NotesController(), sc);
                       _shareBackup(context, jsonStr);
                     },
                   ),
-                  const SizedBox(width: 2),
-                  FilledButton.icon(
+                  const SizedBox(width: 4),
+                  _buildPillButton(
+                    icon: Icons.cloud_upload_rounded,
+                    label: 'Backup',
                     onPressed: () {
                       final jsonStr = _generateFullJsonBackup(tc, nc ?? NotesController(), sc);
                       _showBackupSuccessSheet(context, jsonStr, txCount, notesCount);
                     },
-                    icon: const Icon(Icons.backup_rounded, size: 14, color: Colors.white),
-                    label: Text('Backup'.tr, style: const TextStyle(fontSize: 12.5)),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: p.ink,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      minimumSize: Size.zero,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
                   ),
                 ],
               ),
@@ -805,9 +852,10 @@ class DataExportSheet extends StatelessWidget {
           // Cancel / Close button
           AppButton(
             'Close',
+            icon: Icons.close_rounded,
             style: AppButtonStyle.outlined,
-            height: 44,
-            fontSize: 14,
+            height: 46,
+            fontSize: 14.5,
             margin: EdgeInsets.zero,
             onPressed: () => Navigator.of(context).pop(),
           ),

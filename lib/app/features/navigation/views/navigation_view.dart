@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_widgets.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../core/widgets/custom_app_bar.dart';
 import '../../dashboard/views/dashboard_view.dart';
@@ -36,6 +38,87 @@ class NavigationView extends StatelessWidget {
   ];
   static const _labels = ['Dashboard', 'Transactions', 'Reports', 'Profile'];
 
+  Future<bool?> _confirmExit(BuildContext context) {
+    final p = context.pal;
+    return showDialog<bool>(
+      context: context,
+      builder: (dialogCtx) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 360),
+          padding: const EdgeInsets.fromLTRB(22, 22, 22, 18),
+          decoration: BoxDecoration(
+            color: p.card,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: p.line),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.14),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: p.expense.withOpacity(0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.exit_to_app_rounded, color: p.expense, size: 28),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                'Exit App?'.tr,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                  color: p.ink,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Are you sure you want to close the app?'.tr,
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 13.5, color: p.mute),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: AppButton(
+                      'Cancel',
+                      style: AppButtonStyle.outlined,
+                      height: 44,
+                      fontSize: 13.5,
+                      margin: EdgeInsets.zero,
+                      onPressed: () => Navigator.of(dialogCtx).pop(false),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: AppButton(
+                      'Exit',
+                      style: AppButtonStyle.cancel,
+                      height: 44,
+                      fontSize: 13.5,
+                      margin: EdgeInsets.zero,
+                      onPressed: () => Navigator.of(dialogCtx).pop(true),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = context.pal;
@@ -52,8 +135,9 @@ class NavigationView extends StatelessWidget {
       );
       final page = _pages[c.index];
 
+      final Widget scaffold;
       if (size == ScreenSize.mobile) {
-        return Scaffold(
+        scaffold = Scaffold(
           appBar: CustomAppBar(
             title: _labels[c.index].tr,
           ),
@@ -80,78 +164,94 @@ class NavigationView extends StatelessWidget {
             ),
           ),
         );
+      } else {
+        final extended = size == ScreenSize.desktop;
+        scaffold = Scaffold(
+          floatingActionButton: fab,
+          body: Row(
+            children: [
+              SafeArea(
+                child: NavigationRail(
+                  extended: extended,
+                  selectedIndex: c.index,
+                  onDestinationSelected: c.select,
+                  labelType: extended ? NavigationRailLabelType.none : NavigationRailLabelType.all,
+                  leading: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: extended
+                        ? Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.asset(
+                                  'assets/images/logo.png',
+                                  width: 28,
+                                  height: 28,
+                                  errorBuilder: (_, __, ___) =>
+                                      Icon(Icons.account_balance_wallet, size: 24, color: p.income),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Text('My Wallet'.tr,
+                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: p.ink)),
+                            ],
+                          )
+                        : ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.asset(
+                              'assets/images/logo.png',
+                              width: 28,
+                              height: 28,
+                              errorBuilder: (_, __, ___) =>
+                                  Icon(Icons.account_balance_wallet, size: 24, color: p.income),
+                            ),
+                          ),
+                  ),
+                  destinations: [
+                    for (var i = 0; i < _labels.length; i++)
+                      NavigationRailDestination(
+                        icon: Icon(_icons[i]),
+                        selectedIcon: Icon(_selectedIcons[i], color: p.income),
+                        label: Text(
+                          _labels[i].tr,
+                          style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              VerticalDivider(width: 1, color: p.line),
+              Expanded(
+                child: Column(
+                  children: [
+                    CustomAppBar(
+                      title: _labels[c.index].tr,
+                      showBackButton: false,
+                    ),
+                    Expanded(child: SafeArea(child: page)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
       }
 
-      final extended = size == ScreenSize.desktop;
-      return Scaffold(
-        floatingActionButton: fab,
-        body: Row(
-          children: [
-            SafeArea(
-              child: NavigationRail(
-                extended: extended,
-                selectedIndex: c.index,
-                onDestinationSelected: c.select,
-                labelType: extended ? NavigationRailLabelType.none : NavigationRailLabelType.all,
-                leading: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: extended
-                      ? Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.asset(
-                                'assets/images/logo.png',
-                                width: 28,
-                                height: 28,
-                                errorBuilder: (_, __, ___) =>
-                                    Icon(Icons.account_balance_wallet, size: 24, color: p.income),
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Text('My Wallet'.tr,
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: p.ink)),
-                          ],
-                        )
-                      : ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.asset(
-                            'assets/images/logo.png',
-                            width: 28,
-                            height: 28,
-                            errorBuilder: (_, __, ___) =>
-                                Icon(Icons.account_balance_wallet, size: 24, color: p.income),
-                          ),
-                        ),
-                ),
-                destinations: [
-                  for (var i = 0; i < _labels.length; i++)
-                    NavigationRailDestination(
-                      icon: Icon(_icons[i]),
-                      selectedIcon: Icon(_selectedIcons[i], color: p.income),
-                      label: Text(
-                        _labels[i].tr,
-                        style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            VerticalDivider(width: 1, color: p.line),
-            Expanded(
-              child: Column(
-                children: [
-                  CustomAppBar(
-                    title: _labels[c.index].tr,
-                    showBackButton: false,
-                  ),
-                  Expanded(child: SafeArea(child: page)),
-                ],
-              ),
-            ),
-          ],
-        ),
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) async {
+          if (didPop) return;
+          if (c.index != 0) {
+            c.select(0);
+            return;
+          }
+          final shouldExit = await _confirmExit(context);
+          if (shouldExit == true) {
+            SystemNavigator.pop();
+          }
+        },
+        child: scaffold,
       );
     });
   }

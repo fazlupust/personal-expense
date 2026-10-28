@@ -536,6 +536,9 @@ class AppTranslations extends Translations {
     'Backup JSON copied to clipboard! You can paste and share it in any app.': 'ব্যাকআপ JSON ক্লিপবোর্ডে কপি হয়েছে! আপনি যেকোনো অ্যাপে পেস্ট ও শেয়ার করতে পারেন।',
     'Show amount': 'টাকা দেখুন',
     'Hide amount': 'টাকা লুকান',
+    'Exit App?': 'অ্যাপ থেকে বের হবেন?',
+    'Are you sure you want to close the app?': 'আপনি কি নিশ্চিত যে আপনি অ্যাপটি বন্ধ করতে চান?',
+    'Exit': 'বের হন',
   };
 }
 
