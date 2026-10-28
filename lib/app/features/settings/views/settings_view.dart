@@ -470,190 +470,56 @@ class _DeveloperAppUsersCard extends StatelessWidget {
       stream: auth.streamAllUsers(),
       builder: (context, snapshot) {
         final users = snapshot.data ?? [];
-        final isLoading = snapshot.connectionState == ConnectionState.waiting && users.isEmpty;
 
         return AppCard(
           flush: true,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Header (Tapping opens full Registered Users Page)
-              InkWell(
-                onTap: () => Get.toNamed(AppRoutes.registeredUsers),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(7),
-                        decoration: BoxDecoration(
-                          color: p.income.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(Icons.people_alt_rounded, color: p.income, size: 20),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'Registered App Users'.tr,
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: p.ink,
-                          ),
-                        ),
-                      ),
-                      if (users.isNotEmpty)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: p.income.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            '${users.length}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: p.income,
-                            ),
-                          ),
-                        ),
-                      const SizedBox(width: 6),
-                      Icon(Icons.chevron_right_rounded, color: p.mute, size: 20),
-                    ],
-                  ),
-                ),
-              ),
-              Divider(height: 1, color: p.line),
-
-              // Content
-              if (isLoading)
-                Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Center(
-                    child: SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: p.income),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(14),
+            onTap: () => Get.toNamed(AppRoutes.registeredUsers),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(7),
+                    decoration: BoxDecoration(
+                      color: p.income.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(8),
                     ),
+                    child: Icon(Icons.people_alt_rounded, color: p.income, size: 20),
                   ),
-                )
-              else if (users.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Center(
+                  const SizedBox(width: 12),
+                  Expanded(
                     child: Text(
-                      'No registered users found'.tr,
-                      style: TextStyle(fontSize: 13, color: p.mute),
-                    ),
-                  ),
-                )
-              else
-                ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: users.length,
-                  separatorBuilder: (_, __) => Divider(height: 1, indent: 64, color: p.line),
-                  itemBuilder: (context, i) {
-                    final u = users[i];
-                    final name = u.displayName(isBn);
-                    final desig = u.displayDesignation(isBn);
-                    final phone = u.phone ?? '';
-
-                    return InkWell(
-                      onTap: () => Get.toNamed(AppRoutes.registeredUsers),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        child: Row(
-                          children: [
-                          // Avatar
-                          CircleAvatar(
-                            radius: 20,
-                            backgroundColor: p.income.withOpacity(0.15),
-                            child: Text(
-                              name.isEmpty ? '?' : name.characters.first.toUpperCase(),
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: p.income,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-
-                          // Name, Designation, Phone
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Flexible(
-                                      child: Text(
-                                        name.isEmpty ? 'Personal Expense User'.tr : name,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w700,
-                                          color: p.ink,
-                                        ),
-                                      ),
-                                    ),
-                                    if (u.userNo != null) ...[
-                                      const SizedBox(width: 6),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                                        decoration: BoxDecoration(
-                                          color: p.bg,
-                                          borderRadius: BorderRadius.circular(4),
-                                          border: Border.all(color: p.line),
-                                        ),
-                                        child: Text(
-                                          '#${u.userNo}',
-                                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: p.mute),
-                                        ),
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                                if (desig.isNotEmpty) ...[
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    desig,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(fontSize: 12, color: p.mute),
-                                  ),
-                                ],
-                                if (phone.isNotEmpty) ...[
-                                  const SizedBox(height: 3),
-                                  Row(
-                                    children: [
-                                      Icon(Icons.phone_outlined, size: 12, color: p.income),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        phone,
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                          color: p.ink,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                        ],
+                      'Registered App Users'.tr,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: p.ink,
                       ),
                     ),
-                  );
-                },
-                ),
-            ],
+                  ),
+                  if (users.isNotEmpty)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: p.income.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '${users.length}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: p.income,
+                        ),
+                      ),
+                    ),
+                  const SizedBox(width: 6),
+                  Icon(Icons.chevron_right_rounded, color: p.mute, size: 20),
+                ],
+              ),
+            ),
           ),
         );
       },
