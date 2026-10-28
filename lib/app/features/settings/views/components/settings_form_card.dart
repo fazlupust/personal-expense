@@ -9,9 +9,7 @@ import '../../../../core/theme/app_widgets.dart';
 import '../../controllers/settings_controller.dart';
 
 import '../../../../data/services/app_update_service.dart';
-import '../../../../data/services/auth_service.dart';
 import 'budget_management_sheet.dart';
-import 'change_password_sheet.dart';
 import 'data_export_sheet.dart';
 
 class SettingsFormCard extends StatelessWidget {
@@ -317,17 +315,6 @@ class SettingsFormCard extends StatelessWidget {
             onPressed: () => showDataExportSheet(context),
           ),
 
-          // Change password option if logged in
-          if (Get.isRegistered<AuthService>() && Get.find<AuthService>().isLoggedIn) ...[
-            AppButton(
-              'Change Password',
-              icon: Icons.lock_reset_rounded,
-              height: 44,
-              fontSize: 13.5,
-              margin: const EdgeInsets.only(bottom: 8),
-              onPressed: () => showChangePasswordSheet(context),
-            ),
-          ],
 
           AppButton(
             'Check for Updates',
