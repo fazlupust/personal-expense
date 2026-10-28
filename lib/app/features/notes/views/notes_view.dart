@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/responsive.dart';
@@ -21,6 +22,15 @@ class NotesView extends StatelessWidget {
         title: 'Personal Notes & Debts'.tr,
         showBackButton: true,
         actions: [
+          GetBuilder<NotesController>(
+            builder: (c) => IconButton(
+              icon: Icon(
+                c.isAmountHidden ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+              ),
+              tooltip: c.isAmountHidden ? 'Show amount'.tr : 'Hide amount'.tr,
+              onPressed: c.toggleAmountVisibility,
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
             tooltip: 'Refresh'.tr,
@@ -140,24 +150,63 @@ class NotesView extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 10),
-                        Text(
-                          'Total Calculated Amount'.tr,
-                          style: TextStyle(
-                            fontSize: 13.5,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.white.withOpacity(0.85),
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Total Calculated Amount'.tr,
+                              style: TextStyle(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white.withOpacity(0.85),
+                              ),
+                            ),
+                            InkWell(
+                              onTap: c.toggleAmountVisibility,
+                              borderRadius: BorderRadius.circular(12),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      c.isAmountHidden ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                                      size: 13,
+                                      color: Colors.white,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      c.isAmountHidden ? 'Show'.tr : 'Hide'.tr,
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 2),
-                        FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            Fmt.money(c.totalAmount),
-                            style: const TextStyle(
-                              fontSize: 34,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.white,
-                              letterSpacing: -0.5,
+                        InkWell(
+                          onTap: c.toggleAmountVisibility,
+                          borderRadius: BorderRadius.circular(8),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              c.isAmountHidden ? '${AppConstants.currency} ••••••' : Fmt.money(c.totalAmount),
+                              style: TextStyle(
+                                fontSize: 34,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
+                                letterSpacing: c.isAmountHidden ? 2.0 : -0.5,
+                              ),
                             ),
                           ),
                         ),
@@ -309,6 +358,8 @@ class NotesView extends StatelessWidget {
                       _NoteCardItem(
                         serial: i + 1,
                         note: list[i],
+                        isAmountHidden: c.isAmountHidden,
+                        onToggleAmount: c.toggleAmountVisibility,
                         onTap: () {
                           c.openEdit(list[i]);
                           showNoteFormSheet(context);
@@ -397,12 +448,16 @@ class _NoteCardItem extends StatelessWidget {
   const _NoteCardItem({
     required this.serial,
     required this.note,
+    required this.isAmountHidden,
+    required this.onToggleAmount,
     required this.onTap,
     required this.onDelete,
   });
 
   final int serial;
   final NoteModel note;
+  final bool isAmountHidden;
+  final VoidCallback onToggleAmount;
   final VoidCallback onTap;
   final VoidCallback onDelete;
 
@@ -486,19 +541,33 @@ class _NoteCardItem extends StatelessWidget {
 
                     // Amount if present
                     if (note.hasAmount) ...[
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: p.bg,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: p.line),
-                        ),
-                        child: Text(
-                          Fmt.money(note.amount),
-                          style: TextStyle(
-                            fontSize: 17.5,
-                            fontWeight: FontWeight.w800,
-                            color: p.income,
+                      InkWell(
+                        onTap: onToggleAmount,
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: p.bg,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: p.line),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                isAmountHidden ? '${AppConstants.currency} ••••••' : Fmt.money(note.amount),
+                                style: TextStyle(
+                                  fontSize: 17.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: p.income,
+                                  letterSpacing: isAmountHidden ? 1.5 : 0,
+                                ),
+                              ),
+                              if (isAmountHidden) ...[
+                                const SizedBox(width: 4),
+                                Icon(Icons.visibility_off_rounded, size: 14, color: p.mute),
+                              ],
+                            ],
                           ),
                         ),
                       ),

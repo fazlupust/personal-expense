@@ -534,6 +534,8 @@ class AppTranslations extends Translations {
     'Back': 'ফিরে যান',
     'Backup Ready & Copied': 'ব্যাকআপ প্রস্তুত ও কপি করা হয়েছে',
     'Backup JSON copied to clipboard! You can paste and share it in any app.': 'ব্যাকআপ JSON ক্লিপবোর্ডে কপি হয়েছে! আপনি যেকোনো অ্যাপে পেস্ট ও শেয়ার করতে পারেন।',
+    'Show amount': 'টাকা দেখুন',
+    'Hide amount': 'টাকা লুকান',
   };
 }
 

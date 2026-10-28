@@ -28,6 +28,16 @@ class NotesController extends GetxController {
   String searchQuery = '';
   String selectedPerson = 'All';
 
+  // Amount privacy visibility state
+  bool isAmountHidden = false;
+  static const _amountHiddenKey = 'personal_expense_notes_amount_hidden';
+
+  void toggleAmountVisibility() {
+    isAmountHidden = !isAmountHidden;
+    _prefs?.setBool(_amountHiddenKey, isAmountHidden);
+    update();
+  }
+
   // Voice recognition states
   bool isListeningTitle = false;
   bool isListeningPerson = false;
@@ -96,6 +106,7 @@ class NotesController extends GetxController {
   }
 
   void _initNotes() {
+    isAmountHidden = _prefs?.getBool(_amountHiddenKey) ?? false;
     _loadCachedNotes();
     if (notes.isNotEmpty) {
       isLoading = false;
@@ -173,6 +184,45 @@ class NotesController extends GetxController {
 
   // --- Voice Input Controls ---
 
+  void _startVoiceForController(
+    TextEditingController controller, {
+    required void Function(bool listening) setListening,
+    void Function()? onAfterInsert,
+  }) {
+    stopAllVoice();
+
+    // Capture text before and after cursor so we append/insert from cursor without clearing existing text
+    final currentText = controller.text;
+    final selection = controller.selection;
+    final int cursorPos = (selection.isValid && selection.baseOffset >= 0)
+        ? selection.baseOffset
+        : currentText.length;
+
+    final prefix = currentText.substring(0, cursorPos);
+    final suffix = currentText.substring(cursorPos);
+    final spacing = (prefix.isNotEmpty && !prefix.endsWith(' ') && !prefix.endsWith('\n'))
+        ? ' '
+        : '';
+
+    VoiceService.startListening(
+      onResult: (words) {
+        if (words.isNotEmpty) {
+          final inserted = spacing + words;
+          controller.value = TextEditingValue(
+            text: prefix + inserted + suffix,
+            selection: TextSelection.collapsed(offset: prefix.length + inserted.length),
+          );
+          onAfterInsert?.call();
+          update();
+        }
+      },
+      onListeningChange: (listening) {
+        setListening(listening);
+        update();
+      },
+    );
+  }
+
   void toggleVoiceTitle() {
     if (isListeningTitle) {
       VoiceService.stop();
@@ -180,19 +230,10 @@ class NotesController extends GetxController {
       update();
       return;
     }
-    stopAllVoice();
-    VoiceService.startListening(
-      onResult: (words) {
-        if (words.isNotEmpty) {
-          titleCtrl.text = words;
-          titleError = null;
-          update();
-        }
-      },
-      onListeningChange: (listening) {
-        isListeningTitle = listening;
-        update();
-      },
+    _startVoiceForController(
+      titleCtrl,
+      setListening: (l) => isListeningTitle = l,
+      onAfterInsert: () => titleError = null,
     );
   }
 
@@ -203,18 +244,9 @@ class NotesController extends GetxController {
       update();
       return;
     }
-    stopAllVoice();
-    VoiceService.startListening(
-      onResult: (words) {
-        if (words.isNotEmpty) {
-          personCtrl.text = words;
-          update();
-        }
-      },
-      onListeningChange: (listening) {
-        isListeningPerson = listening;
-        update();
-      },
+    _startVoiceForController(
+      personCtrl,
+      setListening: (l) => isListeningPerson = l,
     );
   }
 
@@ -248,18 +280,9 @@ class NotesController extends GetxController {
       update();
       return;
     }
-    stopAllVoice();
-    VoiceService.startListening(
-      onResult: (words) {
-        if (words.isNotEmpty) {
-          notesCtrl.text = words;
-          update();
-        }
-      },
-      onListeningChange: (listening) {
-        isListeningNote = listening;
-        update();
-      },
+    _startVoiceForController(
+      notesCtrl,
+      setListening: (l) => isListeningNote = l,
     );
   }
 
