@@ -387,16 +387,13 @@ class SettingsFormCard extends StatelessWidget {
             onPressed: () => showDataExportSheet(context),
           ),
 
-          GestureDetector(
-            onLongPress: () => AppUpdateService.to.showTestOptionalDialog(),
-            child: AppButton(
-              'Check for Updates',
-              icon: Icons.sync_rounded,
-              height: 44,
-              fontSize: 13.5,
-              margin: const EdgeInsets.only(bottom: 8),
-              onPressed: () => AppUpdateService.to.checkManually(),
-            ),
+          AppButton(
+            'Check for Updates',
+            icon: Icons.sync_rounded,
+            height: 44,
+            fontSize: 13.5,
+            margin: const EdgeInsets.only(bottom: 8),
+            onPressed: () => AppUpdateService.to.showUpdateDialogPicker(context),
           ),
           const SizedBox(height: 12),
           Center(

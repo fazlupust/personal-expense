@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../data/models/app_update_model.dart';
+import '../../data/services/app_update_service.dart';
 import '../theme/app_theme.dart';
 
 class AppUpdateDialog extends StatelessWidget {
@@ -82,8 +83,8 @@ class AppUpdateDialog extends StatelessWidget {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        isForce ? p.expense : p.income,
-                        p.acc,
+                        isForce ? const Color(0xFFDC2626) : const Color(0xFF0D9488),
+                        isForce ? const Color(0xFFEF4444) : const Color(0xFF10B981),
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
@@ -91,7 +92,7 @@ class AppUpdateDialog extends StatelessWidget {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: (isForce ? p.expense : p.income).withOpacity(0.35),
+                        color: (isForce ? const Color(0xFFDC2626) : const Color(0xFF10B981)).withOpacity(0.35),
                         blurRadius: 16,
                         offset: const Offset(0, 6),
                       ),
@@ -202,26 +203,43 @@ class AppUpdateDialog extends StatelessWidget {
                 // Action Buttons
                 if (isForce) ...[
                   // Single Button for Force Update
-                  SizedBox(
+                  Container(
                     width: double.infinity,
-                    height: 48,
-                    child: FilledButton.icon(
+                    height: 50,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFDC2626), Color(0xFFEF4444)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFDC2626).withOpacity(0.35),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: ElevatedButton.icon(
                       onPressed: () => _launchUpdateUrl(context),
-                      icon: const Icon(Icons.system_update_rounded, size: 20),
+                      icon: const Icon(Icons.system_update_rounded, size: 20, color: Colors.white),
                       label: Text(
                         'Update Now'.tr,
                         style: const TextStyle(
-                          fontSize: 15,
+                          fontSize: 15.5,
                           fontWeight: FontWeight.w700,
+                          color: Colors.white,
                         ),
                       ),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: p.acc,
-                        foregroundColor: p.onAcc,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        foregroundColor: Colors.white,
+                        shadowColor: Colors.transparent,
+                        elevation: 0,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(14),
                         ),
-                        elevation: 2,
                       ),
                     ),
                   ),
@@ -230,48 +248,87 @@ class AppUpdateDialog extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: SizedBox(
-                          height: 46,
-                          child: OutlinedButton(
-                            onPressed: () => Get.back(),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: p.mute,
-                              side: BorderSide(color: p.line),
+                        child: Container(
+                          height: 48,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFFE11D48), Color(0xFFF43F5E)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(14),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFE11D48).withOpacity(0.28),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              if (Get.isRegistered<AppUpdateService>()) {
+                                AppUpdateService.to.dismissOptional(updateModel.latestVersion);
+                              }
+                              Get.back();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              foregroundColor: Colors.white,
+                              shadowColor: Colors.transparent,
+                              elevation: 0,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(14),
                               ),
                             ),
                             child: Text(
                               'Update Later'.tr,
                               style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
+                                fontSize: 14.5,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
                               ),
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 12),
                       Expanded(
-                        child: SizedBox(
-                          height: 46,
-                          child: FilledButton.icon(
-                            onPressed: () {
-                              _launchUpdateUrl(context);
-                            },
-                            icon: const Icon(Icons.arrow_upward_rounded, size: 18),
+                        child: Container(
+                          height: 48,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF0D9488), Color(0xFF10B981)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(14),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF10B981).withOpacity(0.35),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: ElevatedButton.icon(
+                            onPressed: () => _launchUpdateUrl(context),
+                            icon: const Icon(Icons.arrow_upward_rounded, size: 18, color: Colors.white),
                             label: Text(
                               'Update Now'.tr,
                               style: const TextStyle(
-                                fontSize: 14,
+                                fontSize: 14.5,
                                 fontWeight: FontWeight.w700,
+                                color: Colors.white,
                               ),
                             ),
-                            style: FilledButton.styleFrom(
-                              backgroundColor: p.acc,
-                              foregroundColor: p.onAcc,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              foregroundColor: Colors.white,
+                              shadowColor: Colors.transparent,
+                              elevation: 0,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(14),
                               ),
                             ),
                           ),
