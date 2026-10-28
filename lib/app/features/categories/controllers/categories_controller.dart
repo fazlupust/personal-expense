@@ -97,6 +97,8 @@ class CategoriesController extends GetxController {
     for (final c in categories) {
       if (c.type == t && (c.nameEn == name || c.nameBn == name || c.name == name)) return c.emoji;
     }
+    if (name == 'Deposit' || name == 'ডিপোজিট' || name == 'Deposit / Investment' || name == 'ডিপোজিট ও বিনিয়োগ') return '🏦';
+    if (name == 'Investment' || name == 'বিনিয়োগ' || name == 'বিনিয়োগ ও মুনাফা') return '📈';
     return '•';
   }
 

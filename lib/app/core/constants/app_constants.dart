@@ -15,9 +15,8 @@ class AppConstants {
 
   static const List<CategoryModel> defaultCategories = [
     // Expense Categories
-    CategoryModel(nameEn: 'Deposit', nameBn: 'ডিপোজিট', emoji: '🏦', type: EntryType.expense, isDefault: true),
+    CategoryModel(nameEn: 'Deposit / Investment', nameBn: 'ডিপোজিট ও বিনিয়োগ', emoji: '🏦', type: EntryType.expense, isDefault: true),
     CategoryModel(nameEn: 'Savings', nameBn: 'সঞ্চয়', emoji: '💰', type: EntryType.expense, isDefault: true),
-    CategoryModel(nameEn: 'Investment', nameBn: 'বিনিয়োগ', emoji: '📈', type: EntryType.expense, isDefault: true),
     CategoryModel(nameEn: 'DPS Saving', nameBn: 'ডিপিএস ও সঞ্চয়', emoji: '💰', type: EntryType.expense, isDefault: true),
     CategoryModel(nameEn: 'Child Food', nameBn: 'বাচ্চার খাবার', emoji: '🍜', type: EntryType.expense, isDefault: true),
     CategoryModel(nameEn: 'Food & Dining', nameBn: 'খাবার ও রেস্তোরাঁ', emoji: '🍔', type: EntryType.expense, isDefault: true),
@@ -60,9 +59,8 @@ class AppConstants {
     CategoryModel(nameEn: 'Salary', nameBn: 'বেতন', emoji: '💼', type: EntryType.income, isDefault: true),
     CategoryModel(nameEn: 'Business', nameBn: 'ব্যবসা', emoji: '🏪', type: EntryType.income, isDefault: true),
     CategoryModel(nameEn: 'Freelance', nameBn: 'ফ্রিল্যান্স', emoji: '💻', type: EntryType.income, isDefault: true),
-    CategoryModel(nameEn: 'Deposit', nameBn: 'ডিপোজিট', emoji: '🏦', type: EntryType.income, isDefault: true),
+    CategoryModel(nameEn: 'Deposit / Investment', nameBn: 'ডিপোজিট ও বিনিয়োগ', emoji: '🏦', type: EntryType.income, isDefault: true),
     CategoryModel(nameEn: 'Savings', nameBn: 'সঞ্চয়', emoji: '💰', type: EntryType.income, isDefault: true),
-    CategoryModel(nameEn: 'Investment', nameBn: 'বিনিয়োগ ও মুনাফা', emoji: '📈', type: EntryType.income, isDefault: true),
     CategoryModel(nameEn: 'Rental Income', nameBn: 'ভাড়া থেকে আয়', emoji: '🏢', type: EntryType.income, isDefault: true),
     CategoryModel(nameEn: 'Dividends & Profit', nameBn: 'লভ্যাংশ ও মুনাফা', emoji: '📊', type: EntryType.income, isDefault: true),
     CategoryModel(nameEn: 'Overtime & Extra', nameBn: 'ওভারটাইম আয়', emoji: '⏱️', type: EntryType.income, isDefault: true),
@@ -90,6 +88,11 @@ class AppConstants {
     final nEn = norm(nameEn);
     final nBn = norm(nameBn);
     final nLegacy = norm(name);
+    // Legacy support for standalone Deposit and Investment
+    if (nEn == 'deposit' || nBn == 'ডিপোজিট' || nLegacy == 'deposit' ||
+        nEn == 'investment' || nBn == 'বিনিয়োগ' || nBn == 'বিনিয়োগ ও মুনাফা' || nLegacy == 'investment') {
+      return true;
+    }
     for (final d in defaultCategories) {
       final dEn = norm(d.nameEn);
       final dBn = norm(d.nameBn);

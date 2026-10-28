@@ -123,6 +123,7 @@ class AppTranslations extends Translations {
     'Delete default category (Dev)': 'ডিফল্ট ক্যাটাগরি মুছুন (ডেভেলপার)',
     'Category deleted successfully': 'ক্যাটাগরি সফলভাবে ডিলিট করা হয়েছে',
     'Deposit': 'ডিপোজিট',
+    'Deposit / Investment': 'ডিপোজিট ও বিনিয়োগ',
     'Savings': 'সঞ্চয়',
     // Default categories & accounts
     'Child Food': 'বাচ্চার খাবার',
