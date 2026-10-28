@@ -547,25 +547,25 @@ class TasbihCounterView extends StatelessWidget {
                 children: [
                   // Browse All Button
                   InkWell(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(14),
                     onTap: () => _showAllZikirsSheet(context, c, p),
                     child: Container(
-                      height: 34,
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      height: 42,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
                       decoration: BoxDecoration(
                         color: p.card,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(14),
                         border: Border.all(color: p.income.withOpacity(0.4)),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.auto_stories_rounded, size: 15, color: p.income),
+                          Icon(Icons.auto_stories_rounded, size: 17, color: p.income),
                           const SizedBox(width: 4),
                           Text(
                             'All'.tr,
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 15,
                               fontWeight: FontWeight.w700,
                               color: p.income,
                             ),
@@ -579,7 +579,7 @@ class TasbihCounterView extends StatelessWidget {
                   // Horizontal Scrollable Chips
                   Expanded(
                     child: SizedBox(
-                      height: 34,
+                      height: 42,
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
                         itemCount: c.sortedZikirs.length,
@@ -611,14 +611,14 @@ class TasbihCounterView extends StatelessWidget {
                           return Material(
                             color: Colors.transparent,
                             child: InkWell(
-                              borderRadius: BorderRadius.circular(17),
+                              borderRadius: BorderRadius.circular(21),
                               onTap: () => c.selectZikir(item),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                                 decoration: BoxDecoration(
                                   color: isSelected ? p.income : p.card,
-                                  borderRadius: BorderRadius.circular(17),
+                                  borderRadius: BorderRadius.circular(21),
                                   border: Border.all(
                                     color: isSelected ? p.income : p.line,
                                     width: 1.1,
@@ -637,7 +637,7 @@ class TasbihCounterView extends StatelessWidget {
                                   child: Text(
                                     title,
                                     style: TextStyle(
-                                      fontSize: (isBn || isBoroDua) ? 12 : 13.5,
+                                      fontSize: (isBn || isBoroDua) ? 16 : 17.5,
                                       fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
                                       color: isSelected ? Colors.white : p.ink,
                                     ),
@@ -781,6 +781,7 @@ class TasbihCounterView extends StatelessWidget {
                       if (zikir.benefitBn != null && zikir.benefitBn!.isNotEmpty) ...[
                         const SizedBox(height: 6),
                         Container(
+                          constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 60),
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
                           decoration: BoxDecoration(
                             color: p.income.withOpacity(0.08),
@@ -814,6 +815,7 @@ class TasbihCounterView extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8),
                           onTap: c.toggleCountVisibility,
                           child: Container(
+                            constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 60),
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
                               color: p.income.withOpacity(0.08),

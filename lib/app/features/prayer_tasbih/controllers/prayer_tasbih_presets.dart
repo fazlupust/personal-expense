@@ -390,7 +390,7 @@ const List<ZikirItem> _presetZikirs = [
     id: 'shifa_body_pain',
     arabic:
         'بِسْمِ اللَّهِ (৩ বার) ✦ أَعُوْذُ بِاللهِ وَقُدْرَتِهِ مِنْ شَرِّ مَا أَجِدُ وَأُحَاذِرُ (৭ বার)',
-    titleBn: '[১২৪] শরীরে কোনো ব্যথা অনুভব করলে যা করবে ও বলবে',
+    titleBn: 'শরীরে ব্যথা মুক্তির দোয়া',
     titleEn: 'Dua for Body Pain (Bismillah 3x & Shifa Dua 7x)',
     pronunciationBn:
         'বিসমিল্লাহ (৩ বার) ও আ‘ঊযু বিল্লা-হি ওয়া ক্বুদরাতিহী মিন শাররি মা আজিদু ওয়া উহা-যিরু (৭ বার)',
