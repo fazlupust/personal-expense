@@ -381,28 +381,17 @@ const List<ZikirItem> _presetZikirs = [
   ),
   ZikirItem(
     id: 'shifa_body_pain',
-    arabic: 'أَعُوْذُ بِاللهِ وَقُدْرَتِهِ مِنْ شَرِّ مَا أَجِدُ وَأُحَاذِرُ',
-    titleBn: '[১২৪] শরীরে ব্যথা অনুভব করলে দোয়া',
-    titleEn: 'Dua for Pain in the Body (Shifa)',
+    arabic:
+        'بِسْمِ اللهِ (৩ বার) ✦ أَعُوْذُ بِاللهِ وَقُدْرَتِهِ مِنْ شَرِّ مَا أَجِدُ وَأُحَاذِرُ (৭ বার)',
+    titleBn: '[১২৪] শরীরে ব্যথার পূর্ণ আমল (বিসমিল্লাহ ৩x ও দোয়া ৭x)',
+    titleEn: 'Dua for Body Pain (Bismillah 3x & Shifa Dua 7x)',
     meaningBn:
-        'এই যে ব্যথা আমি অনুভব করছি এবং যার আমি আশঙ্কা করছি, তা থেকে আমি আল্লাহ্ এবং তাঁর কুদরতের আশ্রয় প্রার্থনা করছি। (উচ্চারণ: আউযু বিল্লা-হি ওয়া কুদরাতিহী মিন শাররি মা আজিদু ওয়া উহা-যিরু)',
+        'বিসমিল্লাহ (৩ বার): আল্লাহর নামে। এবং (৭ বার): এই যে ব্যথা আমি অনুভব করছি এবং যার আমি আশঙ্কা করছি, তা থেকে আমি আল্লাহ্ এবং তাঁর কুদরতের আশ্রয় প্রার্থনা করছি। (উচ্চারণ: বিসমিল্লাহ [৩ বার], আউযু বিল্লা-হি ওয়া কুদরাতিহী মিন শাররি মা আজিদু ওয়া উহা-যিরু [৭ বার])',
     meaningEn:
-        'I seek refuge in Allah and in His power from the evil of what I find and of what I guard against.',
+        'Bismillah (3x) & "I seek refuge in Allah and in His power from the evil of what I find and of what I guard against" (7x).',
     defaultTarget: 7,
     benefitBn:
-        '[১২৪] ব্যথার স্থানে হাত রেখে ৩ বার "বিসমিল্লাহ" এবং ৭ বার এই দোয়াটি পাঠ করবে (সহীহ মুসলিম: ৪/১৭২৮, নং ২২০২)।',
-    category: ZikirCategory.dua,
-  ),
-  ZikirItem(
-    id: 'shifa_bismillah',
-    arabic: 'بِسْمِ اللهِ',
-    titleBn: 'শরীরে ব্যথার আমল (বিসমিল্লাহ)',
-    titleEn: 'Bismillah for Body Pain (3 Times)',
-    meaningBn: 'আল্লাহর নামে। (উচ্চারণ: বিসমিল্লাহ)',
-    meaningEn: 'In the name of Allah.',
-    defaultTarget: 3,
-    benefitBn:
-        'শরীরের ব্যথার স্থানে হাত রেখে ৩ বার "বিসমিল্লাহ" বলে এরপর ৭ বার "আউযু বিল্লাহি ওয়া কুদরাতিহী..." পাঠ করতে হয় (সহীহ মুসলিম: ২২০২)।',
+        '[১২৪] শরীরের ব্যথার স্থানে হাত রেখে ৩ বার "বিসমিল্লাহ" বলে এরপর ৭ বার এই দোয়াটি পাঠ করবে (সহীহ মুসলিম: ৪/১৭২৮, নং ২২০২)।',
     category: ZikirCategory.dua,
   ),
   ZikirItem(
