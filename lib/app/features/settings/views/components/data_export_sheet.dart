@@ -2,19 +2,23 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_widgets.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../notes/controllers/notes_controller.dart';
 import '../../../transactions/controllers/transactions_controller.dart';
 import '../../controllers/settings_controller.dart';
 
 void showDataExportSheet(BuildContext context) {
-  showModalBottomSheet(
+  showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
+    useSafeArea: true,
     backgroundColor: Colors.transparent,
+    constraints: const BoxConstraints(maxWidth: 580),
     builder: (ctx) => const DataExportSheet(),
   );
 }
@@ -41,7 +45,7 @@ class DataExportSheet extends StatelessWidget {
       final amountStr = e.amount.toStringAsFixed(2);
       final accountStr = _cleanCsvField(e.account);
       final noteStr = _cleanCsvField(e.note);
-      buffer.writeln('$e.id,$dateStr,$timeStr,$typeStr,$categoryStr,$amountStr,$accountStr,$noteStr');
+      buffer.writeln('${e.id},$dateStr,$timeStr,$typeStr,$categoryStr,$amountStr,$accountStr,$noteStr');
     }
     return buffer.toString();
   }
@@ -82,7 +86,6 @@ class DataExportSheet extends StatelessWidget {
 
   void _copyToClipboard(BuildContext context, String data, String title) {
     Clipboard.setData(ClipboardData(text: data));
-    Get.back();
     Get.snackbar(
       title.tr,
       'Copied to clipboard! You can paste it into Excel or Google Sheets.'.tr,
@@ -95,10 +98,286 @@ class DataExportSheet extends StatelessWidget {
     );
   }
 
+  Future<void> _shareBackup(BuildContext context, String jsonStr) async {
+    await Clipboard.setData(ClipboardData(text: jsonStr));
+
+    final dateStr = Fmt.date(DateTime.now(), 'yyyy-MM-dd');
+    final subject = 'Personal Expense JSON Backup ($dateStr)';
+
+    // Launch mailto if payload fits in standard URI length
+    if (jsonStr.length < 2500) {
+      final mailtoUri = Uri(
+        scheme: 'mailto',
+        query: 'subject=${Uri.encodeComponent(subject)}&body=${Uri.encodeComponent(jsonStr)}',
+      );
+      try {
+        if (await canLaunchUrl(mailtoUri)) {
+          await launchUrl(mailtoUri);
+        }
+      } catch (_) {}
+    }
+
+    if (context.mounted) {
+      Get.snackbar(
+        'Backup Ready & Copied'.tr,
+        'Backup JSON copied to clipboard! You can paste and share it in any app.'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: context.pal.card,
+        colorText: context.pal.ink,
+        duration: const Duration(seconds: 4),
+        maxWidth: 420,
+        margin: const EdgeInsets.all(14),
+      );
+    }
+  }
+
+  void _showBackupSuccessSheet(
+    BuildContext context,
+    String jsonStr,
+    int txCount,
+    int notesCount,
+  ) {
+    final p = context.pal;
+    final dateStr = Fmt.date(DateTime.now(), 'yyyy-MM-dd, hh:mm a');
+
+    // Auto-copy so the user always has it ready
+    Clipboard.setData(ClipboardData(text: jsonStr));
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      constraints: const BoxConstraints(maxWidth: 580),
+      builder: (sheetContext) {
+        return Container(
+          margin: EdgeInsets.only(
+            bottom: MediaQuery.viewInsetsOf(sheetContext).bottom,
+          ),
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+          decoration: BoxDecoration(
+            color: p.card,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+            border: Border.all(color: p.line),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Drag handle
+              Center(
+                child: Container(
+                  width: 38,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: p.line,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // Header bar with Back button and Close button
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back_rounded),
+                    tooltip: 'Back'.tr,
+                    onPressed: () => Navigator.of(sheetContext).pop(),
+                  ),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      'Full Backup Completed'.tr,
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        color: p.ink,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.close_rounded, size: 20, color: p.mute),
+                    tooltip: 'Close'.tr,
+                    onPressed: () => Navigator.of(sheetContext).pop(),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+
+              // Success Summary Banner
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      p.income.withOpacity(0.12),
+                      p.income.withOpacity(0.04),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: p.income.withOpacity(0.25)),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: p.income,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.check_rounded, color: Colors.white, size: 22),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Backup Generated Successfully!'.tr,
+                            style: TextStyle(
+                              fontSize: 15.5,
+                              fontWeight: FontWeight.w700,
+                              color: p.ink,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'All transactions, notes & settings are packed in JSON format.'.tr,
+                            style: TextStyle(fontSize: 12, color: p.mute),
+                          ),
+                          const SizedBox(height: 10),
+                          Wrap(
+                            spacing: 12,
+                            runSpacing: 6,
+                            children: [
+                              Text(
+                                '🧾 $txCount ${'entries'.tr}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: p.income,
+                                ),
+                              ),
+                              Text(
+                                '📝 $notesCount ${'notes'.tr}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: p.income,
+                                ),
+                              ),
+                              Text(
+                                '🕒 $dateStr',
+                                style: TextStyle(fontSize: 11.5, color: p.mute),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 18),
+
+              // Action 1: Share Backup Button
+              AppButton(
+                'Share Backup',
+                icon: Icons.share_rounded,
+                height: 48,
+                fontSize: 15,
+                margin: const EdgeInsets.only(bottom: 10),
+                onPressed: () => _shareBackup(sheetContext, jsonStr),
+              ),
+
+              // Action 2: Copy JSON & Preview Buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: AppButton(
+                      'Copy JSON',
+                      icon: Icons.copy_rounded,
+                      style: AppButtonStyle.outlined,
+                      height: 44,
+                      fontSize: 13.5,
+                      margin: EdgeInsets.zero,
+                      onPressed: () {
+                        Clipboard.setData(ClipboardData(text: jsonStr));
+                        Get.snackbar(
+                          'Success'.tr,
+                          'Backup JSON copied to clipboard!'.tr,
+                          snackPosition: SnackPosition.BOTTOM,
+                          duration: const Duration(seconds: 2),
+                          maxWidth: 420,
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: AppButton(
+                      'Preview',
+                      icon: Icons.visibility_outlined,
+                      style: AppButtonStyle.outlined,
+                      height: 44,
+                      fontSize: 13.5,
+                      margin: EdgeInsets.zero,
+                      onPressed: () {
+                        _previewData(sheetContext, jsonStr, 'Full Data Backup (JSON)');
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+
+              // Action 3: Navigation buttons (Back / Back to Settings)
+              Row(
+                children: [
+                  Expanded(
+                    child: AppButton(
+                      'Back',
+                      icon: Icons.arrow_back_rounded,
+                      style: AppButtonStyle.outlined,
+                      height: 44,
+                      fontSize: 13,
+                      margin: EdgeInsets.zero,
+                      onPressed: () => Navigator.of(sheetContext).pop(),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: AppButton(
+                      'Back to Settings',
+                      icon: Icons.done_all_rounded,
+                      style: AppButtonStyle.outlined,
+                      height: 44,
+                      fontSize: 13,
+                      margin: EdgeInsets.zero,
+                      onPressed: () {
+                        Navigator.of(sheetContext).pop();
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   void _previewData(BuildContext context, String data, String title) {
     final p = context.pal;
-    Get.dialog(
-      Dialog(
+    showDialog<void>(
+      context: context,
+      builder: (dialogCtx) => Dialog(
         backgroundColor: Colors.transparent,
         child: Container(
           constraints: const BoxConstraints(maxWidth: 520, maxHeight: 560),
@@ -114,6 +393,12 @@ class DataExportSheet extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back_rounded, size: 20),
+                    tooltip: 'Back'.tr,
+                    onPressed: () => Navigator.of(dialogCtx).pop(),
+                  ),
+                  const SizedBox(width: 4),
                   Expanded(
                     child: Text(
                       title.tr,
@@ -122,7 +407,8 @@ class DataExportSheet extends StatelessWidget {
                   ),
                   IconButton(
                     icon: Icon(Icons.close_rounded, size: 20, color: p.mute),
-                    onPressed: () => Get.back(),
+                    tooltip: 'Close'.tr,
+                    onPressed: () => Navigator.of(dialogCtx).pop(),
                   ),
                 ],
               ),
@@ -152,22 +438,27 @@ class DataExportSheet extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Get.back(),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: p.ink,
-                        side: BorderSide(color: p.line),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
-                      child: Text('Close'.tr),
+                    child: AppButton(
+                      'Back',
+                      icon: Icons.arrow_back_rounded,
+                      style: AppButtonStyle.outlined,
+                      height: 42,
+                      fontSize: 13,
+                      margin: EdgeInsets.zero,
+                      onPressed: () => Navigator.of(dialogCtx).pop(),
                     ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: FilledButton.icon(
+                    child: AppButton(
+                      'Copy All',
+                      icon: Icons.copy_rounded,
+                      height: 42,
+                      fontSize: 13,
+                      margin: EdgeInsets.zero,
                       onPressed: () {
                         Clipboard.setData(ClipboardData(text: data));
-                        Get.back();
+                        Navigator.of(dialogCtx).pop();
                         Get.snackbar(
                           title.tr,
                           'Copied to clipboard!'.tr,
@@ -177,13 +468,6 @@ class DataExportSheet extends StatelessWidget {
                           margin: const EdgeInsets.all(12),
                         );
                       },
-                      icon: const Icon(Icons.copy_rounded, size: 16, color: Colors.white),
-                      label: Text('Copy All'.tr),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: p.income,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
                     ),
                   ),
                 ],
@@ -266,8 +550,9 @@ class DataExportSheet extends StatelessWidget {
                 ),
               ),
               IconButton(
-                icon: Icon(Icons.close_rounded, size: 20, color: p.mute),
-                onPressed: () => Get.back(),
+                icon: Icon(Icons.close_rounded, size: 22, color: p.mute),
+                tooltip: 'Close'.tr,
+                onPressed: () => Navigator.of(context).pop(),
               ),
             ],
           ),
@@ -446,72 +731,85 @@ class DataExportSheet extends StatelessWidget {
           ],
 
           // Option 3: Full JSON Backup
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: p.bg,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: p.line),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.backup_rounded, size: 24, color: p.ink),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Full Data Backup (JSON)'.tr,
-                        style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: p.ink),
-                      ),
-                      const SizedBox(height: 1),
-                      Text(
-                        'Complete backup of all transactions, notes, settings'.tr,
-                        style: TextStyle(fontSize: 11.5, color: p.mute),
-                      ),
-                    ],
+          InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () {
+              final jsonStr = _generateFullJsonBackup(tc, nc ?? NotesController(), sc);
+              _showBackupSuccessSheet(context, jsonStr, txCount, notesCount);
+            },
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: p.bg,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: p.line),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.backup_rounded, size: 24, color: p.ink),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Full Data Backup (JSON)'.tr,
+                          style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: p.ink),
+                        ),
+                        const SizedBox(height: 1),
+                        Text(
+                          'Complete backup of all transactions, notes, settings'.tr,
+                          style: TextStyle(fontSize: 11.5, color: p.mute),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.visibility_outlined, size: 18, color: p.mute),
-                  tooltip: 'Preview'.tr,
-                  onPressed: () {
-                    final jsonStr = _generateFullJsonBackup(tc, nc ?? NotesController(), sc);
-                    _previewData(context, jsonStr, 'Full Data Backup (JSON)');
-                  },
-                ),
-                const SizedBox(width: 4),
-                FilledButton.icon(
-                  onPressed: () {
-                    final jsonStr = _generateFullJsonBackup(tc, nc ?? NotesController(), sc);
-                    _copyToClipboard(context, jsonStr, 'Full Data Backup (JSON)');
-                  },
-                  icon: const Icon(Icons.copy_rounded, size: 14, color: Colors.white),
-                  label: Text('Copy'.tr, style: const TextStyle(fontSize: 12.5)),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: p.ink,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    minimumSize: Size.zero,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  IconButton(
+                    icon: Icon(Icons.visibility_outlined, size: 18, color: p.mute),
+                    tooltip: 'Preview'.tr,
+                    onPressed: () {
+                      final jsonStr = _generateFullJsonBackup(tc, nc ?? NotesController(), sc);
+                      _previewData(context, jsonStr, 'Full Data Backup (JSON)');
+                    },
                   ),
-                ),
-              ],
+                  IconButton(
+                    icon: Icon(Icons.share_rounded, size: 18, color: p.income),
+                    tooltip: 'Share Backup'.tr,
+                    onPressed: () {
+                      final jsonStr = _generateFullJsonBackup(tc, nc ?? NotesController(), sc);
+                      _shareBackup(context, jsonStr);
+                    },
+                  ),
+                  const SizedBox(width: 2),
+                  FilledButton.icon(
+                    onPressed: () {
+                      final jsonStr = _generateFullJsonBackup(tc, nc ?? NotesController(), sc);
+                      _showBackupSuccessSheet(context, jsonStr, txCount, notesCount);
+                    },
+                    icon: const Icon(Icons.backup_rounded, size: 14, color: Colors.white),
+                    label: Text('Backup'.tr, style: const TextStyle(fontSize: 12.5)),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: p.ink,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      minimumSize: Size.zero,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 16),
 
           // Cancel / Close button
-          OutlinedButton(
-            onPressed: () => Get.back(),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: p.ink,
-              side: BorderSide(color: p.line),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              padding: const EdgeInsets.symmetric(vertical: 12),
-            ),
-            child: Text('Close'.tr),
+          AppButton(
+            'Close',
+            style: AppButtonStyle.outlined,
+            height: 44,
+            fontSize: 14,
+            margin: EdgeInsets.zero,
+            onPressed: () => Navigator.of(context).pop(),
           ),
         ],
       ),

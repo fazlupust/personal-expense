@@ -525,6 +525,15 @@ class AppTranslations extends Translations {
     'Saving...': 'সংরক্ষণ হচ্ছে...',
     'Updating...': 'আপডেট হচ্ছে...',
     'Sign Out Confirmation': 'লগআউট নিশ্চিতকরণ',
+    'Full Backup Completed': 'সম্পূর্ণ ব্যাকআপ সম্পন্ন',
+    'Backup Generated Successfully!': 'ব্যাকআপ সফলভাবে তৈরি হয়েছে!',
+    'All transactions, notes & settings are packed in JSON format.': 'সকল লেনদেন, নোট ও সেটিংস JSON ফরম্যাটে প্রস্তুত করা হয়েছে।',
+    'Share Backup': 'ব্যাকআপ শেয়ার করুন',
+    'Copy JSON': 'JSON কপি করুন',
+    'Back to Settings': 'সেটিংসে ফিরে যান',
+    'Back': 'ফিরে যান',
+    'Backup Ready & Copied': 'ব্যাকআপ প্রস্তুত ও কপি করা হয়েছে',
+    'Backup JSON copied to clipboard! You can paste and share it in any app.': 'ব্যাকআপ JSON ক্লিপবোর্ডে কপি হয়েছে! আপনি যেকোনো অ্যাপে পেস্ট ও শেয়ার করতে পারেন।',
   };
 }
 
