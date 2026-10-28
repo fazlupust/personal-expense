@@ -9,6 +9,7 @@ import '../../../../app/core/theme/app_theme.dart';
 import '../../../../app/core/utils/formatters.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/services/auth_service.dart';
+import '../../../data/services/transaction_service.dart';
 
 class RegisteredUsersView extends StatefulWidget {
   const RegisteredUsersView({super.key});
@@ -57,7 +58,7 @@ class _RegisteredUsersViewState extends State<RegisteredUsersView> {
     }
   }
 
-  void _showUserDetails(BuildContext context, UserModel u, AppPalette p, bool isBn) {
+  void _showUserDetails(BuildContext context, UserModel u, int txCount, AppPalette p, bool isBn) {
     final joinedDate = u.createdAt != null
         ? DateFormat('dd MMM yyyy, hh:mm a').format(u.createdAt!)
         : 'N/A';
@@ -200,6 +201,13 @@ class _RegisteredUsersViewState extends State<RegisteredUsersView> {
                       title: 'Name (EN / বাংলা)'.tr,
                       value: '${u.nameEn.isNotEmpty ? u.nameEn : '-'}'
                           '${u.nameBn.isNotEmpty ? ' · ${u.nameBn}' : ''}',
+                      p: p,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildDetailTile(
+                      icon: Icons.receipt_long_rounded,
+                      title: 'Total Transactions'.tr,
+                      value: '$txCount ${'entries'.tr}',
                       p: p,
                     ),
                     if (u.phone != null && u.phone!.isNotEmpty) ...[
@@ -351,6 +359,7 @@ class _RegisteredUsersViewState extends State<RegisteredUsersView> {
     final p = context.pal;
     final isBn = Get.locale?.languageCode == 'bn';
     final auth = Get.isRegistered<AuthService>() ? Get.find<AuthService>() : null;
+    final txService = Get.isRegistered<TransactionService>() ? Get.find<TransactionService>() : null;
 
     return Scaffold(
       backgroundColor: p.bg,
@@ -369,271 +378,357 @@ class _RegisteredUsersViewState extends State<RegisteredUsersView> {
       ),
       body: auth == null
           ? Center(child: Text('Service not available'.tr))
-          : StreamBuilder<List<UserModel>>(
-              stream: auth.streamAllUsers(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(
-                    child: CircularProgressIndicator(color: p.income),
-                  );
-                }
+          : StreamBuilder<Map<String, int>>(
+              stream: txService?.streamAllUserTransactionCounts() ?? const Stream.empty(),
+              builder: (context, txSnap) {
+                final txCounts = txSnap.data ?? {};
 
-                final allUsers = snapshot.data ?? [];
-                final q = _searchQuery.trim().toLowerCase();
+                return StreamBuilder<List<UserModel>>(
+                  stream: auth.streamAllUsers(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(
+                        child: CircularProgressIndicator(color: p.income),
+                      );
+                    }
 
-                final filteredUsers = allUsers.where((u) {
-                  if (q.isEmpty) return true;
-                  final nameEn = u.nameEn.toLowerCase();
-                  final nameBn = u.nameBn.toLowerCase();
-                  final phone = (u.phone ?? '').toLowerCase();
-                  final desigEn = u.designationEn.toLowerCase();
-                  final desigBn = u.designationBn.toLowerCase();
-                  final numStr = u.userNo != null ? '#${u.userNo}' : '';
-                  return nameEn.contains(q) ||
-                      nameBn.contains(q) ||
-                      phone.contains(q) ||
-                      desigEn.contains(q) ||
-                      desigBn.contains(q) ||
-                      numStr.contains(q);
-                }).toList();
+                    final allUsers = snapshot.data ?? [];
+                    final q = _searchQuery.trim().toLowerCase();
 
-                return Column(
-                  children: [
-                    // Search Bar and Count Header
-                    Container(
-                      color: p.card,
-                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
-                      child: Column(
-                        children: [
-                          TextField(
-                            controller: _searchCtrl,
-                            onChanged: (val) {
-                              setState(() {
-                                _searchQuery = val;
-                              });
-                            },
-                            style: TextStyle(fontSize: 14, color: p.ink),
-                            decoration: InputDecoration(
-                              hintText: 'Search by name, phone, designation...'.tr,
-                              hintStyle: TextStyle(fontSize: 13.5, color: p.mute),
-                              prefixIcon: Icon(Icons.search_rounded, color: p.mute, size: 20),
-                              suffixIcon: _searchQuery.isNotEmpty
-                                  ? IconButton(
-                                      icon: Icon(Icons.close_rounded, color: p.mute, size: 18),
-                                      onPressed: () {
-                                        _searchCtrl.clear();
-                                        setState(() {
-                                          _searchQuery = '';
-                                        });
-                                      },
-                                    )
-                                  : null,
-                              isDense: true,
-                              filled: true,
-                              fillColor: p.bg,
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide(color: p.line),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide(color: p.line),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide(color: p.income, width: 1.5),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    final filteredUsers = allUsers.where((u) {
+                      if (q.isEmpty) return true;
+                      final nameEn = u.nameEn.toLowerCase();
+                      final nameBn = u.nameBn.toLowerCase();
+                      final phone = (u.phone ?? '').toLowerCase();
+                      final desigEn = u.designationEn.toLowerCase();
+                      final desigBn = u.designationBn.toLowerCase();
+                      final numStr = u.userNo != null ? '#${u.userNo}' : '';
+                      return nameEn.contains(q) ||
+                          nameBn.contains(q) ||
+                          phone.contains(q) ||
+                          desigEn.contains(q) ||
+                          desigBn.contains(q) ||
+                          numStr.contains(q);
+                    }).toList();
+
+                    final totalTx = txCounts.values.fold<int>(0, (a, b) => a + b);
+
+                    return Column(
+                      children: [
+                        // Search Bar and Count Header
+                        Container(
+                          color: p.card,
+                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+                          child: Column(
                             children: [
-                              Text(
-                                '${'Total Users:'.tr} ${Fmt.count(allUsers.length)}',
-                                style: TextStyle(
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.w600,
-                                  color: p.mute,
+                              TextField(
+                                controller: _searchCtrl,
+                                onChanged: (val) {
+                                  setState(() {
+                                    _searchQuery = val;
+                                  });
+                                },
+                                style: TextStyle(fontSize: 14, color: p.ink),
+                                decoration: InputDecoration(
+                                  hintText: 'Search by name, phone, designation...'.tr,
+                                  hintStyle: TextStyle(fontSize: 13.5, color: p.mute),
+                                  prefixIcon: Icon(Icons.search_rounded, color: p.mute, size: 20),
+                                  suffixIcon: _searchQuery.isNotEmpty
+                                      ? IconButton(
+                                          icon: Icon(Icons.close_rounded, color: p.mute, size: 18),
+                                          onPressed: () {
+                                            _searchCtrl.clear();
+                                            setState(() {
+                                              _searchQuery = '';
+                                            });
+                                          },
+                                        )
+                                      : null,
+                                  isDense: true,
+                                  filled: true,
+                                  fillColor: p.bg,
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: BorderSide(color: p.line),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: BorderSide(color: p.line),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: BorderSide(color: p.income, width: 1.5),
+                                  ),
                                 ),
                               ),
-                              if (_searchQuery.isNotEmpty)
-                                Text(
-                                  '${'Found:'.tr} ${Fmt.count(filteredUsers.length)}',
-                                  style: TextStyle(
-                                    fontSize: 12.5,
-                                    fontWeight: FontWeight.w700,
-                                    color: p.income,
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // User List
-                    Expanded(
-                      child: filteredUsers.isEmpty
-                          ? Center(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
+                              const SizedBox(height: 10),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Icon(Icons.people_outline_rounded, size: 48, color: p.mute),
-                                  const SizedBox(height: 12),
                                   Text(
-                                    _searchQuery.isNotEmpty
-                                        ? 'No matching users found'.tr
-                                        : 'No registered users found'.tr,
-                                    style: TextStyle(fontSize: 14, color: p.mute, fontWeight: FontWeight.w500),
+                                    '${'Total Users:'.tr} ${Fmt.count(allUsers.length)} · ${'Total Entries:'.tr} ${Fmt.count(totalTx)}',
+                                    style: TextStyle(
+                                      fontSize: 12.5,
+                                      fontWeight: FontWeight.w600,
+                                      color: p.mute,
+                                    ),
                                   ),
+                                  if (_searchQuery.isNotEmpty)
+                                    Text(
+                                      '${'Found:'.tr} ${Fmt.count(filteredUsers.length)}',
+                                      style: TextStyle(
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.w700,
+                                        color: p.income,
+                                      ),
+                                    ),
                                 ],
                               ),
-                            )
-                          : ListView.separated(
-                              padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
-                              itemCount: filteredUsers.length,
-                              separatorBuilder: (_, __) => const SizedBox(height: 10),
-                              itemBuilder: (context, index) {
-                                final u = filteredUsers[index];
-                                final name = u.displayName(isBn);
-                                final desig = u.displayDesignation(isBn);
-                                final phone = u.phone ?? '';
+                            ],
+                          ),
+                        ),
 
-                                return Material(
-                                  color: p.card,
-                                  borderRadius: BorderRadius.circular(14),
-                                  child: InkWell(
-                                    borderRadius: BorderRadius.circular(14),
-                                    onTap: () => _showUserDetails(context, u, p, isBn),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(14),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(14),
-                                        border: Border.all(color: p.line),
+                        // User List
+                        Expanded(
+                          child: filteredUsers.isEmpty
+                              ? Center(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.people_outline_rounded, size: 48, color: p.mute),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        _searchQuery.isNotEmpty
+                                            ? 'No matching users found'.tr
+                                            : 'No registered users found'.tr,
+                                        style: TextStyle(fontSize: 14, color: p.mute, fontWeight: FontWeight.w500),
                                       ),
-                                      child: Row(
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        children: [
-                                          CircleAvatar(
-                                            radius: 22,
-                                            backgroundColor: p.income.withOpacity(0.12),
-                                            child: Text(
-                                              name.isNotEmpty ? name.substring(0, 1).toUpperCase() : 'U',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w800,
-                                                color: p.income,
-                                              ),
-                                            ),
+                                    ],
+                                  ),
+                                )
+                              : ListView.separated(
+                                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+                                  itemCount: filteredUsers.length,
+                                  separatorBuilder: (_, __) => const SizedBox(height: 10),
+                                  itemBuilder: (context, index) {
+                                    final u = filteredUsers[index];
+                                    final name = u.displayName(isBn);
+                                    final desig = u.displayDesignation(isBn);
+                                    final phone = u.phone ?? '';
+                                    final txCount = txCounts[u.uid] ?? u.transactionCount ?? 0;
+
+                                    return Material(
+                                      color: p.card,
+                                      borderRadius: BorderRadius.circular(14),
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.circular(14),
+                                        onTap: () => _showUserDetails(context, u, txCount, p, isBn),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(14),
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(14),
+                                            border: Border.all(color: p.line),
                                           ),
-                                          const SizedBox(width: 12),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Row(
+                                          child: Row(
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            children: [
+                                              CircleAvatar(
+                                                radius: 22,
+                                                backgroundColor: p.income.withOpacity(0.12),
+                                                child: Text(
+                                                  name.isNotEmpty ? name.substring(0, 1).toUpperCase() : 'U',
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w800,
+                                                    color: p.income,
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 12),
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
-                                                    Flexible(
-                                                      child: Text(
-                                                        name.isEmpty ? 'Personal Expense User'.tr : name,
+                                                    Row(
+                                                      children: [
+                                                        Flexible(
+                                                          child: Text(
+                                                            name.isEmpty ? 'Personal Expense User'.tr : name,
+                                                            maxLines: 1,
+                                                            overflow: TextOverflow.ellipsis,
+                                                            style: TextStyle(
+                                                              fontSize: 14.5,
+                                                              fontWeight: FontWeight.w700,
+                                                              color: p.ink,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        if (u.userNo != null) ...[
+                                                          const SizedBox(width: 6),
+                                                          Container(
+                                                            padding: const EdgeInsets.symmetric(
+                                                                horizontal: 6, vertical: 1),
+                                                            decoration: BoxDecoration(
+                                                              color: p.bg,
+                                                              borderRadius: BorderRadius.circular(4),
+                                                              border: Border.all(color: p.line),
+                                                            ),
+                                                            child: Text(
+                                                              '#${u.userNo}',
+                                                              style: TextStyle(
+                                                                fontSize: 10,
+                                                                fontWeight: FontWeight.w800,
+                                                                color: p.mute,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                        if (u.isDeveloper) ...[
+                                                          const SizedBox(width: 6),
+                                                          Container(
+                                                            padding: const EdgeInsets.symmetric(
+                                                                horizontal: 5, vertical: 1),
+                                                            decoration: BoxDecoration(
+                                                              color: p.income.withOpacity(0.12),
+                                                              borderRadius: BorderRadius.circular(4),
+                                                            ),
+                                                            child: Text(
+                                                              'Dev'.tr,
+                                                              style: TextStyle(
+                                                                fontSize: 9.5,
+                                                                fontWeight: FontWeight.w800,
+                                                                color: p.income,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                        const SizedBox(width: 6),
+                                                        // Transaction count badge beside user
+                                                        Container(
+                                                          padding: const EdgeInsets.symmetric(
+                                                              horizontal: 6, vertical: 1.5),
+                                                          decoration: BoxDecoration(
+                                                            color: txCount > 0 ? p.income.withOpacity(0.12) : p.bg,
+                                                            borderRadius: BorderRadius.circular(4),
+                                                            border: Border.all(
+                                                              color: txCount > 0 ? p.income.withOpacity(0.35) : p.line,
+                                                            ),
+                                                          ),
+                                                          child: Row(
+                                                            mainAxisSize: MainAxisSize.min,
+                                                            children: [
+                                                              Icon(
+                                                                Icons.receipt_long_rounded,
+                                                                size: 11,
+                                                                color: txCount > 0 ? p.income : p.mute,
+                                                              ),
+                                                              const SizedBox(width: 3),
+                                                              Text(
+                                                                '$txCount ${'entries'.tr}',
+                                                                style: TextStyle(
+                                                                  fontSize: 10,
+                                                                  fontWeight: FontWeight.w700,
+                                                                  color: txCount > 0 ? p.income : p.mute,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    if (desig.isNotEmpty) ...[
+                                                      const SizedBox(height: 2),
+                                                      Text(
+                                                        desig,
                                                         maxLines: 1,
                                                         overflow: TextOverflow.ellipsis,
-                                                        style: TextStyle(
-                                                          fontSize: 14.5,
-                                                          fontWeight: FontWeight.w700,
-                                                          color: p.ink,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    if (u.userNo != null) ...[
-                                                      const SizedBox(width: 6),
-                                                      Container(
-                                                        padding: const EdgeInsets.symmetric(
-                                                            horizontal: 6, vertical: 1),
-                                                        decoration: BoxDecoration(
-                                                          color: p.bg,
-                                                          borderRadius: BorderRadius.circular(4),
-                                                          border: Border.all(color: p.line),
-                                                        ),
-                                                        child: Text(
-                                                          '#${u.userNo}',
-                                                          style: TextStyle(
-                                                            fontSize: 10,
-                                                            fontWeight: FontWeight.w800,
-                                                            color: p.mute,
-                                                          ),
-                                                        ),
+                                                        style: TextStyle(fontSize: 12, color: p.mute),
                                                       ),
                                                     ],
-                                                    if (u.isDeveloper) ...[
-                                                      const SizedBox(width: 6),
-                                                      Container(
-                                                        padding: const EdgeInsets.symmetric(
-                                                            horizontal: 5, vertical: 1),
-                                                        decoration: BoxDecoration(
-                                                          color: p.income.withOpacity(0.12),
-                                                          borderRadius: BorderRadius.circular(4),
-                                                        ),
-                                                        child: Text(
-                                                          'Dev'.tr,
-                                                          style: TextStyle(
-                                                            fontSize: 9.5,
-                                                            fontWeight: FontWeight.w800,
-                                                            color: p.income,
+                                                    if (phone.isNotEmpty) ...[
+                                                      const SizedBox(height: 4),
+                                                      Row(
+                                                        children: [
+                                                          Icon(Icons.phone_outlined, size: 12.5, color: p.income),
+                                                          const SizedBox(width: 4),
+                                                          Text(
+                                                            phone,
+                                                            style: TextStyle(
+                                                              fontSize: 12,
+                                                              fontWeight: FontWeight.w600,
+                                                              color: p.ink,
+                                                            ),
                                                           ),
-                                                        ),
+                                                          const SizedBox(width: 8),
+                                                          Container(
+                                                            width: 3,
+                                                            height: 3,
+                                                            decoration: BoxDecoration(
+                                                              color: p.mute.withOpacity(0.6),
+                                                              shape: BoxShape.circle,
+                                                            ),
+                                                          ),
+                                                          const SizedBox(width: 8),
+                                                          Icon(
+                                                            Icons.receipt_long_rounded,
+                                                            size: 12,
+                                                            color: txCount > 0 ? p.income : p.mute,
+                                                          ),
+                                                          const SizedBox(width: 3),
+                                                          Text(
+                                                            '$txCount ${'entries'.tr}',
+                                                            style: TextStyle(
+                                                              fontSize: 11.5,
+                                                              fontWeight: FontWeight.w600,
+                                                              color: txCount > 0 ? p.income : p.mute,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ] else ...[
+                                                      const SizedBox(height: 4),
+                                                      Row(
+                                                        children: [
+                                                          Icon(
+                                                            Icons.receipt_long_rounded,
+                                                            size: 12,
+                                                            color: txCount > 0 ? p.income : p.mute,
+                                                          ),
+                                                          const SizedBox(width: 3),
+                                                          Text(
+                                                            '$txCount ${'entries'.tr}',
+                                                            style: TextStyle(
+                                                              fontSize: 11.5,
+                                                              fontWeight: FontWeight.w600,
+                                                              color: txCount > 0 ? p.income : p.mute,
+                                                            ),
+                                                          ),
+                                                        ],
                                                       ),
                                                     ],
                                                   ],
                                                 ),
-                                                if (desig.isNotEmpty) ...[
-                                                  const SizedBox(height: 2),
-                                                  Text(
-                                                    desig,
-                                                    maxLines: 1,
-                                                    overflow: TextOverflow.ellipsis,
-                                                    style: TextStyle(fontSize: 12, color: p.mute),
-                                                  ),
-                                                ],
-                                                if (phone.isNotEmpty) ...[
-                                                  const SizedBox(height: 4),
-                                                  Row(
-                                                    children: [
-                                                      Icon(Icons.phone_outlined, size: 12.5, color: p.income),
-                                                      const SizedBox(width: 4),
-                                                      Text(
-                                                        phone,
-                                                        style: TextStyle(
-                                                          fontSize: 12,
-                                                          fontWeight: FontWeight.w600,
-                                                          color: p.ink,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              ],
-                                            ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              if (phone.isNotEmpty)
+                                                IconButton(
+                                                  icon: Icon(Icons.call_rounded, color: p.income, size: 20),
+                                                  tooltip: 'Call'.tr,
+                                                  onPressed: () => _makeCall(phone),
+                                                ),
+                                              Icon(Icons.chevron_right_rounded, color: p.mute, size: 20),
+                                            ],
                                           ),
-                                          const SizedBox(width: 8),
-                                          if (phone.isNotEmpty)
-                                            IconButton(
-                                              icon: Icon(Icons.call_rounded, color: p.income, size: 20),
-                                              tooltip: 'Call'.tr,
-                                              onPressed: () => _makeCall(phone),
-                                            ),
-                                          Icon(Icons.chevron_right_rounded, color: p.mute, size: 20),
-                                        ],
+                                        ),
                                       ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                    ),
-                  ],
+                                    );
+                                  },
+                                ),
+                        ),
+                      ],
+                    );
+                  },
                 );
               },
             ),

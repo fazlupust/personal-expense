@@ -84,6 +84,11 @@ class TransactionService extends GetxService {
     );
 
     await docRef.set(newTx.toMap());
+    try {
+      await _db.collection('users').doc(uid).set({
+        'transaction_count': FieldValue.increment(1),
+      }, SetOptions(merge: true));
+    } catch (_) {}
     return docRef.id;
   }
 
@@ -110,9 +115,38 @@ class TransactionService extends GetxService {
 
   /// Soft delete transaction (sets is_deleted to true as per specification)
   Future<void> softDeleteTransaction(String id) async {
+    final docSnap = await _collection.doc(id).get();
+    final uid = docSnap.data()?['user_id'] as String?;
+
     await _collection.doc(id).update({
       'is_deleted': true,
       'updated_at': FieldValue.serverTimestamp(),
     });
+
+    if (uid != null) {
+      try {
+        await _db.collection('users').doc(uid).set({
+          'transaction_count': FieldValue.increment(-1),
+        }, SetOptions(merge: true));
+      } catch (_) {}
+    }
+  }
+
+  /// Stream mapping of {userId: transactionCount} for all active transactions across users
+  Stream<Map<String, int>> streamAllUserTransactionCounts() {
+    return _collection
+        .where('is_deleted', isEqualTo: false)
+        .snapshots()
+        .map((snapshot) {
+      final map = <String, int>{};
+      for (final doc in snapshot.docs) {
+        final data = doc.data();
+        final uid = data['user_id'] as String?;
+        if (uid != null && uid.isNotEmpty) {
+          map[uid] = (map[uid] ?? 0) + 1;
+        }
+      }
+      return map;
+    }).handleError((_) => <String, int>{});
   }
 }

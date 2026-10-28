@@ -155,6 +155,8 @@ class AppTranslations extends Translations {
     'Card': 'কার্ড',
     'S.N': 'S.N',
     'Total': 'মোট',
+    'Total Transactions': 'মোট লেনদেন',
+    'Total Entries:': 'মোট এন্ট্রি:',
     'Load More': 'আরও দেখুন',
     'more': 'টি বাকি',
     'Showing': 'দেখানো হচ্ছে',

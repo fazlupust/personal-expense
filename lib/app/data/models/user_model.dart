@@ -20,10 +20,12 @@ class UserModel {
     this.lastLoginLongitude,
     this.lastLoginDevice,
     this.lastLoginAt,
+    this.transactionCount,
   });
 
   final String uid;
   final int? userNo; // Sequential numeric user ID e.g. 1, 2, 3...
+  final int? transactionCount;
   final String nameBn;
   final String nameEn;
   final String designationBn;
@@ -71,6 +73,7 @@ class UserModel {
       'address_en': addressEn,
       'role': role,
       'is_active': isActive,
+      if (transactionCount != null) 'transaction_count': transactionCount,
       'last_login_latitude': lastLoginLatitude,
       'last_login_longitude': lastLoginLongitude,
       'last_login_device': lastLoginDevice,
@@ -100,9 +103,17 @@ class UserModel {
       return null;
     }
 
+    int? parseCount(dynamic val) {
+      if (val is int) return val;
+      if (val is num) return val.toInt();
+      if (val is String) return int.tryParse(val);
+      return null;
+    }
+
     return UserModel(
       uid: (map['uid'] as String?) ?? docId,
       userNo: parseUserNo(map['user_no']),
+      transactionCount: parseCount(map['transaction_count']),
       nameBn: (map['name_bn'] as String?) ?? '',
       nameEn: (map['name_en'] as String?) ?? '',
       designationBn: (map['designation_bn'] as String?) ?? '',
@@ -130,6 +141,7 @@ class UserModel {
   UserModel copyWith({
     String? uid,
     int? userNo,
+    int? transactionCount,
     String? nameBn,
     String? nameEn,
     String? designationBn,
@@ -150,6 +162,7 @@ class UserModel {
     return UserModel(
       uid: uid ?? this.uid,
       userNo: userNo ?? this.userNo,
+      transactionCount: transactionCount ?? this.transactionCount,
       nameBn: nameBn ?? this.nameBn,
       nameEn: nameEn ?? this.nameEn,
       designationBn: designationBn ?? this.designationBn,
