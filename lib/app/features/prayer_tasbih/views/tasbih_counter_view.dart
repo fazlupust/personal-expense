@@ -232,6 +232,19 @@ class TasbihCounterView extends StatelessWidget {
                     ),
                   ),
                 ),
+                const SizedBox(width: 8),
+                InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Container(
+                    padding: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      color: p.line.withOpacity(0.5),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.close_rounded, size: 18, color: p.ink),
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 12),

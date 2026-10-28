@@ -63,23 +63,49 @@ class PrayerTasbihView extends StatelessWidget {
                   child: Container(
                     width: 40,
                     height: 4,
-                    margin: const EdgeInsets.only(bottom: 14),
+                    margin: const EdgeInsets.only(bottom: 10),
                     decoration: BoxDecoration(
                       color: p.mute.withOpacity(0.3),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
                 ),
-                Text(
-                  'Select Division / Location'.tr,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: p.ink),
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Align(
+                      alignment: Alignment.center,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 40),
+                        child: Text(
+                          'Select Division / Location'.tr,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 16.5, fontWeight: FontWeight.w800, color: p.ink),
+                        ),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(20),
+                        onTap: () => Navigator.of(context).pop(),
+                        child: Container(
+                          padding: const EdgeInsets.all(5),
+                          decoration: BoxDecoration(
+                            color: p.line.withOpacity(0.5),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.close_rounded, size: 18, color: p.ink),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Prayer times are calculated accurately based on geographic coordinates.'.tr,
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 11.5, color: p.mute),
+                  style: TextStyle(fontSize: 12, color: p.mute),
                 ),
                 const SizedBox(height: 12),
 
