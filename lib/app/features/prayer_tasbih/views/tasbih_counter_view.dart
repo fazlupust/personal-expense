@@ -1406,12 +1406,15 @@ class TasbihCounterView extends StatelessWidget {
                       children: [
                         Icon(Icons.stars_rounded, size: 14, color: p.income),
                         const SizedBox(width: 6),
-                        Text(
-                          currentPhaseText,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: p.income,
+                        Flexible(
+                          child: Text(
+                            currentPhaseText,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: p.income,
+                            ),
                           ),
                         ),
                       ],
@@ -1566,9 +1569,9 @@ class TasbihCounterView extends StatelessWidget {
     // Current recitation phase (1..10)
     String currentPhaseText;
     if (cycleStep == 0 && c.currentCount > 0) {
-      currentPhaseText = '১০ বার আমল সম্পন্ন হয়েছে! পুনরায় শুরু করতে পারেন';
+      currentPhaseText = '১০ বার সম্পন্ন! পুনরায় শুরু করুন';
     } else if (cycleStep == 0) {
-      currentPhaseText = 'শুরু করুন: ব্যথার স্থানে হাত রেখে ৩ বার বিসমিল্লাহ বলুন';
+      currentPhaseText = 'শুরু: ব্যথার স্থানে হাত রেখে ৩ বার বলুন';
     } else if (cycleStep <= 3) {
       currentPhaseText = '১ম পর্ব: বিসমিল্লাহ (${cycleStep}/৩ বার)';
     } else {
@@ -1675,12 +1678,15 @@ class TasbihCounterView extends StatelessWidget {
                       children: [
                         Icon(Icons.stars_rounded, size: 14, color: p.income),
                         const SizedBox(width: 6),
-                        Text(
-                          currentPhaseText,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: p.income,
+                        Flexible(
+                          child: Text(
+                            currentPhaseText,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: p.income,
+                            ),
                           ),
                         ),
                       ],
