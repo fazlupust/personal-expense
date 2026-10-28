@@ -684,6 +684,238 @@ class TasbihHistoryView extends StatelessWidget {
     );
   }
 
+  void _showMonthYearPicker(
+    BuildContext context,
+    PrayerTasbihController c,
+    AppPalette p,
+    bool isBn,
+  ) {
+    final now = DateTime.now();
+    int tempYear = c.selectedHistoryMonth?.year ?? now.year;
+    int? tempMonth = c.selectedHistoryMonth?.month;
+
+    // Available years: from 3 years ago to current year
+    final years = List.generate(4, (i) => now.year - 3 + i).reversed.toList();
+
+    const monthNamesEn = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    const monthNamesBn = [
+      'জানু', 'ফেব্রু', 'মার্চ', 'এপ্রিল', 'মে', 'জুন',
+      'জুলাই', 'আগস্ট', 'সেপ্টে', 'অক্টো', 'নভে', 'ডিসে'
+    ];
+
+    Get.bottomSheet(
+      StatefulBuilder(
+        builder: (ctx, setState) {
+          final isAllTime = tempMonth == null;
+
+          return Container(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+            decoration: BoxDecoration(
+              color: p.card,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+              border: Border.all(color: p.line),
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Drag Handle
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: p.line,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+
+                  // Header title
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Filter by Month & Year'.tr,
+                        style: TextStyle(
+                          fontSize: 16.5,
+                          fontWeight: FontWeight.w800,
+                          color: p.ink,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Get.back(),
+                        icon: const Icon(Icons.close_rounded, size: 20),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+
+                  // "All Time History" quick button
+                  InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () {
+                      c.setHistoryMonth(null);
+                      Get.back();
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                      decoration: BoxDecoration(
+                        color: isAllTime ? p.income : p.bg,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: isAllTime ? p.income : p.line),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.all_inclusive_rounded,
+                            size: 18,
+                            color: isAllTime ? Colors.white : p.income,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'All Time History'.tr,
+                            style: TextStyle(
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w700,
+                              color: isAllTime ? Colors.white : p.ink,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Year selector row
+                  Text(
+                    'Select Year'.tr,
+                    style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: p.mute),
+                  ),
+                  const SizedBox(height: 8),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: years.map((y) {
+                        final isSel = !isAllTime && y == tempYear;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(10),
+                            onTap: () {
+                              setState(() {
+                                tempYear = y;
+                                if (tempMonth == null) tempMonth = now.month;
+                              });
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 150),
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                              decoration: BoxDecoration(
+                                color: isSel ? p.income : p.bg,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: isSel ? p.income : p.line),
+                              ),
+                              child: Text(
+                                isBn ? NumberFormat('', 'bn').format(y) : '$y',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: isSel ? FontWeight.w700 : FontWeight.w600,
+                                  color: isSel ? Colors.white : p.ink,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Month selector Grid
+                  Text(
+                    'Select Month'.tr,
+                    style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: p.mute),
+                  ),
+                  const SizedBox(height: 8),
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 4,
+                      mainAxisSpacing: 8,
+                      crossAxisSpacing: 8,
+                      childAspectRatio: 2.1,
+                    ),
+                    itemCount: 12,
+                    itemBuilder: (ctx, i) {
+                      final monthIndex = i + 1;
+                      final isFuture = tempYear == now.year && monthIndex > now.month;
+                      final isSel = !isAllTime && tempMonth == monthIndex;
+                      final name = isBn ? monthNamesBn[i] : monthNamesEn[i];
+
+                      return InkWell(
+                        borderRadius: BorderRadius.circular(10),
+                        onTap: isFuture
+                            ? null
+                            : () {
+                                c.setHistoryMonth(DateTime(tempYear, monthIndex));
+                                Get.back();
+                              },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 150),
+                          decoration: BoxDecoration(
+                            color: isSel
+                                ? p.income
+                                : isFuture
+                                    ? p.bg.withOpacity(0.4)
+                                    : p.bg,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: isSel
+                                  ? p.income
+                                  : isFuture
+                                      ? p.line.withOpacity(0.4)
+                                      : p.line,
+                            ),
+                          ),
+                          child: Center(
+                            child: Text(
+                              name,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: isSel ? FontWeight.w800 : FontWeight.w600,
+                                color: isSel
+                                    ? Colors.white
+                                    : isFuture
+                                        ? p.mute.withOpacity(0.4)
+                                        : p.ink,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+      isScrollControlled: true,
+    );
+  }
+
   // --- Tab 1: Day-Wise Chronological History Logs (Firebase Firestore) ---
   Widget _buildDailyHistoryLogsTab({
     required BuildContext context,
@@ -700,61 +932,139 @@ class TasbihHistoryView extends StatelessWidget {
       color: p.income,
       child: CustomScrollView(
         slivers: [
-          // Header info banner
+          // Month & Year Filter Bar
           SliverToBoxAdapter(
             child: Container(
               margin: const EdgeInsets.fromLTRB(14, 8, 14, 10),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               decoration: BoxDecoration(
                 color: p.card,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: p.line),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.02),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Row(
                 children: [
+                  // Prev Month Button
+                  InkWell(
+                    borderRadius: BorderRadius.circular(10),
+                    onTap: c.previousHistoryMonth,
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: p.bg,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: p.line),
+                      ),
+                      child: Icon(Icons.chevron_left_rounded, size: 22, color: p.ink),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+
+                  // Center Month & Year Tappable Button
+                  Expanded(
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(10),
+                      onTap: () => _showMonthYearPicker(context, c, p, isBn),
+                      child: Container(
+                        height: 36,
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        decoration: BoxDecoration(
+                          color: p.bg,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: p.line),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.calendar_month_rounded, size: 17, color: p.income),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                c.selectedHistoryMonth != null
+                                    ? (isBn
+                                        ? DateFormat('MMMM yyyy', 'bn').format(c.selectedHistoryMonth!)
+                                        : DateFormat('MMMM yyyy').format(c.selectedHistoryMonth!))
+                                    : 'All Time History'.tr,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: p.ink,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Icon(Icons.keyboard_arrow_down_rounded, size: 18, color: p.mute),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+
+                  // Next Month Button
+                  InkWell(
+                    borderRadius: BorderRadius.circular(10),
+                    onTap: (c.selectedHistoryMonth != null &&
+                            (c.selectedHistoryMonth!.year > DateTime.now().year ||
+                             (c.selectedHistoryMonth!.year == DateTime.now().year &&
+                              c.selectedHistoryMonth!.month >= DateTime.now().month)))
+                        ? null
+                        : c.nextHistoryMonth,
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: p.bg,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: p.line),
+                      ),
+                      child: Icon(
+                        Icons.chevron_right_rounded,
+                        size: 22,
+                        color: (c.selectedHistoryMonth != null &&
+                                (c.selectedHistoryMonth!.year > DateTime.now().year ||
+                                 (c.selectedHistoryMonth!.year == DateTime.now().year &&
+                                  c.selectedHistoryMonth!.month >= DateTime.now().month)))
+                            ? p.mute.withOpacity(0.3)
+                            : p.ink,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+
+                  // Total Recitations Badge for selected period
                   Container(
-                    width: 34,
-                    height: 34,
+                    height: 36,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
                     decoration: BoxDecoration(
                       color: p.income.withOpacity(0.12),
-                      shape: BoxShape.circle,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: p.income.withOpacity(0.25)),
                     ),
                     child: Center(
-                      child: Icon(Icons.cloud_done_rounded, size: 18, color: p.income),
+                      child: Text(
+                        c.isCountHidden
+                            ? '***'
+                            : '${NumberFormat('#,###').format(c.selectedMonthTotal)} ${'Times'.tr}',
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w800,
+                          color: p.income,
+                          letterSpacing: c.isCountHidden ? 2 : 0,
+                        ),
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Synced with Firebase'.tr,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: p.ink,
-                          ),
-                        ),
-                        Text(
-                          'History from Firebase'.tr,
-                          style: TextStyle(fontSize: 11, color: p.mute),
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (c.isSyncingHistory)
-                    SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: p.income),
-                    )
-                  else
-                    IconButton(
-                      icon: Icon(Icons.refresh_rounded, size: 20, color: p.income),
-                      tooltip: 'Refresh'.tr,
-                      onPressed: c.refreshHistoryFromFirestore,
-                    ),
                 ],
               ),
             ),
@@ -772,16 +1082,24 @@ class TasbihHistoryView extends StatelessWidget {
                       Icon(Icons.history_toggle_off_rounded, size: 48, color: p.mute.withOpacity(0.5)),
                       const SizedBox(height: 12),
                       Text(
-                        'No history recorded yet'.tr,
+                        c.selectedHistoryMonth != null
+                            ? '${'No history recorded in'.tr} ${isBn ? DateFormat('MMMM yyyy', 'bn').format(c.selectedHistoryMonth!) : DateFormat('MMMM yyyy').format(c.selectedHistoryMonth!)}'
+                            : 'No history recorded yet'.tr,
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: p.ink),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Start counting tasbih today to record day-wise entries in Firebase.'.tr,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 12, color: p.mute),
-                      ),
+                      const SizedBox(height: 12),
+                      if (c.selectedHistoryMonth != null)
+                        OutlinedButton.icon(
+                          onPressed: () => c.setHistoryMonth(null),
+                          icon: const Icon(Icons.all_inclusive_rounded, size: 16),
+                          label: Text('View All Time History'.tr),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: p.income,
+                            side: BorderSide(color: p.income.withOpacity(0.4)),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
+                        ),
                     ],
                   ),
                 ),

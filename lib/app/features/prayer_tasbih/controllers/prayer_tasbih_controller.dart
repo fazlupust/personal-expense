@@ -202,6 +202,35 @@ class PrayerTasbihController extends GetxController {
     update();
   }
 
+  final Rxn<DateTime> _selectedHistoryMonth =
+      Rxn<DateTime>(DateTime(DateTime.now().year, DateTime.now().month));
+  DateTime? get selectedHistoryMonth => _selectedHistoryMonth.value;
+
+  void setHistoryMonth(DateTime? month) {
+    if (month == null) {
+      _selectedHistoryMonth.value = null;
+    } else {
+      _selectedHistoryMonth.value = DateTime(month.year, month.month);
+    }
+    update();
+  }
+
+  void previousHistoryMonth() {
+    final current = _selectedHistoryMonth.value ?? DateTime.now();
+    _selectedHistoryMonth.value = DateTime(current.year, current.month - 1);
+    update();
+  }
+
+  void nextHistoryMonth() {
+    final current = _selectedHistoryMonth.value ?? DateTime.now();
+    final next = DateTime(current.year, current.month + 1);
+    final now = DateTime.now();
+    if (!next.isAfter(DateTime(now.year, now.month))) {
+      _selectedHistoryMonth.value = next;
+      update();
+    }
+  }
+
   bool _isSyncingHistory = false;
   bool get isSyncingHistory => _isSyncingHistory;
 
@@ -209,10 +238,40 @@ class PrayerTasbihController extends GetxController {
 
   Map<String, List<TasbihEntryModel>> get groupedHistoryEntries {
     final map = <String, List<TasbihEntryModel>>{};
+    final selectedMonth = _selectedHistoryMonth.value;
     for (final entry in _historyEntries) {
+      if (selectedMonth != null) {
+        final parts = entry.date.split('-');
+        if (parts.length >= 2) {
+          final y = int.tryParse(parts[0]);
+          final m = int.tryParse(parts[1]);
+          if (y != selectedMonth.year || m != selectedMonth.month) {
+            continue;
+          }
+        }
+      }
       map.putIfAbsent(entry.date, () => []).add(entry);
     }
     return map;
+  }
+
+  int get selectedMonthTotal {
+    int sum = 0;
+    final selectedMonth = _selectedHistoryMonth.value;
+    _zikirDailyCounts.forEach((dateKey, dayMap) {
+      if (selectedMonth != null) {
+        final parts = dateKey.split('-');
+        if (parts.length >= 2) {
+          final y = int.tryParse(parts[0]);
+          final m = int.tryParse(parts[1]);
+          if (y != selectedMonth.year || m != selectedMonth.month) {
+            return;
+          }
+        }
+      }
+      dayMap.forEach((_, c) => sum += c);
+    });
+    return sum;
   }
 
   Map<String, int> get dayTotals {
