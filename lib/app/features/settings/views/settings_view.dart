@@ -115,12 +115,22 @@ class SettingsView extends StatelessWidget {
                                       Expanded(
                                         child: ElevatedButton.icon(
                                           onPressed: () => showEditProfileSheet(context),
-                                          icon: const Icon(Icons.edit_outlined, size: 17, color: Colors.white),
-                                          label: Text('Edit Profile'.tr),
+                                          icon: const Icon(Icons.edit_outlined, size: 16, color: Colors.white),
+                                          label: FittedBox(
+                                            fit: BoxFit.scaleDown,
+                                            child: Text(
+                                              'Edit Profile'.tr,
+                                              maxLines: 1,
+                                              style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
+                                            ),
+                                          ),
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: p.income,
                                             foregroundColor: Colors.white,
                                             elevation: 0,
+                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+                                            minimumSize: const Size(0, 40),
+                                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                           ),
                                         ),
@@ -129,12 +139,22 @@ class SettingsView extends StatelessWidget {
                                       Expanded(
                                         child: ElevatedButton.icon(
                                           onPressed: () => showChangePasswordSheet(context),
-                                          icon: const Icon(Icons.lock_reset_rounded, size: 17, color: Colors.white),
-                                          label: Text('Change Password'.tr),
+                                          icon: const Icon(Icons.lock_reset_rounded, size: 16, color: Colors.white),
+                                          label: FittedBox(
+                                            fit: BoxFit.scaleDown,
+                                            child: Text(
+                                              'Change Password'.tr,
+                                              maxLines: 1,
+                                              style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
+                                            ),
+                                          ),
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: p.income,
                                             foregroundColor: Colors.white,
                                             elevation: 0,
+                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+                                            minimumSize: const Size(0, 40),
+                                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                           ),
                                         ),
@@ -161,12 +181,22 @@ class SettingsView extends StatelessWidget {
                                       Expanded(
                                         child: ElevatedButton.icon(
                                           onPressed: () => showEditProfileSheet(context),
-                                          icon: const Icon(Icons.edit_outlined, size: 17, color: Colors.white),
-                                          label: Text('Edit Profile'.tr),
+                                          icon: const Icon(Icons.edit_outlined, size: 16, color: Colors.white),
+                                          label: FittedBox(
+                                            fit: BoxFit.scaleDown,
+                                            child: Text(
+                                              'Edit Profile'.tr,
+                                              maxLines: 1,
+                                              style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
+                                            ),
+                                          ),
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: p.income,
                                             foregroundColor: Colors.white,
                                             elevation: 0,
+                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+                                            minimumSize: const Size(0, 40),
+                                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                           ),
                                         ),
@@ -175,12 +205,22 @@ class SettingsView extends StatelessWidget {
                                       Expanded(
                                         child: ElevatedButton.icon(
                                           onPressed: () => Get.toNamed(AppRoutes.login),
-                                          icon: const Icon(Icons.login, size: 17, color: Colors.white),
-                                          label: Text('Sign In with Phone'.tr),
+                                          icon: const Icon(Icons.login, size: 16, color: Colors.white),
+                                          label: FittedBox(
+                                            fit: BoxFit.scaleDown,
+                                            child: Text(
+                                              'Sign In with Phone'.tr,
+                                              maxLines: 1,
+                                              style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
+                                            ),
+                                          ),
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: p.income,
                                             foregroundColor: Colors.white,
                                             elevation: 0,
+                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+                                            minimumSize: const Size(0, 40),
+                                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                           ),
                                         ),
