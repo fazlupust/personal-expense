@@ -16,6 +16,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
 
   final Color bg, card, ink, mute, line, income, expense, acc, onAcc;
 
+  bool get isDark => bg == dark.bg;
+
   static const light = AppPalette(
     bg: Color(0xFFF3F5F1),
     card: Colors.white,

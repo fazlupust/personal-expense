@@ -240,17 +240,78 @@ class TransactionsController extends GetxController {
   }
 
   Future<void> remove(String id) async {
+    final bool canShowDialog = Get.context != null;
+    if (canShowDialog) {
+      Get.dialog(
+        PopScope(
+          canPop: false,
+          child: Center(
+            child: Material(
+              color: Colors.transparent,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E293B),
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Text(
+                      'Deleting transaction...'.tr,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        barrierDismissible: false,
+      );
+    }
+
     // 1. Immediately remove from local list for instant UI response
     entries.removeWhere((e) => e.id == id);
     update();
 
-    // 2. Perform reliable cloud delete
+    // 2. Perform reliable cloud delete with minimal delay for smooth UX
     if (Get.isRegistered<TransactionService>()) {
       try {
-        await Get.find<TransactionService>().deleteTransaction(id);
+        await Future.wait([
+          Get.find<TransactionService>().deleteTransaction(id),
+          Future.delayed(const Duration(milliseconds: 500)),
+        ]);
       } catch (e) {
         debugPrint('[TransactionsController] remove cloud error: $e');
       }
+    } else {
+      await Future.delayed(const Duration(milliseconds: 400));
+    }
+
+    // Dismiss loading dialog if open
+    if (canShowDialog && (Get.isDialogOpen ?? false)) {
+      Get.back();
     }
 
     if (Get.context != null) {

@@ -434,8 +434,8 @@ class NoteFormSheet extends StatelessWidget {
                                   final note = c.editingNote!;
                                   final ok = await _confirmDeleteNote(context, p);
                                   if (ok == true && context.mounted) {
-                                    c.delete(note);
                                     Navigator.of(context).pop();
+                                    c.delete(note);
                                   }
                                 }
                               },

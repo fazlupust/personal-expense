@@ -424,8 +424,8 @@ class EntryFormSheet extends StatelessWidget {
                               onPressed: () async {
                                 final ok = await _confirmDeleteEntry(context, p);
                                 if (ok == true && context.mounted) {
-                                  f.delete();
                                   Navigator.of(context).pop();
+                                  f.delete();
                                 }
                               },
                             ),

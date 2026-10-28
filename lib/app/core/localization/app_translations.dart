@@ -60,6 +60,9 @@ class AppTranslations extends Translations {
     'Delete Transaction?': 'লেনদেনটি মুছবেন?',
     'Are you sure you want to delete this transaction?': 'আপনি কি নিশ্চিত যে এই লেনদেনটি মুছে ফেলতে চান?',
     'Transaction deleted': 'লেনদেনটি মুছে ফেলা হয়েছে',
+    'Deleting transaction...': 'লেনদেন মুছে ফেলা হচ্ছে...',
+    'Deleting note...': 'নোট মুছে ফেলা হচ্ছে...',
+    'Deleting...': 'মুছে ফেলা হচ্ছে...',
     'Cancel': 'বাতিল',
     'Enter a valid amount.': 'সঠিক পরিমাণ দিন।',
     // Reports

@@ -311,8 +311,8 @@ class EntryFormController extends GetxController {
     }
   }
 
-  void delete() {
+  Future<void> delete() async {
     final e = existing;
-    if (e != null) Get.find<TransactionsController>().remove(e.id);
+    if (e != null) await Get.find<TransactionsController>().remove(e.id);
   }
 }

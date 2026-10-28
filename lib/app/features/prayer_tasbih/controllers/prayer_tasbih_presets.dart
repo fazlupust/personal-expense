@@ -382,14 +382,16 @@ const List<ZikirItem> _presetZikirs = [
   ZikirItem(
     id: 'shifa_body_pain',
     arabic:
-        'بِسْمِ اللهِ (৩ বার) ✦ أَعُوْذُ بِاللهِ وَقُدْرَتِهِ مِنْ شَرِّ مَا أَجِدُ وَأُحَاذِرُ (৭ বার)',
-    titleBn: '[১২৪] শরীরে ব্যথার পূর্ণ আমল (বিসমিল্লাহ ৩x ও দোয়া ৭x)',
+        'بِسْمِ اللَّهِ (৩ বার) ✦ أَعُوْذُ بِاللهِ وَقُدْرَتِهِ مِنْ شَرِّ مَا أَجِدُ وَأُحَاذِرُ (৭ বার)',
+    titleBn: '[১২৪] শরীরে কোনো ব্যথা অনুভব করলে যা করবে ও বলবে',
     titleEn: 'Dua for Body Pain (Bismillah 3x & Shifa Dua 7x)',
+    pronunciationBn:
+        'বিসমিল্লাহ (৩ বার) ও আ‘ঊযু বিল্লা-হি ওয়া ক্বুদরাতিহী মিন শাররি মা আজিদু ওয়া উহা-যিরু (৭ বার)',
     meaningBn:
-        'বিসমিল্লাহ (৩ বার): আল্লাহর নামে। এবং (৭ বার): এই যে ব্যথা আমি অনুভব করছি এবং যার আমি আশঙ্কা করছি, তা থেকে আমি আল্লাহ্ এবং তাঁর কুদরতের আশ্রয় প্রার্থনা করছি। (উচ্চারণ: বিসমিল্লাহ [৩ বার], আউযু বিল্লা-হি ওয়া কুদরাতিহী মিন শাররি মা আজিদু ওয়া উহা-যিরু [৭ বার])',
+        'আপনার দেহের যে স্থানে আপনি ব্যথা অনুভব করছেন, সেখানে আপনার হাত রেখে তিনবার বলুন: বিসমিল্লাহ (আল্লাহর নামে)। আর সাতবার বলুন: আ‘ঊযু বিল্লা-হি ওয়া ক্বুদরাতিহী মিন শাররি মা আজিদু ওয়া উহা-যিরু (এই যে ব্যথা আমি অনুভব করছি এবং যার আমি আশঙ্কা করছি, তা থেকে আমি আল্লাহ্ এবং তাঁর কুদরতের আশ্রয় প্রার্থনা করছি)।',
     meaningEn:
-        'Bismillah (3x) & "I seek refuge in Allah and in His power from the evil of what I find and of what I guard against" (7x).',
-    defaultTarget: 7,
+        'Place your hand where you feel pain and say 3 times: Bismillah (In the Name of Allah). And say 7 times: I seek refuge in Allah and in His power from the evil of what I find and of what I guard against.',
+    defaultTarget: 10,
     benefitBn:
         '[১২৪] শরীরের ব্যথার স্থানে হাত রেখে ৩ বার "বিসমিল্লাহ" বলে এরপর ৭ বার এই দোয়াটি পাঠ করবে (সহীহ মুসলিম: ৪/১৭২৮, নং ২২০২)।',
     category: ZikirCategory.dua,

@@ -511,13 +511,64 @@ class NotesController extends GetxController {
   }
 
   Future<void> delete(NoteModel note) async {
+    final bool canShowDialog = Get.context != null;
+    if (canShowDialog) {
+      Get.dialog(
+        PopScope(
+          canPop: false,
+          child: Center(
+            child: Material(
+              color: Colors.transparent,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E293B),
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Text(
+                      'Deleting note...'.tr,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        barrierDismissible: false,
+      );
+    }
+
     try {
       // 1. Instantly remove from local list and cache for snappy UI response
       notes.removeWhere((n) => n.id == note.id);
       _saveCachedNotes(notes);
       update();
 
-      // 2. Perform reliable cloud delete
+      // 2. Perform reliable cloud delete with minimal delay for smooth UX
       final auth = Get.isRegistered<AuthService>() ? Get.find<AuthService>() : null;
       final service = Get.isRegistered<NoteService>() ? Get.find<NoteService>() : null;
       final uid = auth?.currentUid ?? auth?.currentUser?.uid;
@@ -525,11 +576,22 @@ class NotesController extends GetxController {
 
       if (canCloudDelete && note.id.isNotEmpty) {
         try {
-          await service.deleteNote(note.id);
+          await Future.wait([
+            service.deleteNote(note.id),
+            Future.delayed(const Duration(milliseconds: 500)),
+          ]);
         } catch (e) {
           debugPrint('Cloud delete error: $e');
         }
+      } else {
+        await Future.delayed(const Duration(milliseconds: 400));
       }
+
+      // Close loading dialog
+      if (canShowDialog && (Get.isDialogOpen ?? false)) {
+        Get.back();
+      }
+
       if (Get.context != null) {
         Get.snackbar(
           'Success'.tr,
@@ -544,6 +606,9 @@ class NotesController extends GetxController {
         );
       }
     } catch (e) {
+      if (canShowDialog && (Get.isDialogOpen ?? false)) {
+        Get.back();
+      }
       debugPrint('Delete note error: $e');
       if (Get.context != null) {
         Get.snackbar(
