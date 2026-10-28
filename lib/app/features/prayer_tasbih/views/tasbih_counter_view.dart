@@ -478,6 +478,7 @@ class TasbihCounterView extends StatelessWidget {
             : current;
         final progress = target > 0 ? (cycleStep / target).clamp(0.0, 1.0) : 0.0;
         final zikir = c.selectedZikir;
+        final isBn = Get.locale?.languageCode == 'bn';
 
         final content = SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -586,8 +587,24 @@ class TasbihCounterView extends StatelessWidget {
                         itemBuilder: (ctx, i) {
                           final item = c.sortedZikirs[i];
                           final isSelected = item.id == zikir.id;
-                          final isBn = Get.locale?.languageCode == 'bn';
-                          final title = isBn
+                          const boroDuaIds = {
+                            'durood_ibrahim',
+                            'durood_sharif',
+                            'ayatul_kursi',
+                            'sayyidul_istighfar',
+                            'dua_yunus',
+                            'post_prayer_sea_foam',
+                            'shifa_body_pain',
+                            'four_kalimas',
+                            'la_ilaha_wahdahu',
+                            'adada_khalqihi',
+                            'bismika_amootu_wa_ahya',
+                            'alhamdulillah_alladhi_ahyana',
+                            'allahumma_ajirni',
+                          };
+                          final isBoroDua = boroDuaIds.contains(item.id);
+
+                          final title = (isBn || isBoroDua)
                               ? item.titleBn
                               : item.arabic.split('\n').first.replaceAll(RegExp(r'✦.*'), '').trim();
 
@@ -620,7 +637,7 @@ class TasbihCounterView extends StatelessWidget {
                                   child: Text(
                                     title,
                                     style: TextStyle(
-                                      fontSize: isBn ? 12 : 13.5,
+                                      fontSize: (isBn || isBoroDua) ? 12 : 13.5,
                                       fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
                                       color: isSelected ? Colors.white : p.ink,
                                     ),
@@ -724,14 +741,14 @@ class TasbihCounterView extends StatelessWidget {
                         zikir.arabic,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 21,
+                          fontSize: zikir.arabic.length > 80 ? 17.5 : 21,
                           fontWeight: FontWeight.w700,
                           color: p.income,
-                          height: 1.3,
+                          height: zikir.arabic.length > 80 ? 1.45 : 1.3,
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      // Bengali Pronunciation & Meaning
+                      const SizedBox(height: 5),
+                      // Bengali / English Title & Meaning
                       Wrap(
                         alignment: WrapAlignment.center,
                         crossAxisAlignment: WrapCrossAlignment.center,
@@ -739,19 +756,19 @@ class TasbihCounterView extends StatelessWidget {
                         runSpacing: 2,
                         children: [
                           Text(
-                            zikir.titleBn,
+                            isBn ? zikir.titleBn : zikir.titleEn,
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontSize: 14.5,
+                              fontSize: 14,
                               fontWeight: FontWeight.w700,
                               color: p.ink,
                             ),
                           ),
                           Text('•', style: TextStyle(color: p.mute, fontSize: 11)),
                           Text(
-                            Get.locale?.languageCode == 'bn' ? zikir.meaningBn : zikir.meaningEn,
+                            isBn ? zikir.meaningBn : zikir.meaningEn,
                             textAlign: TextAlign.center,
-                            maxLines: 1,
+                            maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontSize: 12,

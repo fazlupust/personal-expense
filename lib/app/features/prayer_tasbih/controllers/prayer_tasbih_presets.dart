@@ -146,16 +146,19 @@ const List<ZikirItem> _presetZikirs = [
 
   ZikirItem(
     id: 'ayatul_kursi',
-    arabic: 'اللَّهُ لَا إِلٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ',
+    arabic:
+        'اللَّهُ لَا إِلٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَن ذَا الَّذِي يَشْفَعُ عِندَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ',
     titleBn: 'আয়াতুল কুরসী',
     titleEn: 'Ayatul Kursi',
+    pronunciationBn:
+        'আল্লা-হু লা- ইলা-হা ইল্লা- হুওয়াল হাইয়্যুল ক্বাইয়্যূম, লা- তা’খুযুহূ সিনাতুঁও ওয়ালা- নাওম, লাহূ মা- ফিস্ সামা-ওয়া-তি ওয়া মা- ফিল আরদ্ব, মান যাল্লাযী ইয়াশফা‘উ ‘ইনদাহূ ইল্লা- বিইযনিহ, ইয়া‘লামু মা- বাইনা আইদীহিম ওয়া মা- খলফাহুম, ওয়ালা- ইউহীতূনা বিশাইয়িম মিন ‘ইলমিহী ইল্লা- বিমা- শা-আ, ওয়াসি‘আ কুরসিয়্যুহুস্ সামা-ওয়া-তি ওয়াল আরদ্ব, ওয়ালা- ইয়াউদুহূ হিফযুহুমা-, ওয়া হুওয়াল ‘আলিইয়্যুল ‘আযীম।',
     meaningBn:
-        'আল্লাহ, তিনি ছাড়া সত্য কোনো উপাস্য নেই, তিনি চিরঞ্জীব ও সর্বসত্তার ধারক',
+        'আল্লাহ, তিনি ছাড়া সত্য কোনো উপাস্য নেই, তিনি চিরঞ্জীব ও সর্বসত্তার ধারক। তাঁকে তন্দ্রাও স্পর্শ করতে পারে না এবং নিদ্রাও নয়। আকাশ ও পৃথিবীতে যা কিছু আছে সবই তাঁর। কে আছে যে তাঁর অনুমতি ছাড়া তাঁর কাছে সুপারিশ করবে? তাদের সামনে ও পেছনে যা কিছু আছে তা তিনি জানেন। আর তাঁর জ্ঞানের কোনো অংশই তারা আয়ত্ত করতে পারে না তাঁর ইচ্ছা ব্যতীত। তাঁর কুরসী সমস্ত আকাশ ও পৃথিবীকে পরিবেষ্টন করে আছে, আর এ দুটির রক্ষণাবেক্ষণ তাঁকে পরিশ্রান্ত করে না। তিনি পরম উচ্চ, সর্বশ্রেষ্ঠ।',
     meaningEn:
-        'Allah! There is no deity except Him, the Ever-Living, the Sustainer',
+        'Allah! There is no deity except Him, the Ever-Living, the Sustainer of all existence. Neither drowsiness overtakes Him nor sleep. To Him belongs whatever is in the heavens and whatever is on the earth. Who is it that can intercede with Him except by His permission? He knows what is before them and what will be after them, and they encompass not a thing of His knowledge except for what He wills. His Kursi extends over the heavens and the earth, and their preservation tires Him not. And He is the Most High, the Most Great.',
     defaultTarget: 7,
     benefitBn:
-        'কুরআনের শ্রেষ্ঠ আয়াত। প্রতিটি ফরজ নামাজের পর পাঠে জান্নাত সুনিশ্চিত।',
+        'কুরআনের শ্রেষ্ঠ আয়াত। প্রতিটি ফরজ নামাজের পর পাঠে জান্নাত সুনিশ্চিত (নাসায়ী)।',
     category: ZikirCategory.prayer,
   ),
   ZikirItem(
@@ -203,16 +206,18 @@ const List<ZikirItem> _presetZikirs = [
   ZikirItem(
     id: 'sayyidul_istighfar',
     arabic:
-        'اللَّهُمَّ أَنْتَ رَبِّي لَا إِلٰهَ إِلَّا أَنْتَ خَلَقْتَنِي وَأَنَا عَبْدُكَ',
+        'اللَّهُمَّ أَنْتَ رَبِّي لَا إِلٰهَ إِلَّا أَنْتَ ، خَلَقْتَنِي وَأَنَا عَبْدُكَ ، وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ ، أَعُوْذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ ، أَبُوْءُ لَكَ بِنِعْمَتِكَ عَلَيَّ ، وَأَبُوْءُ بِذَنْبِي فَاغْفِرْ لِي فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ',
     titleBn: 'সাইয়্যিদুল ইস্তিগফার',
     titleEn: 'Sayyidul Istighfar',
+    pronunciationBn:
+        'আল্লা-হুম্মা আনতা রব্বী লা- ইলা-হা ইল্লা- আনতা, খলাক্বতানী ওয়া আনা ‘আবদুকা, ওয়া আনা ‘আলা- ‘আহদিকা ওয়া ওয়া‘দিকা মাসতাত্বা‘তু, আ‘ঊযু বিকা মিন শাররি মা- সনা‘তু, আবূউ লাকা বিনি‘মাতিকা ‘আলাইয়্যা, ওয়া আবূউ বিযাম্বী ফাগফির লী, ফাইন্নাহূ লা- ইয়াগফিরুয যুনূবা ইল্লা- আনতা।',
     meaningBn:
-        'হে আল্লাহ! আপনি আমার রব, আপনি ছাড়া সত্য কোনো উপাস্য নেই। আপনি আমাকে সৃষ্টি করেছেন...',
+        'হে আল্লাহ! আপনি আমার রব, আপনি ছাড়া সত্য কোনো উপাস্য নেই। আপনি আমাকে সৃষ্টি করেছেন এবং আমি আপনার বান্দা। আমি সাধ্যমতো আপনার অঙ্গীকার ও প্রতিশ্রতির ওপর আছি। আমি আমার কৃতকর্মের অনিষ্ট থেকে আপনার আশ্রয় চাই। আমার ওপর আপনার নিয়ামত স্বীকার করছি এবং আমার গুনাহও স্বীকার করছি। অতএব আমাকে ক্ষমা করে দিন, নিশ্চয়ই আপনি ছাড়া গুনাহ ক্ষমা করার কেউ নেই।',
     meaningEn:
-        'O Allah, You are my Lord, there is no deity except You. You created me and I am Your servant',
+        'O Allah, You are my Lord, there is no deity except You. You created me and I am Your servant, and I abide by Your covenant and promise as best I can. I seek refuge in You from the evil of what I have done. I acknowledge Your favor upon me, and I acknowledge my sin, so forgive me, for none forgives sins except You.',
     defaultTarget: 3,
     benefitBn:
-        'ক্ষমা প্রার্থনার শ্রেষ্ঠতম দোয়া। সকালে বা সন্ধ্যায় পাঠে জান্নাত প্রাপ্তির সুসংবাদ।',
+        'ক্ষমা প্রার্থনার শ্রেষ্ঠতম দোয়া। সকালে বা সন্ধ্যায় একনিষ্ঠভাবে পাঠে জান্নাত প্রাপ্তির সুসংবাদ (সহীহ বুখারী: ৬৩০৬)।',
     category: ZikirCategory.forgiveness,
   ),
   ZikirItem(
@@ -245,13 +250,15 @@ const List<ZikirItem> _presetZikirs = [
   ZikirItem(
     id: 'durood_ibrahim',
     arabic:
-        'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ كَمَا صَلَّيْتَ عَلَى إِبْرَاهِيمَ',
-    titleBn: 'দুরুদে ইব্রাহিম (শ্রেষ্ঠ দুরুদ)',
+        'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ كَمَا صَلَّيْتَ عَلَى إِبْرَاهِيمَ وَعَلَى آلِ إِبْرَاهِيمَ إِنَّكَ حَمِيدٌ مَجِيدٌ ، اللَّهُمَّ بَارِكْ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ كَمَا بَارَكْتَ عَلَى إِبْرَاهِيمَ وَعَلَى آلِ إِبْرَاهِيمَ إِنَّكَ حَمِيدٌ مَجِيدٌ',
+    titleBn: 'দুরুদে ইব্রাহিম',
     titleEn: 'Durood-e-Ibrahim',
+    pronunciationBn:
+        'আল্লা-হুম্মা সাল্লি ‘আলা- মুহাম্মাদিঁও ওয়া ‘আলা- আ-লি মুহাম্মাদ, কামা- সাল্লাইতা ‘আলা- ইবরা-হীমা ওয়া ‘আলা- আ-লি ইবরা-হীম, ইন্নাকা হামীদুম মাজীদ। আল্লা-হুম্মা বা-রিক ‘আলা- মুহাম্মাদিঁও ওয়া ‘আলা- আ-লি মুহাম্মাদ, কামা- বা-রকতা ‘আলা- ইবরা-হীমা ওয়া ‘আলা- আ-লি ইবরা-হীম, ইন্নাকা হামীদুম মাজীদ।',
     meaningBn:
-        'হে আল্লাহ! হযরত মুহাম্মদ (সাঃ) ও তাঁর পরিবারের ওপর রহমত বর্ষণ করুন যেমনটি করেছিলেন ইব্রাহিম (আঃ)-এর ওপর...',
+        'হে আল্লাহ! মুহাম্মদ (সাঃ) এবং তাঁর পরিবারের ওপর রহমত বর্ষণ করুন, যেমন আপনি ইব্রাহিম (আঃ) এবং তাঁর পরিবারের ওপর রহমত বর্ষণ করেছিলেন। নিশ্চয়ই আপনি প্রশংসিত ও সম্মানিত। হে আল্লাহ! মুহাম্মদ (সাঃ) এবং তাঁর পরিবারের ওপর বরকত বর্ষণ করুন, যেমন আপনি ইব্রাহিম (আঃ) এবং তাঁর পরিবারের ওপর বরকত বর্ষণ করেছিলেন। নিশ্চয়ই আপনি প্রশংসিত ও সম্মানিত।',
     meaningEn:
-        'O Allah, send blessings upon Muhammad and the family of Muhammad, as You sent blessings upon Ibrahim...',
+        'O Allah, send blessings upon Muhammad and upon the family of Muhammad, as You sent blessings upon Ibrahim and upon the family of Ibrahim; indeed, You are Praiseworthy and Glorious. O Allah, bless Muhammad and the family of Muhammad, as You blessed Ibrahim and the family of Ibrahim; indeed, You are Praiseworthy and Glorious.',
     defaultTarget: 10,
     benefitBn: 'নামাজের তাশাহহুদে পঠিত সর্বোত্তম ও সর্বাধিক বরকতপূর্ণ দুরুদ।',
     category: ZikirCategory.salawat,
