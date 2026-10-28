@@ -106,8 +106,25 @@ class NoteService extends GetxService {
     });
   }
 
-  /// Permanently delete a note from Firestore
+  /// Permanently delete a note from Firestore with soft-delete safeguard
   Future<void> deleteNote(String noteId) async {
-    await _collection.doc(noteId).delete();
+    final docRef = _collection.doc(noteId);
+    // 1. Soft-delete immediately so streamUserNotes (.where('is_active', isEqualTo: true))
+    // instantly excludes it and never restores it on snapshots
+    try {
+      await docRef.update({
+        'is_active': false,
+        'updated_at': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      debugPrint('[NoteService] soft-delete update error: $e');
+    }
+
+    // 2. Permanently remove document from Firestore
+    try {
+      await docRef.delete();
+    } catch (e) {
+      debugPrint('[NoteService] hard-delete error: $e');
+    }
   }
 }

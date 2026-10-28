@@ -113,18 +113,43 @@ class TransactionService extends GetxService {
     await _collection.doc(tx.id).update(updateData);
   }
 
-  /// Permanently delete transaction from Firestore
+  /// Permanently delete transaction from Firestore with reliable soft-delete fallback
   Future<void> deleteTransaction(String id) async {
-    final docSnap = await _collection.doc(id).get();
-    final uid = docSnap.data()?['user_id'] as String?;
+    try {
+      final docRef = _collection.doc(id);
+      final docSnap = await docRef.get();
+      final uid = docSnap.data()?['user_id'] as String?;
 
-    await _collection.doc(id).delete();
-
-    if (uid != null) {
+      // 1. Soft-delete immediately so streamUserTransactions (.where('is_deleted', isEqualTo: false))
+      // instantly removes it and never resurrects it on snapshot updates
       try {
-        await _db.collection('users').doc(uid).set({
-          'transaction_count': FieldValue.increment(-1),
-        }, SetOptions(merge: true));
+        await docRef.update({
+          'is_deleted': true,
+          'updated_at': FieldValue.serverTimestamp(),
+        });
+      } catch (e) {
+        debugPrint('[TransactionService] soft-delete update error: $e');
+      }
+
+      // 2. Decrement transaction count
+      if (uid != null && uid.isNotEmpty) {
+        try {
+          await _db.collection('users').doc(uid).set({
+            'transaction_count': FieldValue.increment(-1),
+          }, SetOptions(merge: true));
+        } catch (_) {}
+      }
+
+      // 3. Permanently remove document from Firestore
+      try {
+        await docRef.delete();
+      } catch (e) {
+        debugPrint('[TransactionService] hard-delete error: $e');
+      }
+    } catch (e) {
+      debugPrint('[TransactionService] deleteTransaction error: $e');
+      try {
+        await _collection.doc(id).delete();
       } catch (_) {}
     }
   }

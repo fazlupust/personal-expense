@@ -512,6 +512,12 @@ class NotesController extends GetxController {
 
   Future<void> delete(NoteModel note) async {
     try {
+      // 1. Instantly remove from local list and cache for snappy UI response
+      notes.removeWhere((n) => n.id == note.id);
+      _saveCachedNotes(notes);
+      update();
+
+      // 2. Perform reliable cloud delete
       final auth = Get.isRegistered<AuthService>() ? Get.find<AuthService>() : null;
       final service = Get.isRegistered<NoteService>() ? Get.find<NoteService>() : null;
       final uid = auth?.currentUid ?? auth?.currentUser?.uid;
@@ -524,9 +530,6 @@ class NotesController extends GetxController {
           debugPrint('Cloud delete error: $e');
         }
       }
-      notes.removeWhere((n) => n.id == note.id);
-      _saveCachedNotes(notes);
-      update();
       if (Get.context != null) {
         Get.snackbar(
           'Success'.tr,

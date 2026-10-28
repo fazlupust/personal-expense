@@ -36,7 +36,7 @@ service cloud.firestore {
       // Creator or admin can update (e.g. rename or soft-delete with is_active: false)
       allow update: if isAuthenticated() && 
         (resource.data.created_by == request.auth.uid || isAdmin());
-      allow delete: if isAdmin();
+      allow delete: if isAuthenticated() && (resource.data.created_by == request.auth.uid || isAdmin());
     }
 
     // 3. Transactions collection
@@ -47,7 +47,7 @@ service cloud.firestore {
       allow create: if isAuthenticated() && request.resource.data.user_id == request.auth.uid;
       // Users can update or soft-delete (is_deleted: true) their own transactions
       allow update: if isAuthenticated() && resource.data.user_id == request.auth.uid;
-      allow delete: if isAdmin();
+      allow delete: if isAuthenticated() && (resource.data.user_id == request.auth.uid || isAdmin());
     }
 
     // 4. App Config (Version & Update check)
@@ -64,7 +64,7 @@ service cloud.firestore {
       allow create: if isAuthenticated() && request.resource.data.user_id == request.auth.uid;
       // Users can update or soft-delete (is_active: false) their own notes
       allow update: if isAuthenticated() && resource.data.user_id == request.auth.uid;
-      allow delete: if isAdmin();
+      allow delete: if isAuthenticated() && (resource.data.user_id == request.auth.uid || isAdmin());
     }
 
     // 6. Tasbih / Zikir records (Day-wise counts and summary - strictly private to user)

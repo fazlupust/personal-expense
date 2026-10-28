@@ -240,17 +240,25 @@ class TransactionsController extends GetxController {
   }
 
   Future<void> remove(String id) async {
-    if (Get.isRegistered<TransactionService>()) {
-      await Get.find<TransactionService>().deleteTransaction(id);
-    }
+    // 1. Immediately remove from local list for instant UI response
     entries.removeWhere((e) => e.id == id);
     update();
+
+    // 2. Perform reliable cloud delete
+    if (Get.isRegistered<TransactionService>()) {
+      try {
+        await Get.find<TransactionService>().deleteTransaction(id);
+      } catch (e) {
+        debugPrint('[TransactionsController] remove cloud error: $e');
+      }
+    }
+
     if (Get.context != null) {
       Get.snackbar(
         'Success'.tr,
         'Transaction deleted'.tr,
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFF1B5E20),
+        backgroundColor: const Color(0xFF0D9488),
         colorText: Colors.white,
         icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 24),
         duration: const Duration(seconds: 3),
