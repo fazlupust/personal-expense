@@ -123,10 +123,27 @@ class EntryFormController extends GetxController {
       isListeningAmount = false;
     }
 
+    // Capture text before and after cursor so we append/insert from cursor without clearing existing text
+    final currentText = noteCtrl.text;
+    final selection = noteCtrl.selection;
+    final int cursorPos = (selection.isValid && selection.baseOffset >= 0)
+        ? selection.baseOffset
+        : currentText.length;
+
+    final prefix = currentText.substring(0, cursorPos);
+    final suffix = currentText.substring(cursorPos);
+    final spacing = (prefix.isNotEmpty && !prefix.endsWith(' ') && !prefix.endsWith('\n'))
+        ? ' '
+        : '';
+
     VoiceService.startListening(
       onResult: (words) {
         if (words.isNotEmpty) {
-          noteCtrl.text = words;
+          final inserted = spacing + words;
+          noteCtrl.value = TextEditingValue(
+            text: prefix + inserted + suffix,
+            selection: TextSelection.collapsed(offset: prefix.length + inserted.length),
+          );
           update();
         }
       },

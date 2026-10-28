@@ -265,54 +265,92 @@ class AppButton extends StatelessWidget {
     final shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(12),
     );
-    const textStyle = TextStyle(fontSize: 16, fontWeight: FontWeight.w600);
+    const textStyle = TextStyle(fontSize: 16, fontWeight: FontWeight.w700);
     final child = Text(label.tr);
     final Widget button = switch (style) {
-      AppButtonStyle.filled => FilledButton(
-        onPressed: onPressed,
-        style: FilledButton.styleFrom(
-          backgroundColor: p.income,
-          foregroundColor: Colors.white,
-          shape: shape,
-          textStyle: textStyle,
+      AppButtonStyle.filled => Container(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF0D9488), Color(0xFF10B981)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF10B981).withOpacity(0.28),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: ElevatedButton(
+            onPressed: onPressed,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              foregroundColor: Colors.white,
+              shadowColor: Colors.transparent,
+              elevation: 0,
+              shape: shape,
+              textStyle: textStyle,
+            ),
+            child: child,
+          ),
         ),
-        child: child,
-      ),
-      AppButtonStyle.cancel => FilledButton(
-        onPressed: onPressed,
-        style: FilledButton.styleFrom(
-          backgroundColor: p.expense,
-          foregroundColor: Colors.white,
-          shape: shape,
-          textStyle: textStyle,
+      AppButtonStyle.cancel => Container(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFFE11D48), Color(0xFFF43F5E)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFE11D48).withOpacity(0.25),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: ElevatedButton(
+            onPressed: onPressed,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              foregroundColor: Colors.white,
+              shadowColor: Colors.transparent,
+              elevation: 0,
+              shape: shape,
+              textStyle: textStyle,
+            ),
+            child: child,
+          ),
         ),
-        child: child,
-      ),
       AppButtonStyle.outlined => OutlinedButton(
-        onPressed: onPressed,
-        style: OutlinedButton.styleFrom(
-          foregroundColor: p.ink,
-          backgroundColor: p.bg,
-          side: BorderSide(color: p.line),
-          shape: shape,
-          textStyle: textStyle,
+          onPressed: onPressed,
+          style: OutlinedButton.styleFrom(
+            foregroundColor: p.ink,
+            backgroundColor: p.bg,
+            side: BorderSide(color: p.line),
+            shape: shape,
+            textStyle: textStyle,
+          ),
+          child: child,
         ),
-        child: child,
-      ),
       AppButtonStyle.danger => OutlinedButton(
-        onPressed: onPressed,
-        style: OutlinedButton.styleFrom(
-          foregroundColor: p.expense,
-          side: BorderSide(color: p.expense),
-          shape: shape,
-          textStyle: textStyle,
+          onPressed: onPressed,
+          style: OutlinedButton.styleFrom(
+            foregroundColor: p.expense,
+            side: BorderSide(color: p.expense),
+            shape: shape,
+            textStyle: textStyle,
+          ),
+          child: child,
         ),
-        child: child,
-      ),
     };
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: SizedBox(width: double.infinity, height: 50, child: button),
+      child: SizedBox(width: double.infinity, height: 48, child: button),
     );
   }
 }

@@ -241,33 +241,44 @@ class EntryFormSheet extends StatelessWidget {
 
                           const SizedBox(height: 12),
 
-                          // Note Field with Voice Input
+                          // Note Field with Voice Input (Text Area)
                           TextField(
                             controller: f.noteCtrl,
+                            minLines: 3,
+                            maxLines: 5,
+                            keyboardType: TextInputType.multiline,
+                            textInputAction: TextInputAction.newline,
                             decoration: InputDecoration(
                               labelText: 'Note'.tr,
                               hintText: 'Note (e.g. lunch, salary)'.tr,
-                              prefixIcon: Icon(Icons.edit_note, color: p.mute),
-                              suffixIcon: IconButton(
-                                tooltip: 'Voice Input'.tr,
-                                onPressed: f.toggleVoiceNote,
-                                icon: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 200),
-                                  padding: const EdgeInsets.all(6),
-                                  decoration: BoxDecoration(
-                                    color: f.isListeningNote
-                                        ? p.expense.withOpacity(0.15)
-                                        : Colors.transparent,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    f.isListeningNote
-                                        ? Icons.mic
-                                        : Icons.mic_none,
-                                    color: f.isListeningNote
-                                        ? p.expense
-                                        : p.mute,
-                                    size: 22,
+                              alignLabelWithHint: true,
+                              prefixIcon: Padding(
+                                padding: const EdgeInsets.only(bottom: 40),
+                                child: Icon(Icons.edit_note, color: p.mute),
+                              ),
+                              suffixIcon: Padding(
+                                padding: const EdgeInsets.only(bottom: 40),
+                                child: IconButton(
+                                  tooltip: 'Voice Input'.tr,
+                                  onPressed: f.toggleVoiceNote,
+                                  icon: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 200),
+                                    padding: const EdgeInsets.all(6),
+                                    decoration: BoxDecoration(
+                                      color: f.isListeningNote
+                                          ? p.expense.withOpacity(0.15)
+                                          : Colors.transparent,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      f.isListeningNote
+                                          ? Icons.mic
+                                          : Icons.mic_none,
+                                      color: f.isListeningNote
+                                          ? p.expense
+                                          : p.mute,
+                                      size: 22,
+                                    ),
                                   ),
                                 ),
                               ),
