@@ -22,10 +22,9 @@ class TransactionTable extends StatelessWidget {
     final net = tc.sum(rows, EntryType.income) - tc.sum(rows, EntryType.expense);
     final bold = TextStyle(fontWeight: FontWeight.w700, color: p.ink);
 
-    final cashRows = rows.where((e) => e.account.trim().toLowerCase() != 'due');
     final dueRows = rows.where((e) => e.account.trim().toLowerCase() == 'due');
-    final cashNet = tc.sum(cashRows, EntryType.income) - tc.sum(cashRows, EntryType.expense);
     final dueNet = tc.sum(dueRows, EntryType.income) - tc.sum(dueRows, EntryType.expense);
+    final isBn = Get.locale?.languageCode == 'bn';
 
     return AppCard(
       flush: true,
@@ -42,11 +41,11 @@ class TransactionTable extends StatelessWidget {
               dataTextStyle: TextStyle(fontSize: 13, color: p.ink),
               columns: [
                 DataColumn(label: Text('S.N'.tr)),
+                DataColumn(label: Text('Amount'.tr), numeric: true),
                 DataColumn(label: Text('Date'.tr)),
                 DataColumn(label: Text('Category'.tr)),
-                DataColumn(label: Text('Amount'.tr), numeric: true),
-                DataColumn(label: Text('Cash'.tr), numeric: true),
                 DataColumn(label: Text('Due'.tr), numeric: true),
+                DataColumn(label: Text('Note'.tr)),
               ],
               rows: [
                 for (var i = 0; i < rows.length; i++) ...[
@@ -55,6 +54,7 @@ class TransactionTable extends StatelessWidget {
                     final isDue = e.account.trim().toLowerCase() == 'due';
                     final sign = e.type == EntryType.income ? '+' : '−';
                     final color = e.type == EntryType.income ? p.income : p.expense;
+                    final note = e.noteText(isBn).trim();
 
                     return DataRow(
                       onSelectChanged: (_) => showEntrySheet(context, entry: e),
@@ -63,19 +63,12 @@ class TransactionTable extends StatelessWidget {
                           '${i + 1}',
                           style: TextStyle(fontSize: 12, color: p.mute, fontWeight: FontWeight.w500),
                         )),
-                        DataCell(Text(Fmt.date(e.date, 'd MMM'))),
-                        DataCell(Text('${cats.emojiOf(e.type, e.category)} ${e.category.tr}')),
                         DataCell(Text(
                           '$sign${Fmt.money(e.amount)}',
                           style: TextStyle(fontWeight: FontWeight.w700, color: color),
                         )),
-                        DataCell(Text(
-                          isDue ? '–' : '$sign${Fmt.money(e.amount)}',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: isDue ? p.mute : color,
-                          ),
-                        )),
+                        DataCell(Text(Fmt.date(e.date, 'd MMM'))),
+                        DataCell(Text('${cats.emojiOf(e.type, e.category)} ${e.category.tr}')),
                         DataCell(Text(
                           !isDue ? '–' : '$sign${Fmt.money(e.amount)}',
                           style: TextStyle(
@@ -83,6 +76,19 @@ class TransactionTable extends StatelessWidget {
                             color: !isDue ? p.mute : color,
                           ),
                         )),
+                        DataCell(
+                          note.isNotEmpty
+                              ? ConstrainedBox(
+                                  constraints: const BoxConstraints(maxWidth: 160),
+                                  child: Text(
+                                    note,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(fontSize: 12, color: p.ink.withOpacity(0.85)),
+                                  ),
+                                )
+                              : Text('–', style: TextStyle(color: p.mute)),
+                        ),
                       ],
                     );
                   }(),
@@ -92,11 +98,6 @@ class TransactionTable extends StatelessWidget {
                   cells: [
                     DataCell(Text('Total'.tr, style: bold)),
                     DataCell(Text(
-                      '${Fmt.count(rows.length)}${tc.hasMore ? '/${tc.totalCount}' : ''} ${'entries'.tr}',
-                      style: TextStyle(color: p.mute, fontSize: 11, fontWeight: FontWeight.w600),
-                    )),
-                    const DataCell(Text('')),
-                    DataCell(Text(
                       '${net < 0 ? '−' : (net > 0 ? '+' : '')}${Fmt.money(net.abs())}',
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
@@ -104,12 +105,10 @@ class TransactionTable extends StatelessWidget {
                       ),
                     )),
                     DataCell(Text(
-                      '${cashNet < 0 ? '−' : (cashNet > 0 ? '+' : '')}${Fmt.money(cashNet.abs())}',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        color: cashNet < 0 ? p.expense : (cashNet > 0 ? p.income : p.ink),
-                      ),
+                      '${Fmt.count(rows.length)}${tc.hasMore ? '/${tc.totalCount}' : ''} ${'entries'.tr}',
+                      style: TextStyle(color: p.mute, fontSize: 11, fontWeight: FontWeight.w600),
                     )),
+                    const DataCell(Text('')),
                     DataCell(Text(
                       dueNet == 0
                           ? '–'
@@ -119,6 +118,7 @@ class TransactionTable extends StatelessWidget {
                         color: dueNet < 0 ? p.expense : (dueNet > 0 ? p.income : p.ink),
                       ),
                     )),
+                    const DataCell(Text('')),
                   ],
                 ),
               ],
