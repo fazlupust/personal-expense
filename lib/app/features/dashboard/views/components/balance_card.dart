@@ -32,9 +32,9 @@ class BalanceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = Get.isRegistered<SettingsController>() ? SettingsController.to : null;
-    final hidden = isHidden || (s?.isBalanceHidden ?? false);
     final incomeHidden = isIncomeHidden || (s?.isIncomeHidden ?? false);
     final expenseHidden = isExpenseHidden || (s?.isExpenseHidden ?? false);
+    final hidden = isHidden || incomeHidden || expenseHidden;
     final toggle = onToggleVisibility ?? s?.toggleBalanceVisibility;
     final toggleIncome = onToggleIncomeVisibility ?? s?.toggleIncomeVisibility ?? toggle;
     final toggleExpense = onToggleExpenseVisibility ?? s?.toggleExpenseVisibility;
@@ -141,120 +141,57 @@ class BalanceCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Clickable Eye Toggle Pill
-                        if (toggle != null) ...[
-                          Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(20),
-                              onTap: toggle,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.14),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(color: Colors.white.withOpacity(0.18)),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      hidden ? Icons.visibility_off_rounded : Icons.visibility_rounded,
-                                      size: 14,
-                                      color: hidden ? const Color(0xFFFFB3A7) : const Color(0xFF5DFFB2),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      hidden ? 'Show'.tr : 'Hide'.tr,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.white.withOpacity(0.95),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.10),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 7,
+                            height: 7,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF4EFA9D),
+                              shape: BoxShape.circle,
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 5),
+                          Text(
+                            AppConstants.currency,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
                         ],
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.10),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 7,
-                                height: 7,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFF4EFA9D),
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 5),
-                              Text(
-                                AppConstants.currency,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
 
-                // Hero Balance Display (Tappable to toggle visibility)
-                Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(12),
-                    onTap: toggle,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Flexible(
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                hidden ? '${AppConstants.currency} ••••••' : Fmt.money(net),
-                                style: TextStyle(
-                                  fontSize: hidden ? 34 : 38,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: hidden ? 2.0 : -0.8,
-                                  color: Colors.white,
-                                  shadows: const [
-                                    Shadow(
-                                      color: Colors.black26,
-                                      blurRadius: 10,
-                                      offset: Offset(0, 3),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Icon(
-                            hidden ? Icons.visibility_off_rounded : Icons.visibility_rounded,
-                            size: 18,
-                            color: Colors.white.withOpacity(0.60),
+                // Hero Balance Display
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      hidden ? '${AppConstants.currency} ••••••' : Fmt.money(net),
+                      style: TextStyle(
+                        fontSize: hidden ? 34 : 38,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: hidden ? 2.0 : -0.8,
+                        color: Colors.white,
+                        shadows: const [
+                          Shadow(
+                            color: Colors.black26,
+                            blurRadius: 10,
+                            offset: Offset(0, 3),
                           ),
                         ],
                       ),
@@ -282,7 +219,7 @@ class BalanceCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Material(
                         color: Colors.transparent,
@@ -333,9 +270,13 @@ class BalanceCard extends StatelessWidget {
                             const SizedBox(width: 8),
                             Flexible(
                               child: Text(
-                                over
-                                    ? '${'Over budget by'.tr} ${Fmt.money(expense - budget)}'
-                                    : '${Fmt.money(budget - expense)} ${'left of'.tr} ${Fmt.money(budget)}',
+                                (expenseHidden || hidden)
+                                    ? (over
+                                        ? '${'Over budget by'.tr} ••••••'
+                                        : '•••••• ${'left of'.tr} ${hidden ? '••••••' : Fmt.money(budget)}')
+                                    : (over
+                                        ? '${'Over budget by'.tr} ${Fmt.money(expense - budget)}'
+                                        : '${Fmt.money(budget - expense)} ${'left of'.tr} ${Fmt.money(budget)}'),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 textAlign: TextAlign.end,
@@ -352,7 +293,9 @@ class BalanceCard extends StatelessWidget {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(6),
                           child: LinearProgressIndicator(
-                            value: (expense / budget).clamp(0.0, 1.0).toDouble(),
+                            value: (expenseHidden || hidden)
+                                ? 0.0
+                                : (expense / budget).clamp(0.0, 1.0).toDouble(),
                             minHeight: 6,
                             backgroundColor: Colors.white.withOpacity(0.20),
                             valueColor: AlwaysStoppedAnimation(
@@ -396,7 +339,7 @@ class _GlassMetricBox extends StatelessWidget {
         : const Color(0xFFE74C3C).withOpacity(0.22);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.13),
         borderRadius: BorderRadius.circular(16),
@@ -405,8 +348,8 @@ class _GlassMetricBox extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 32,
-            height: 32,
+            width: 30,
+            height: 30,
             decoration: BoxDecoration(
               color: circleBg,
               shape: BoxShape.circle,
@@ -415,25 +358,25 @@ class _GlassMetricBox extends StatelessWidget {
               child: Icon(
                 isIncome ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded,
                 color: iconColor,
-                size: 18,
+                size: 17,
               ),
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Flexible(
+                    Expanded(
                       child: Text(
                         label.tr,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: 12.5,
                           fontWeight: FontWeight.w500,
                           color: Colors.white.withOpacity(0.85),
                         ),

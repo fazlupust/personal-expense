@@ -24,11 +24,12 @@ class SettingsController extends GetxController {
   String defaultAccount = AppConstants.accounts.first;
   String? budgetError;
   bool showIncome = true;
-  bool isBalanceHidden = false;
   bool isIncomeHidden = false;
   bool showExpense = true;
   bool isExpenseHidden = false;
   bool showPrayerCard = true;
+
+  bool get isBalanceHidden => isIncomeHidden || isExpenseHidden;
 
   Locale get locale => Locale(langCode);
 
@@ -114,7 +115,6 @@ class SettingsController extends GetxController {
     budgetCtrl.clear();
     showIncome = true;
     showExpense = true;
-    isBalanceHidden = false;
     isIncomeHidden = false;
     isExpenseHidden = false;
   }
@@ -139,7 +139,6 @@ class SettingsController extends GetxController {
       final sys = WidgetsBinding.instance.platformDispatcher.locale.languageCode;
       langCode = sys == 'bn' ? 'bn' : 'en';
       showIncome = true;
-      isBalanceHidden = false;
       isIncomeHidden = false;
       showExpense = true;
       isExpenseHidden = false;
@@ -158,7 +157,6 @@ class SettingsController extends GetxController {
       showIncome = (m['show_income'] as bool?) ?? true;
       showExpense = (m['show_expense'] as bool?) ?? true;
       showPrayerCard = (m['show_prayer_card'] as bool?) ?? true;
-      isBalanceHidden = (m['is_balance_hidden'] as bool?) ?? !showIncome;
       isIncomeHidden = (m['is_income_hidden'] as bool?) ?? !showIncome;
       isExpenseHidden = (m['is_expense_hidden'] as bool?) ?? !showExpense;
 
@@ -190,10 +188,6 @@ class SettingsController extends GetxController {
         if (data['category_budgets'] is Map) {
           final bMap = data['category_budgets'] as Map<String, dynamic>;
           categoryBudgets = bMap.map((k, v) => MapEntry(k, (v as num).toDouble()));
-          changed = true;
-        }
-        if (data['is_balance_hidden'] is bool) {
-          isBalanceHidden = data['is_balance_hidden'] as bool;
           changed = true;
         }
         if (data['is_income_hidden'] is bool) {
@@ -315,15 +309,17 @@ class SettingsController extends GetxController {
 
   void setShowIncome(bool val) {
     showIncome = val;
-    isBalanceHidden = !val;
     isIncomeHidden = !val;
     _persist();
     update();
   }
 
   void toggleBalanceVisibility() {
-    isBalanceHidden = !isBalanceHidden;
-    showIncome = !isBalanceHidden;
+    final shouldHide = !(isIncomeHidden && isExpenseHidden);
+    isIncomeHidden = shouldHide;
+    isExpenseHidden = shouldHide;
+    showIncome = !shouldHide;
+    showExpense = !shouldHide;
     _persist();
     update();
   }

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../data/services/prayer_time_service.dart';
 import '../../../../routes/app_routes.dart';
+import '../../prayer_tasbih/controllers/prayer_tasbih_controller.dart';
 
 class DashboardPrayerCard extends StatelessWidget {
   const DashboardPrayerCard({super.key});
@@ -54,7 +55,12 @@ class DashboardPrayerCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () => Get.toNamed(AppRoutes.prayerAndTasbih),
+          onTap: () {
+            if (Get.isRegistered<PrayerTasbihController>()) {
+              Get.find<PrayerTasbihController>().setActiveTab(0);
+            }
+            Get.toNamed(AppRoutes.prayerAndTasbih);
+          },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             child: Row(
@@ -187,7 +193,13 @@ class DashboardPrayerCard extends StatelessWidget {
                 Material(
                   color: Colors.transparent,
                   child: InkWell(
-                    onTap: () => Get.toNamed(AppRoutes.tasbihCounter),
+                    onTap: () {
+                      final c = Get.isRegistered<PrayerTasbihController>()
+                          ? Get.find<PrayerTasbihController>()
+                          : Get.put(PrayerTasbihController());
+                      c.setActiveTab(1);
+                      Get.toNamed(AppRoutes.prayerAndTasbih);
+                    },
                     borderRadius: BorderRadius.circular(22),
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7.5),

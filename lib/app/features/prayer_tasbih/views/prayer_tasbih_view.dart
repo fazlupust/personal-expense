@@ -566,7 +566,7 @@ class PrayerTasbihView extends StatelessWidget {
 
                 // Button to open Digital Tasbih
                 FilledButton.icon(
-                  onPressed: () => Get.toNamed(AppRoutes.tasbihCounter),
+                  onPressed: () => c.setActiveTab(1),
                   icon: const Icon(Icons.fingerprint_rounded, size: 20),
                   label: Text(
                     'Open Digital Tasbih Counter'.tr,
@@ -1108,12 +1108,19 @@ class PrayerTasbihView extends StatelessWidget {
                   onPressed: () => _showLocationPicker(context, c, p),
                 ),
               ],
-              // Shortcut to open Tasbih directly
-              IconButton(
-                icon: Icon(Icons.fingerprint_rounded, color: p.income, size: 22),
-                tooltip: 'Digital Tasbih'.tr,
-                onPressed: () => Get.toNamed(AppRoutes.tasbihCounter),
-              ),
+              // Shortcut to toggle between Tasbih and Prayer Times
+              if (c.activeTab == 0)
+                IconButton(
+                  icon: Icon(Icons.fingerprint_rounded, color: p.income, size: 22),
+                  tooltip: 'Digital Tasbih'.tr,
+                  onPressed: () => c.setActiveTab(1),
+                )
+              else
+                IconButton(
+                  icon: Icon(Icons.access_time_filled_rounded, color: p.income, size: 21),
+                  tooltip: 'Prayer Times'.tr,
+                  onPressed: () => c.setActiveTab(0),
+                ),
             ],
           ),
           body: SafeArea(

@@ -13,17 +13,23 @@ class TransactionTile extends StatelessWidget {
     required this.entry,
     required this.onTap,
     this.showDivider = true,
+    this.isAmountHidden = false,
   });
 
   final TransactionModel entry;
   final VoidCallback onTap;
   final bool showDivider;
+  final bool isAmountHidden;
 
   @override
   Widget build(BuildContext context) {
     final p = context.pal;
     final isIncome = entry.type == EntryType.income;
     final emoji = Get.find<CategoriesController>().emojiOf(entry.type, entry.category);
+    final time = entry.createdAt ?? entry.date;
+    final timeStr = (time.hour != 0 || time.minute != 0 || entry.createdAt != null)
+        ? Fmt.date(time, 'h:mm a')
+        : '';
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -56,10 +62,7 @@ class TransactionTile extends StatelessWidget {
                       entry.category.tr,
                       entry.account.tr,
                       Fmt.date(entry.date, 'd MMM'),
-                      if (entry.latitude != null && entry.longitude != null)
-                        '📍 ${entry.latitude!.toStringAsFixed(2)}, ${entry.longitude!.toStringAsFixed(2)}',
-                      if (entry.deviceInfo != null && entry.deviceInfo!.isNotEmpty)
-                        entry.deviceInfo!,
+                      if (timeStr.isNotEmpty) timeStr,
                     ].join(' · '),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -70,10 +73,13 @@ class TransactionTile extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              '${isIncome ? '+' : '−'}${Fmt.money(entry.amount)}',
+              isAmountHidden
+                  ? '${isIncome ? '+' : '−'}••••••'
+                  : '${isIncome ? '+' : '−'}${Fmt.money(entry.amount)}',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
+                letterSpacing: isAmountHidden ? 1.0 : null,
                 color: isIncome ? p.income : p.expense,
               ),
             ),

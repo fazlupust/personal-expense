@@ -158,6 +158,7 @@ class DashboardView extends StatelessWidget {
     required bool totalExceeded,
     required double totalOver,
     required Map<String, double> exceededCategories,
+    bool isExpenseHidden = false,
   }) {
     final catCount = exceededCategories.length;
     final catNames = exceededCategories.keys.map((k) => k.tr).toList();
@@ -169,7 +170,8 @@ class DashboardView extends StatelessWidget {
       subtitle =
           '${'Total monthly budget'.tr} & $catCount ${catCount == 1 ? '1 category budget exceeded'.tr : 'categories budget exceeded'.tr}';
     } else if (totalExceeded) {
-      subtitle = '${'Total monthly budget exceeded by'.tr} ${AppConstants.currency}${Fmt.money(totalOver)}';
+      final overText = isExpenseHidden ? '••••••' : '${AppConstants.currency}${Fmt.money(totalOver)}';
+      subtitle = '${'Total monthly budget exceeded by'.tr} $overText';
     } else {
       final namesStr = catNames.take(2).join(', ') + (catNames.length > 2 ? ' +${catNames.length - 2}' : '');
       subtitle = '$namesStr ${'budget exceeded'.tr}';
@@ -284,6 +286,7 @@ class DashboardView extends StatelessWidget {
                   totalExceeded: totalBudgetExceeded,
                   totalOver: expense - s.budget,
                   exceededCategories: exceededCategories,
+                  isExpenseHidden: s.isExpenseHidden,
                 ),
               if (s.showPrayerCard) const DashboardPrayerCard(),
               AdaptiveColumns(
@@ -292,7 +295,7 @@ class DashboardView extends StatelessWidget {
                     income: income,
                     expense: expense,
                     budget: s.budget,
-                    isHidden: s.isBalanceHidden,
+                    isHidden: s.isIncomeHidden || s.isExpenseHidden,
                     onToggleVisibility: s.toggleBalanceVisibility,
                     isIncomeHidden: s.isIncomeHidden,
                     onToggleIncomeVisibility: s.toggleIncomeVisibility,
@@ -306,7 +309,7 @@ class DashboardView extends StatelessWidget {
                     byCategory: byCat,
                     entryCount: rows.length,
                     daily: tc.dailyExpense(rows),
-                    isHidden: s.isBalanceHidden || s.isIncomeHidden,
+                    isHidden: s.isIncomeHidden,
                     isExpenseHidden: s.isExpenseHidden,
                   ),
                 ],
@@ -333,6 +336,9 @@ class DashboardView extends StatelessWidget {
                                 TransactionTile(
                                   entry: recent[i],
                                   showDivider: i < recent.length - 1,
+                                  isAmountHidden: recent[i].type == EntryType.income
+                                      ? s.isIncomeHidden
+                                      : s.isExpenseHidden,
                                   onTap: () => showEntrySheet(context, entry: recent[i]),
                                 ),
                             ],
@@ -340,7 +346,12 @@ class DashboardView extends StatelessWidget {
                   ),
                   AppCard(
                     title: 'Expenses by category',
-                    child: CategoryBars(data: byCat, total: expense, type: EntryType.expense),
+                    child: CategoryBars(
+                      data: byCat,
+                      total: expense,
+                      type: EntryType.expense,
+                      isHidden: s.isExpenseHidden,
+                    ),
                   ),
                 ],
               ),

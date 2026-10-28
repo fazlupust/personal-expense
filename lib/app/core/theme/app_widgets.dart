@@ -31,9 +31,16 @@ class FieldLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 4),
-        child: Text(text.tr, style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w500, color: context.pal.mute)),
-      );
+    padding: const EdgeInsets.only(bottom: 4),
+    child: Text(
+      text.tr,
+      style: TextStyle(
+        fontSize: 13.5,
+        fontWeight: FontWeight.w500,
+        color: context.pal.mute,
+      ),
+    ),
+  );
 }
 
 /// Rounded bordered card with optional title + action link.
@@ -44,6 +51,7 @@ class AppCard extends StatelessWidget {
     this.title,
     this.action,
     this.onAction,
+    this.trailing,
     this.flush = false,
   });
 
@@ -51,8 +59,7 @@ class AppCard extends StatelessWidget {
   final String? title;
   final String? action;
   final VoidCallback? onAction;
-
-  /// When true the body has no padding (lists, tables).
+  final Widget? trailing;
   final bool flush;
 
   @override
@@ -76,13 +83,28 @@ class AppCard extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(
-                    child: Text(title!.tr,
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: p.ink)),
+                    child: Text(
+                      title!.tr,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: p.ink,
+                      ),
+                    ),
                   ),
-                  if (action != null)
+                  if (trailing != null)
+                    trailing!
+                  else if (action != null)
                     InkWell(
                       onTap: onAction,
-                      child: Text(action!.tr, style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: p.income)),
+                      child: Text(
+                        action!.tr,
+                        style: TextStyle(
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.w600,
+                          color: p.income,
+                        ),
+                      ),
                     ),
                 ],
               ),
@@ -114,32 +136,41 @@ class StatGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = context.pal;
-    return LayoutBuilder(builder: (context, c) {
-      final w = (c.maxWidth - 10 * (columns - 1)) / columns;
-      return Wrap(
-        spacing: 10,
-        runSpacing: 10,
-        children: [
-          for (final i in items)
-            SizedBox(
-              width: w,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(i.label.tr, style: TextStyle(fontSize: 13, color: p.mute)),
-                  const SizedBox(height: 2),
-                  Text(
-                    i.value,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 17.5, fontWeight: FontWeight.w700, color: i.color ?? p.ink),
-                  ),
-                ],
+    return LayoutBuilder(
+      builder: (context, c) {
+        final w = (c.maxWidth - 10 * (columns - 1)) / columns;
+        return Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: [
+            for (final i in items)
+              SizedBox(
+                width: w,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      i.label.tr,
+                      style: TextStyle(fontSize: 15, color: p.mute),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      i.value,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 17.5,
+                        fontWeight: FontWeight.w700,
+                        color: i.color ?? p.ink,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-        ],
-      );
-    });
+          ],
+        );
+      },
+    );
   }
 }
 
@@ -161,7 +192,9 @@ class SegmentBar<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = context.pal;
-    final shape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(10));
+    final shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(10),
+    );
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
@@ -170,37 +203,41 @@ class SegmentBar<T> extends StatelessWidget {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 3),
-                child: Builder(builder: (context) {
-                  final sel = e.key == value;
-                  final selBg = colorOf?.call(e.key) ?? p.income;
-                  const selFg = Colors.white;
-                  return Material(
-                    color: sel ? selBg : p.card,
-                    clipBehavior: Clip.antiAlias,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      side: BorderSide(color: sel ? selBg : p.line),
-                    ),
-                    child: InkWell(
-                      customBorder: shape,
-                      onTap: () => onChanged(e.key),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        child: Center(
-                          child: Text(
-                            e.value,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 13.5,
-                              fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
-                              color: sel ? selFg : p.mute,
+                child: Builder(
+                  builder: (context) {
+                    final sel = e.key == value;
+                    final selBg = colorOf?.call(e.key) ?? p.income;
+                    const selFg = Colors.white;
+                    return Material(
+                      color: sel ? selBg : p.card,
+                      clipBehavior: Clip.antiAlias,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        side: BorderSide(color: sel ? selBg : p.line),
+                      ),
+                      child: InkWell(
+                        customBorder: shape,
+                        onTap: () => onChanged(e.key),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          child: Center(
+                            child: Text(
+                              e.value,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 13.5,
+                                fontWeight: sel
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
+                                color: sel ? selFg : p.mute,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  );
-                }),
+                    );
+                  },
+                ),
               ),
             ),
         ],
@@ -212,7 +249,12 @@ class SegmentBar<T> extends StatelessWidget {
 enum AppButtonStyle { filled, outlined, danger, cancel }
 
 class AppButton extends StatelessWidget {
-  const AppButton(this.label, {super.key, required this.onPressed, this.style = AppButtonStyle.filled});
+  const AppButton(
+    this.label, {
+    super.key,
+    required this.onPressed,
+    this.style = AppButtonStyle.filled,
+  });
   final String label;
   final VoidCallback onPressed;
   final AppButtonStyle style;
@@ -220,36 +262,53 @@ class AppButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = context.pal;
-    final shape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(12));
+    final shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
+    );
     const textStyle = TextStyle(fontSize: 16, fontWeight: FontWeight.w600);
     final child = Text(label.tr);
     final Widget button = switch (style) {
       AppButtonStyle.filled => FilledButton(
-          onPressed: onPressed,
-          style: FilledButton.styleFrom(
-              backgroundColor: p.income, foregroundColor: Colors.white, shape: shape, textStyle: textStyle),
-          child: child,
+        onPressed: onPressed,
+        style: FilledButton.styleFrom(
+          backgroundColor: p.income,
+          foregroundColor: Colors.white,
+          shape: shape,
+          textStyle: textStyle,
         ),
+        child: child,
+      ),
       AppButtonStyle.cancel => FilledButton(
-          onPressed: onPressed,
-          style: FilledButton.styleFrom(
-              backgroundColor: p.expense, foregroundColor: Colors.white, shape: shape, textStyle: textStyle),
-          child: child,
+        onPressed: onPressed,
+        style: FilledButton.styleFrom(
+          backgroundColor: p.expense,
+          foregroundColor: Colors.white,
+          shape: shape,
+          textStyle: textStyle,
         ),
+        child: child,
+      ),
       AppButtonStyle.outlined => OutlinedButton(
-          onPressed: onPressed,
-          style: OutlinedButton.styleFrom(
-              foregroundColor: p.ink, backgroundColor: p.bg, side: BorderSide(color: p.line),
-              shape: shape, textStyle: textStyle),
-          child: child,
+        onPressed: onPressed,
+        style: OutlinedButton.styleFrom(
+          foregroundColor: p.ink,
+          backgroundColor: p.bg,
+          side: BorderSide(color: p.line),
+          shape: shape,
+          textStyle: textStyle,
         ),
+        child: child,
+      ),
       AppButtonStyle.danger => OutlinedButton(
-          onPressed: onPressed,
-          style: OutlinedButton.styleFrom(
-              foregroundColor: p.expense, side: BorderSide(color: p.expense),
-              shape: shape, textStyle: textStyle),
-          child: child,
+        onPressed: onPressed,
+        style: OutlinedButton.styleFrom(
+          foregroundColor: p.expense,
+          side: BorderSide(color: p.expense),
+          shape: shape,
+          textStyle: textStyle,
         ),
+        child: child,
+      ),
     };
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),

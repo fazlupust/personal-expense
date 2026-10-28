@@ -64,7 +64,7 @@ class EntryFormController extends GetxController {
     noteCtrl = TextEditingController(text: e?.note ?? '');
     account = e?.account ?? Get.find<SettingsController>().defaultAccount;
     final now = DateTime.now();
-    date = e?.date ?? DateTime(now.year, now.month, now.day);
+    date = e?.date ?? now;
     final names = _categories;
     category = e?.category ?? (names.isEmpty ? null : names.first.name);
   }
@@ -157,7 +157,8 @@ class EntryFormController extends GetxController {
   }
 
   void setDate(DateTime d) {
-    date = DateTime(d.year, d.month, d.day);
+    final now = DateTime.now();
+    date = DateTime(d.year, d.month, d.day, now.hour, now.minute);
     update();
   }
 
@@ -244,6 +245,8 @@ class EntryFormController extends GetxController {
         noteEn: noteCtrl.text.trim(),
         account: account,
         date: date,
+        createdAt: existing?.createdAt ?? DateTime.now(),
+        updatedAt: DateTime.now(),
         latitude: existing?.latitude,
         longitude: existing?.longitude,
         deviceInfo: existing?.deviceInfo,

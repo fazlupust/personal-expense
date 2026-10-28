@@ -75,10 +75,13 @@ class TasbihHistoryView extends StatelessWidget {
                 icon: Icon(Icons.fingerprint_rounded, size: 22, color: p.income),
                 tooltip: 'Digital Tasbih'.tr,
                 onPressed: () {
-                  if (Get.previousRoute == AppRoutes.tasbihCounter) {
+                  if (Get.previousRoute == AppRoutes.tasbihCounter ||
+                      Get.previousRoute == AppRoutes.prayerAndTasbih) {
+                    c.setActiveTab(1);
                     Get.back();
                   } else {
-                    Get.toNamed(AppRoutes.tasbihCounter);
+                    c.setActiveTab(1);
+                    Get.toNamed(AppRoutes.prayerAndTasbih);
                   }
                 },
               ),
@@ -106,7 +109,7 @@ class TasbihHistoryView extends StatelessWidget {
                             onTap: () => selectedTab.value = 0,
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 180),
-                              padding: const EdgeInsets.symmetric(vertical: 7.5),
+                              padding: const EdgeInsets.symmetric(vertical: 8.5),
                               decoration: BoxDecoration(
                                 color: selectedTab.value == 0 ? p.income : Colors.transparent,
                                 borderRadius: BorderRadius.circular(9),
@@ -117,17 +120,17 @@ class TasbihHistoryView extends StatelessWidget {
                                 children: [
                                   Icon(
                                     Icons.format_list_bulleted_rounded,
-                                    size: 14,
+                                    size: 15,
                                     color: selectedTab.value == 0 ? Colors.white : p.mute,
                                   ),
-                                  const SizedBox(width: 5),
+                                  const SizedBox(width: 6),
                                   Flexible(
                                     child: Text(
                                       'Zikir Overview'.tr,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
-                                        fontSize: 11.5,
+                                        fontSize: 13.5,
                                         fontWeight: FontWeight.w700,
                                         color: selectedTab.value == 0 ? Colors.white : p.ink,
                                       ),
@@ -144,7 +147,7 @@ class TasbihHistoryView extends StatelessWidget {
                             onTap: () => selectedTab.value = 1,
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 180),
-                              padding: const EdgeInsets.symmetric(vertical: 7.5),
+                              padding: const EdgeInsets.symmetric(vertical: 8.5),
                               decoration: BoxDecoration(
                                 color: selectedTab.value == 1 ? p.income : Colors.transparent,
                                 borderRadius: BorderRadius.circular(9),
@@ -155,17 +158,17 @@ class TasbihHistoryView extends StatelessWidget {
                                 children: [
                                   Icon(
                                     Icons.cloud_sync_rounded,
-                                    size: 14,
+                                    size: 15,
                                     color: selectedTab.value == 1 ? Colors.white : p.mute,
                                   ),
-                                  const SizedBox(width: 5),
+                                  const SizedBox(width: 6),
                                   Flexible(
                                     child: Text(
                                       'Daily History Logs'.tr,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
-                                        fontSize: 11.5,
+                                        fontSize: 13.5,
                                         fontWeight: FontWeight.w700,
                                         color: selectedTab.value == 1 ? Colors.white : p.ink,
                                       ),
@@ -248,27 +251,28 @@ class TasbihHistoryView extends StatelessWidget {
                   children: [
                     Expanded(
                       child: SizedBox(
-                        height: 38,
+                        height: 42,
                         child: TextField(
                           controller: searchCtrl,
                           onChanged: (v) => searchQuery.value = v.trim().toLowerCase(),
+                          style: TextStyle(fontSize: 13.5, color: p.ink),
                           decoration: InputDecoration(
                             hintText: 'Search zikir or meaning...'.tr,
-                            hintStyle: TextStyle(fontSize: 12.5, color: p.mute),
-                            prefixIcon: Icon(Icons.search, size: 17, color: p.mute),
+                            hintStyle: TextStyle(fontSize: 13.5, color: p.mute),
+                            prefixIcon: Icon(Icons.search, size: 19, color: p.mute),
                             suffixIcon: searchQuery.value.isNotEmpty
                                 ? GestureDetector(
                                     onTap: () {
                                       searchCtrl.clear();
                                       searchQuery.value = '';
                                     },
-                                    child: Icon(Icons.clear, size: 16, color: p.mute),
+                                    child: Icon(Icons.clear, size: 17, color: p.mute),
                                   )
                                 : null,
                             isDense: true,
                             filled: true,
                             fillColor: p.bg,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
                               borderSide: BorderSide(color: p.line),
@@ -298,8 +302,8 @@ class TasbihHistoryView extends StatelessWidget {
                         }
                       },
                       child: Container(
-                        height: 38,
-                        width: 38,
+                        height: 42,
+                        width: 42,
                         decoration: BoxDecoration(
                           color: c.selectedHistoryDate != null
                               ? p.income
@@ -314,7 +318,7 @@ class TasbihHistoryView extends StatelessWidget {
                         child: Center(
                           child: Icon(
                             Icons.calendar_month_rounded,
-                            size: 18,
+                            size: 19,
                             color: c.selectedHistoryDate != null ? Colors.white : p.income,
                           ),
                         ),
@@ -323,8 +327,8 @@ class TasbihHistoryView extends StatelessWidget {
                     const SizedBox(width: 8),
                     // Total Recitations Badge
                     Container(
-                      height: 38,
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      height: 42,
+                      padding: const EdgeInsets.symmetric(horizontal: 11),
                       decoration: BoxDecoration(
                         color: p.income.withOpacity(0.12),
                         borderRadius: BorderRadius.circular(10),
@@ -333,14 +337,14 @@ class TasbihHistoryView extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.query_stats_rounded, size: 16, color: p.income),
-                          const SizedBox(width: 4),
+                          Icon(Icons.query_stats_rounded, size: 17, color: p.income),
+                          const SizedBox(width: 5),
                           Text(
                             c.isCountHidden
                                 ? '***'
                                 : '${NumberFormat('#,###').format(totalCount)} ${'Times'.tr}',
                             style: TextStyle(
-                              fontSize: 12.5,
+                              fontSize: 13.5,
                               fontWeight: FontWeight.w800,
                               color: p.income,
                               letterSpacing: c.isCountHidden ? 2 : 0,
@@ -371,7 +375,7 @@ class TasbihHistoryView extends StatelessWidget {
                           child: Text(
                             '${'Date:'.tr} ${formatDateLabel(c.selectedHistoryDate!, isBn)}',
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 13,
                               fontWeight: FontWeight.w700,
                               color: p.income,
                             ),
@@ -389,13 +393,13 @@ class TasbihHistoryView extends StatelessWidget {
                                 Text(
                                   'Reset Date'.tr,
                                   style: TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 12,
                                     fontWeight: FontWeight.w700,
                                     color: p.mute,
                                   ),
                                 ),
                                 const SizedBox(width: 2),
-                                Icon(Icons.close_rounded, size: 13, color: p.mute),
+                                Icon(Icons.close_rounded, size: 14, color: p.mute),
                               ],
                             ),
                           ),
@@ -406,7 +410,7 @@ class TasbihHistoryView extends StatelessWidget {
                 ] else ...[
                   // Time Filter Pills (Horizontal scrollable)
                   SizedBox(
-                    height: 30,
+                    height: 34,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount: TasbihTimeFilter.values.length,
@@ -415,24 +419,24 @@ class TasbihHistoryView extends StatelessWidget {
                         final filter = TasbihTimeFilter.values[i];
                         final isSelected = c.selectedTimeFilter == filter;
                         return InkWell(
-                          borderRadius: BorderRadius.circular(15),
+                          borderRadius: BorderRadius.circular(17),
                           onTap: () {
                             c.selectHistoryDate(null);
                             c.setTimeFilter(filter);
                           },
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 180),
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                            padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 6),
                             decoration: BoxDecoration(
                               color: isSelected ? p.income : p.bg,
-                              borderRadius: BorderRadius.circular(15),
+                              borderRadius: BorderRadius.circular(17),
                               border: Border.all(color: isSelected ? p.income : p.line),
                             ),
                             child: Center(
                               child: Text(
                                 c.getTimeFilterName(filter),
                                 style: TextStyle(
-                                  fontSize: 11,
+                                  fontSize: 12.5,
                                   fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                                   color: isSelected ? Colors.white : p.ink,
                                 ),
@@ -448,7 +452,7 @@ class TasbihHistoryView extends StatelessWidget {
 
                 // Category Filter Chips (Horizontal scrollable)
                 SizedBox(
-                  height: 30,
+                  height: 34,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: ZikirCategory.values.length,
@@ -457,21 +461,21 @@ class TasbihHistoryView extends StatelessWidget {
                       final cat = ZikirCategory.values[i];
                       final isSelected = c.selectedCategoryFilter == cat;
                       return InkWell(
-                        borderRadius: BorderRadius.circular(15),
+                        borderRadius: BorderRadius.circular(17),
                         onTap: () => c.setCategoryFilter(cat),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 180),
-                          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
                             color: isSelected ? p.income : p.bg,
-                            borderRadius: BorderRadius.circular(15),
+                            borderRadius: BorderRadius.circular(17),
                             border: Border.all(color: isSelected ? p.income : p.line),
                           ),
                           child: Center(
                             child: Text(
                               c.getCategoryName(cat),
                               style: TextStyle(
-                                fontSize: 11,
+                                fontSize: 12.5,
                                 fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                                 color: isSelected ? Colors.white : p.ink,
                               ),
@@ -500,13 +504,13 @@ class TasbihHistoryView extends StatelessWidget {
                       'Tap a zikir to start counting'.tr,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: p.mute),
+                      style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: p.mute),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Text(
                     '${list.length} ${'Items'.tr}',
-                    style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: p.income),
+                    style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: p.income),
                   ),
                 ],
               ),
@@ -544,10 +548,13 @@ class TasbihHistoryView extends StatelessWidget {
                         borderRadius: BorderRadius.circular(14),
                         onTap: () {
                           c.selectZikir(item);
-                          if (Get.previousRoute == AppRoutes.tasbihCounter) {
+                          if (Get.previousRoute == AppRoutes.tasbihCounter ||
+                              Get.previousRoute == AppRoutes.prayerAndTasbih) {
+                            c.setActiveTab(1);
                             Get.back();
                           } else {
-                            Get.toNamed(AppRoutes.tasbihCounter);
+                            c.setActiveTab(1);
+                            Get.toNamed(AppRoutes.prayerAndTasbih);
                           }
                         },
                         child: Container(
@@ -574,7 +581,7 @@ class TasbihHistoryView extends StatelessWidget {
                                 children: [
                                   // Category Badge
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                     decoration: BoxDecoration(
                                       color: p.income.withOpacity(0.12),
                                       borderRadius: BorderRadius.circular(6),
@@ -582,7 +589,7 @@ class TasbihHistoryView extends StatelessWidget {
                                     child: Text(
                                       c.getCategoryName(item.category),
                                       style: TextStyle(
-                                        fontSize: 10.5,
+                                        fontSize: 11.5,
                                         fontWeight: FontWeight.w700,
                                         color: p.income,
                                       ),

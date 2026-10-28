@@ -8,10 +8,17 @@ import '../../../categories/controllers/categories_controller.dart';
 
 /// Horizontal bars: category label, proportion bar, amount and percentage.
 class CategoryBars extends StatelessWidget {
-  const CategoryBars({super.key, required this.data, required this.total, required this.type});
+  const CategoryBars({
+    super.key,
+    required this.data,
+    required this.total,
+    required this.type,
+    this.isHidden = false,
+  });
   final Map<String, double> data;
   final double total;
   final EntryType type;
+  final bool isHidden;
 
   @override
   Widget build(BuildContext context) {
@@ -59,11 +66,16 @@ class CategoryBars extends StatelessWidget {
                 Flexible(
                   flex: 3,
                   child: Text(
-                    '${Fmt.money(e.value)} · ${Fmt.count(total > 0 ? (e.value / total * 100).round() : 0)}%',
+                    '${isHidden ? '••••••' : Fmt.money(e.value)} · ${Fmt.count(total > 0 ? (e.value / total * 100).round() : 0)}%',
                     textAlign: TextAlign.right,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: p.ink),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: isHidden ? 0.8 : null,
+                      color: p.ink,
+                    ),
                   ),
                 ),
               ],

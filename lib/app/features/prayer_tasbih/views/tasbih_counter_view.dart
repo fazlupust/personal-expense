@@ -1190,10 +1190,13 @@ class TasbihCounterView extends StatelessWidget {
               // Quick switch to Prayer Times
               OutlinedButton.icon(
                 onPressed: () {
+                  c.setActiveTab(0);
                   if (isEmbedded) {
-                    c.setActiveTab(0);
-                  } else {
+                    // Already inside tabbed view, setActiveTab(0) is applied
+                  } else if (Get.previousRoute == AppRoutes.prayerAndTasbih) {
                     Get.back();
+                  } else {
+                    Get.offNamed(AppRoutes.prayerAndTasbih);
                   }
                 },
                 icon: Icon(Icons.access_time_filled_rounded, size: 16, color: p.income),

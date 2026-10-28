@@ -49,7 +49,7 @@ class DashboardStatsCard extends StatelessWidget {
           DailyExpenseChart(
             values: daily,
             month: controller.month,
-            isExpenseHidden: isExpenseHidden || isHidden,
+            isExpenseHidden: isExpenseHidden,
           ),
         ],
       ),
