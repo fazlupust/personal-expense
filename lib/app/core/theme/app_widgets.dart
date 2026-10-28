@@ -192,9 +192,8 @@ class SegmentBar<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = context.pal;
-    final shape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(10),
-    );
+    final borderRadius = BorderRadius.circular(12);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
@@ -206,30 +205,61 @@ class SegmentBar<T> extends StatelessWidget {
                 child: Builder(
                   builder: (context) {
                     final sel = e.key == value;
-                    final selBg = colorOf?.call(e.key) ?? p.income;
-                    const selFg = Colors.white;
-                    return Material(
-                      color: sel ? selBg : p.card,
-                      clipBehavior: Clip.antiAlias,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        side: BorderSide(color: sel ? selBg : p.line),
+                    final customColor = colorOf?.call(e.key);
+                    final gradient = sel
+                        ? (customColor != null
+                            ? LinearGradient(
+                                colors: [customColor.withOpacity(0.85), customColor],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              )
+                            : const LinearGradient(
+                                colors: [Color(0xFF0D9488), Color(0xFF10B981)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ))
+                        : null;
+
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      curve: Curves.easeInOut,
+                      decoration: BoxDecoration(
+                        color: sel ? null : p.card,
+                        gradient: gradient,
+                        borderRadius: borderRadius,
+                        border: Border.all(
+                          color: sel ? Colors.transparent : p.line,
+                          width: 1,
+                        ),
+                        boxShadow: sel
+                            ? [
+                                BoxShadow(
+                                  color: (customColor ?? const Color(0xFF10B981))
+                                      .withOpacity(0.28),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ]
+                            : null,
                       ),
-                      child: InkWell(
-                        customBorder: shape,
-                        onTap: () => onChanged(e.key),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          child: Center(
-                            child: Text(
-                              e.value,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 13.5,
-                                fontWeight: sel
-                                    ? FontWeight.w700
-                                    : FontWeight.w500,
-                                color: sel ? selFg : p.mute,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: borderRadius,
+                          onTap: () => onChanged(e.key),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            child: Center(
+                              child: Text(
+                                e.value,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 13.5,
+                                  fontWeight: sel
+                                      ? FontWeight.w700
+                                      : FontWeight.w500,
+                                  color: sel ? Colors.white : p.mute,
+                                ),
                               ),
                             ),
                           ),

@@ -61,21 +61,31 @@ class SettingsFormCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              TextButton.icon(
-                onPressed: () => showBudgetManagementSheet(context),
-                icon: Icon(Icons.tune_rounded, size: 15, color: context.pal.income),
-                label: Text(
-                  'Manage Category Budgets'.tr,
-                  style: TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
-                    color: context.pal.income,
+              InkWell(
+                borderRadius: BorderRadius.circular(20),
+                onTap: () => showBudgetManagementSheet(context),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: context.pal.income.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: context.pal.income.withOpacity(0.28)),
                   ),
-                ),
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.tune_rounded, size: 14, color: context.pal.income),
+                      const SizedBox(width: 5),
+                      Text(
+                        'Manage Category Budgets'.tr,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: context.pal.income,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
