@@ -205,20 +205,20 @@ class TasbihCounterView extends StatelessWidget {
             ),
             Row(
               children: [
-                Icon(Icons.auto_stories_rounded, size: 20, color: p.income),
+                Icon(Icons.auto_stories_rounded, size: 22, color: p.income),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'All Zikirs & Duas'.tr,
                     style: TextStyle(
-                      fontSize: 16.5,
+                      fontSize: 17.5,
                       fontWeight: FontWeight.w800,
                       color: p.ink,
                     ),
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3.5),
                   decoration: BoxDecoration(
                     color: p.income.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(8),
@@ -226,7 +226,7 @@ class TasbihCounterView extends StatelessWidget {
                   child: Text(
                     '${c.allZikirs.length} ${'Items'.tr}',
                     style: TextStyle(
-                      fontSize: 11.5,
+                      fontSize: 12.5,
                       fontWeight: FontWeight.w700,
                       color: p.income,
                     ),
@@ -242,7 +242,7 @@ class TasbihCounterView extends StatelessWidget {
                       color: p.line.withOpacity(0.5),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.close_rounded, size: 18, color: p.ink),
+                    child: Icon(Icons.close_rounded, size: 19, color: p.ink),
                   ),
                 ),
               ],
@@ -251,13 +251,15 @@ class TasbihCounterView extends StatelessWidget {
             TextField(
               controller: searchCtrl,
               onChanged: (v) => query.value = v.trim().toLowerCase(),
+              style: TextStyle(fontSize: 14.5, color: p.ink),
               decoration: InputDecoration(
                 hintText: 'Search zikir or meaning...'.tr,
-                prefixIcon: Icon(Icons.search, size: 18, color: p.mute),
+                hintStyle: TextStyle(fontSize: 14, color: p.mute),
+                prefixIcon: Icon(Icons.search, size: 20, color: p.mute),
                 isDense: true,
                 filled: true,
                 fillColor: p.bg,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: p.line),
@@ -271,7 +273,7 @@ class TasbihCounterView extends StatelessWidget {
             const SizedBox(height: 10),
             // Category filter chips in catalog
             SizedBox(
-              height: 32,
+              height: 36,
               child: Obx(() {
                 final currentCat = selectedCategory.value;
                 return ListView.separated(
@@ -282,21 +284,21 @@ class TasbihCounterView extends StatelessWidget {
                     final cat = ZikirCategory.values[i];
                     final isSel = currentCat == cat;
                     return InkWell(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(18),
                       onTap: () => selectedCategory.value = cat,
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 180),
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
                           color: isSel ? p.income : p.bg,
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(18),
                           border: Border.all(color: isSel ? p.income : p.line),
                         ),
                         child: Center(
                           child: Text(
                             c.getCategoryName(cat),
                             style: TextStyle(
-                              fontSize: 11,
+                              fontSize: 12.5,
                               fontWeight: isSel ? FontWeight.w800 : FontWeight.w600,
                               color: isSel ? Colors.white : p.ink,
                             ),

@@ -18,9 +18,14 @@ class SplashController extends GetxController {
   Future<void> _loadAppVersion() async {
     try {
       final info = await PackageInfo.fromPlatform();
-      appVersion.value = 'v${info.version}';
-    } catch (_) {
-      appVersion.value = 'v1.0.0';
+      if (info.version.isNotEmpty) {
+        appVersion.value = 'v${info.version}';
+        return;
+      }
+    } catch (_) {}
+    if (Get.isRegistered<AppUpdateService>() &&
+        AppUpdateService.to.currentVersion.isNotEmpty) {
+      appVersion.value = 'v${AppUpdateService.to.currentVersion}';
     }
   }
 

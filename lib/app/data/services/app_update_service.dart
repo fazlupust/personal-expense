@@ -14,7 +14,7 @@ class AppUpdateService extends GetxService {
 
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   AppUpdateModel? _pendingOptionalConfig;
-  String _cachedCurrentVersion = '1.0.0';
+  String _cachedCurrentVersion = '';
 
   String get currentVersion => _cachedCurrentVersion;
 
@@ -30,10 +30,8 @@ class AppUpdateService extends GetxService {
       final info = await PackageInfo.fromPlatform();
       if (info.version.isNotEmpty) {
         _cachedCurrentVersion = info.version;
-        return;
       }
     } catch (_) {}
-    _cachedCurrentVersion = '1.0.0';
   }
 
   /// Compares semantic versions (e.g. 1.1.0 vs 1.0.0)

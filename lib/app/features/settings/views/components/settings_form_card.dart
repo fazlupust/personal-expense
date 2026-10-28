@@ -400,9 +400,9 @@ class SettingsFormCard extends StatelessWidget {
             child: FutureBuilder<PackageInfo>(
               future: PackageInfo.fromPlatform(),
               builder: (ctx, snapshot) {
-                final v = snapshot.data?.version ?? '1.0.0';
+                final v = snapshot.data?.version ?? '';
                 return Text(
-                  '${AppConstants.appName} v$v',
+                  v.isNotEmpty ? '${AppConstants.appName} v$v' : AppConstants.appName,
                   style: TextStyle(fontSize: 11, color: context.pal.mute.withOpacity(0.6)),
                 );
               },

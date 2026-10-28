@@ -124,14 +124,37 @@ class NavigationView extends StatelessWidget {
     final p = context.pal;
     return GetBuilder<NavigationController>(builder: (c) {
       final size = Responsive.sizeOf(context);
-      final fab = FloatingActionButton(
-        onPressed: () => showEntrySheet(context),
-        backgroundColor: p.income,
-        foregroundColor: Colors.white,
-        shape: const CircleBorder(),
-        elevation: 4,
-        tooltip: '+ Add'.tr,
-        child: const Icon(Icons.add, size: 28),
+      final fab = Container(
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: const LinearGradient(
+            colors: [Color(0xFF0D9488), Color(0xFF10B981)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF10B981).withOpacity(0.38),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: FloatingActionButton(
+          onPressed: () => showEntrySheet(context),
+          backgroundColor: Colors.transparent,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          highlightElevation: 0,
+          focusElevation: 0,
+          hoverElevation: 0,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          shape: const CircleBorder(),
+          tooltip: '+ Add'.tr,
+          child: const Icon(Icons.add_rounded, size: 30),
+        ),
       );
       final page = _pages[c.index];
 

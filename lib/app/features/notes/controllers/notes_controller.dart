@@ -480,7 +480,7 @@ class NotesController extends GetxController {
           'Success'.tr,
           (editingNote != null ? 'Note updated successfully.' : 'Note saved successfully.').tr,
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: const Color(0xFF1B5E20),
+          backgroundColor: const Color(0xFF0D9488),
           colorText: Colors.white,
           icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 24),
           duration: const Duration(seconds: 3),
@@ -498,6 +498,12 @@ class NotesController extends GetxController {
           'Alert'.tr,
           'Failed to save note. Please try again.'.tr,
           snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color(0xFFDC2626),
+          colorText: Colors.white,
+          icon: const Icon(Icons.error_outline_rounded, color: Colors.white, size: 24),
+          duration: const Duration(seconds: 3),
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          borderRadius: 12,
         );
       }
       return false;
@@ -526,11 +532,29 @@ class NotesController extends GetxController {
           'Success'.tr,
           'Note deleted successfully.'.tr,
           snackPosition: SnackPosition.BOTTOM,
-          duration: const Duration(seconds: 2),
+          backgroundColor: const Color(0xFF0D9488),
+          colorText: Colors.white,
+          icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 24),
+          duration: const Duration(seconds: 3),
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          borderRadius: 12,
         );
       }
     } catch (e) {
       debugPrint('Delete note error: $e');
+      if (Get.context != null) {
+        Get.snackbar(
+          'Alert'.tr,
+          'Failed to delete note. Please try again.'.tr,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color(0xFFDC2626),
+          colorText: Colors.white,
+          icon: const Icon(Icons.error_outline_rounded, color: Colors.white, size: 24),
+          duration: const Duration(seconds: 3),
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          borderRadius: 12,
+        );
+      }
     }
   }
 }

@@ -348,11 +348,17 @@ class DashboardView extends StatelessWidget {
                   ),
                   AppCard(
                     title: 'Expenses by category',
+                    action: 'See all',
+                    onAction: () => Get.find<NavigationController>().select(2),
                     child: CategoryBars(
                       data: byCat,
                       total: expense,
                       type: EntryType.expense,
                       isHidden: s.isExpenseHidden,
+                      onTapCategory: (cat) {
+                        tc.setQuery(cat);
+                        Get.find<NavigationController>().select(1);
+                      },
                     ),
                   ),
                 ],

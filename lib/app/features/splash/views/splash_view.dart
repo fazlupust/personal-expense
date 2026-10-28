@@ -159,7 +159,7 @@ class SplashView extends GetView<SplashController> {
                     () => Text(
                       controller.appVersion.value.isNotEmpty
                           ? '${AppConstants.appName} ${controller.appVersion.value}'
-                          : '${AppConstants.appName} v1.0.0',
+                          : AppConstants.appName,
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
