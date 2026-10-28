@@ -47,8 +47,10 @@ class AppUpdateService extends GetxService {
         final isForce = config.isForceUpdate ||
             isVersionHigher(config.minVersion, _cachedCurrentVersion);
 
-        // If user already dismissed this optional version during this session, do not re-prompt
-        if (!isForce && _dismissedVersion == config.latestVersion) {
+        // If user already dismissed this or a higher version during this session, do not re-prompt
+        if (!isForce &&
+            _dismissedVersion != null &&
+            !isVersionHigher(config.latestVersion, _dismissedVersion!)) {
           return;
         }
 
@@ -176,6 +178,10 @@ class AppUpdateService extends GetxService {
     if (_pendingOptionalConfig != null) {
       final cfg = _pendingOptionalConfig!;
       _pendingOptionalConfig = null;
+      if (_dismissedVersion != null &&
+          !isVersionHigher(cfg.latestVersion, _dismissedVersion!)) {
+        return;
+      }
       _showDialog(cfg);
     }
   }
