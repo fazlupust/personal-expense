@@ -39,6 +39,7 @@ class ZikirItem {
   final String arabic;
   final String titleBn;
   final String titleEn;
+  final String? pronunciationBn;
   final String meaningBn;
   final String meaningEn;
   final int defaultTarget;
@@ -51,6 +52,7 @@ class ZikirItem {
     required this.arabic,
     required this.titleBn,
     required this.titleEn,
+    this.pronunciationBn,
     required this.meaningBn,
     required this.meaningEn,
     this.defaultTarget = 33,
@@ -64,6 +66,7 @@ class ZikirItem {
         'arabic': arabic,
         'titleBn': titleBn,
         'titleEn': titleEn,
+        if (pronunciationBn != null) 'pronunciationBn': pronunciationBn,
         'meaningBn': meaningBn,
         'meaningEn': meaningEn,
         'defaultTarget': defaultTarget,
@@ -77,6 +80,7 @@ class ZikirItem {
         arabic: json['arabic'] as String? ?? '',
         titleBn: json['titleBn'] as String? ?? '',
         titleEn: json['titleEn'] as String? ?? '',
+        pronunciationBn: json['pronunciationBn'] as String?,
         meaningBn: json['meaningBn'] as String? ?? '',
         meaningEn: json['meaningEn'] as String? ?? '',
         defaultTarget: json['defaultTarget'] as int? ?? 33,

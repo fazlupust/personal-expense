@@ -398,10 +398,10 @@ class TasbihCounterView extends StatelessWidget {
                               const SizedBox(height: 5),
                               Text(
                                 item.arabic,
-                                maxLines: 1,
+                                maxLines: item.id == 'post_prayer_sea_foam' ? 3 : 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  fontSize: 19.5,
+                                  fontSize: item.id == 'post_prayer_sea_foam' ? 17 : 19.5,
                                   fontWeight: FontWeight.w700,
                                   color: p.income,
                                   height: 1.35,
@@ -668,6 +668,8 @@ class TasbihCounterView extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 6),
+              ] else if (zikir.id == 'post_prayer_sea_foam') ...[
+                _buildHisnulMuslimSeaFoamCard(c, zikir, cycleStep, p),
               ] else ...[
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -1284,6 +1286,273 @@ class TasbihCounterView extends StatelessWidget {
           body: SafeArea(child: content),
         );
       },
+    );
+  }
+
+  Widget _buildHisnulMuslimSeaFoamCard(
+    PrayerTasbihController c,
+    ZikirItem zikir,
+    int cycleStep,
+    AppPalette p,
+  ) {
+    // Current recitation phase (1..100)
+    String currentPhaseText;
+    if (cycleStep == 0) {
+      currentPhaseText = 'শুরু করুন: ১ম পর্ব - সুবহানাল্লাহ (৩৩ বার)';
+    } else if (cycleStep <= 33) {
+      currentPhaseText = '১ম পর্ব: সুবহানাল্লাহ (${cycleStep}/৩৩ বার)';
+    } else if (cycleStep <= 66) {
+      currentPhaseText = '২য় পর্ব: আলহামদুলিল্লাহ (${cycleStep - 33}/৩৩ বার)';
+    } else if (cycleStep <= 99) {
+      currentPhaseText = '৩য় পর্ব: আল্লাহু আকবার (${cycleStep - 66}/৩৩ বার)';
+    } else {
+      currentPhaseText = '৪র্থ পর্ব (১০০তম দোয়া): ১ বার পাঠ করে সম্পূর্ণ করুন';
+    }
+
+    Widget buildStripeBox(String text) {
+      return Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(top: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+        decoration: BoxDecoration(
+          color: p.isDark ? const Color(0xFF1E293B) : const Color(0xFFFFFBEB),
+          borderRadius: const BorderRadius.horizontal(right: Radius.circular(8)),
+          border: const Border(
+            left: BorderSide(color: Color(0xFFEAB308), width: 3.5),
+          ),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            fontSize: 13.5,
+            fontWeight: FontWeight.w500,
+            color: p.ink,
+            height: 1.45,
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: p.card,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFEAB308).withOpacity(0.4)),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFEAB308).withOpacity(0.08),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // 1. Top Header Banner (হিসনুল মুসলিম ২৫.৪)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: p.isDark ? const Color(0xFF854D0E) : const Color(0xFFFDE68A),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(13)),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'হিসনুল মুসলিম ২৫.৪',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14.5,
+                      fontWeight: FontWeight.w800,
+                      color: p.isDark ? Colors.white : const Color(0xFF78350F),
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                ),
+                InkWell(
+                  borderRadius: BorderRadius.circular(6),
+                  onTap: c.toggleZikirCardVisibility,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                    child: Icon(
+                      Icons.visibility_off_outlined,
+                      size: 16,
+                      color: p.isDark ? Colors.white70 : const Color(0xFF78350F),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Phase Tracker Badge
+                Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: p.income.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: p.income.withOpacity(0.25)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.stars_rounded, size: 14, color: p.income),
+                        const SizedBox(width: 6),
+                        Text(
+                          currentPhaseText,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: p.income,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Part 1: Instruction
+                Text(
+                  'প্রত্যেকটি ৩৩ বার করে বলবে,',
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                    color: p.ink,
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                // Part 1: Arabic
+                Center(
+                  child: Text(
+                    'سُبْحَانَ اللهِ، وَالْحَمْدُ لِلَّهِ، وَاللهُ أَكْبَرُ',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      color: p.income,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+
+                // Part 1: Meaning
+                buildStripeBox('আল্লাহ কতই না পবিত্র-মহান। সকল প্রশংসা আল্লাহ্ জন্য। আল্লাহ সবচেয়ে বড়।'),
+
+                // Part 1: Pronunciation
+                buildStripeBox('সুবহা-নাল্লাহ, আলহামদুলিল্লাহ, আল্লা-হু আকবার'),
+
+                const SizedBox(height: 16),
+
+                // Part 2: Instruction
+                Text(
+                  'তারপর বলবে,',
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                    color: p.ink,
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                // Part 2: Arabic
+                Center(
+                  child: Text(
+                    'لَا إِلَهَ إِلَّا اللهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: p.income,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+
+                // Part 2: Meaning
+                buildStripeBox(
+                  'একমাত্র আল্লাহ ছাড়া কোনো হক্ব ইলাহ নেই, তাঁর কোনো শরীক নেই, রাজত্ব তাঁরই, সকল প্রশংসা তাঁরই এবং তিনি সবকিছুর উপর ক্ষমতাবান।',
+                ),
+
+                const SizedBox(height: 12),
+
+                // Virtue / Benefit
+                if (zikir.benefitBn != null && zikir.benefitBn!.isNotEmpty) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: p.income.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.verified_rounded, size: 14, color: p.income),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            zikir.benefitBn!,
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w600,
+                              color: p.income,
+                              height: 1.35,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+
+                if (!c.isCountHidden) ...[
+                  const SizedBox(height: 8),
+                  InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: c.toggleCountVisibility,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: p.income.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: p.income.withOpacity(0.2)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.visibility_off_rounded, size: 14, color: p.income),
+                          const SizedBox(width: 6),
+                          Flexible(
+                            child: Text(
+                              '${c.getZikirTodayCount(zikir.id)} ${'Times'.tr} (${'Today'.tr}) · ${c.getZikirLifetimeCount(zikir.id)} ${'Times'.tr} (${'All Time'.tr})',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: p.income,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(Icons.chevron_right_rounded, size: 14, color: p.income),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
