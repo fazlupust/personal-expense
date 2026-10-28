@@ -587,7 +587,9 @@ class TasbihCounterView extends StatelessWidget {
                           final item = c.sortedZikirs[i];
                           final isSelected = item.id == zikir.id;
                           final isBn = Get.locale?.languageCode == 'bn';
-                          final title = isBn ? item.titleBn : item.titleEn;
+                          final title = isBn
+                              ? item.titleBn
+                              : item.arabic.split('\n').first.replaceAll(RegExp(r'✦.*'), '').trim();
 
                           return Material(
                             color: Colors.transparent,
@@ -618,7 +620,7 @@ class TasbihCounterView extends StatelessWidget {
                                   child: Text(
                                     title,
                                     style: TextStyle(
-                                      fontSize: 12,
+                                      fontSize: isBn ? 12 : 13.5,
                                       fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
                                       color: isSelected ? Colors.white : p.ink,
                                     ),
