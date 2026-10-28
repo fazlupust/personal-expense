@@ -18,6 +18,7 @@ import '../../transactions/views/components/transaction_tile.dart';
 import 'components/balance_card.dart';
 import 'components/dashboard_prayer_card.dart';
 import 'components/dashboard_stats_card.dart';
+import 'components/dashboard_weather_card.dart';
 
 class DashboardView extends StatelessWidget {
   const DashboardView({super.key});
@@ -288,6 +289,7 @@ class DashboardView extends StatelessWidget {
                   exceededCategories: exceededCategories,
                   isExpenseHidden: s.isExpenseHidden,
                 ),
+              if (s.showWeatherCard) const DashboardWeatherCard(),
               if (s.showPrayerCard) const DashboardPrayerCard(),
               AdaptiveColumns(
                 left: [

@@ -13,6 +13,7 @@ import 'app/data/services/auth_service.dart';
 import 'app/data/services/category_service.dart';
 import 'app/data/services/note_service.dart';
 import 'app/data/services/transaction_service.dart';
+import 'app/data/services/weather_service.dart';
 import 'app/features/settings/controllers/settings_controller.dart';
 import 'app/routes/app_pages.dart';
 import 'app/routes/app_routes.dart';
@@ -27,6 +28,7 @@ Future<void> main() async {
   final prefs = await SharedPreferences.getInstance();
   Get.put<SharedPreferences>(prefs, permanent: true);
   Get.put(AppUpdateService(), permanent: true);
+  Get.put(WeatherService(), permanent: true);
   Get.put(AuthService(), permanent: true);
   Get.put(CategoryService(), permanent: true);
   Get.put(TransactionService(), permanent: true);

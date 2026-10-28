@@ -11,6 +11,7 @@ import '../../controllers/settings_controller.dart';
 import '../../../../data/services/app_update_service.dart';
 import 'budget_management_sheet.dart';
 import 'data_export_sheet.dart';
+import 'weather_check_sheet.dart';
 
 class SettingsFormCard extends StatelessWidget {
   const SettingsFormCard({super.key, required this.settings});
@@ -302,10 +303,81 @@ class SettingsFormCard extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(height: 8),
+
+          // Show weather toggle
+          Container(
+            decoration: BoxDecoration(
+              color: context.pal.bg,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: context.pal.line),
+            ),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () => s.setShowWeatherCard(!s.showWeatherCard),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: Checkbox(
+                        value: s.showWeatherCard,
+                        activeColor: context.pal.income,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                        onChanged: (v) {
+                          if (v != null) s.setShowWeatherCard(v);
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Show weather'.tr,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: context.pal.ink,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Display live weather and temperature on dashboard'.tr,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: context.pal.mute,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      s.showWeatherCard ? Icons.visibility_rounded : Icons.visibility_off_rounded,
+                      size: 20,
+                      color: s.showWeatherCard ? context.pal.income : context.pal.mute,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
           const SizedBox(height: 16),
           AppButton('Save settings', onPressed: s.saveProfile),
 
           const SizedBox(height: 4),
+          AppButton(
+            'Check Weather',
+            icon: Icons.cloud_queue_rounded,
+            height: 44,
+            fontSize: 13.5,
+            margin: const EdgeInsets.only(bottom: 8),
+            onPressed: () => showWeatherCheckSheet(context),
+          ),
+
           AppButton(
             'Export Data (CSV / JSON)',
             icon: Icons.file_download_outlined,
@@ -314,7 +386,6 @@ class SettingsFormCard extends StatelessWidget {
             margin: const EdgeInsets.only(bottom: 8),
             onPressed: () => showDataExportSheet(context),
           ),
-
 
           AppButton(
             'Check for Updates',

@@ -74,8 +74,8 @@ class TransactionTile extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               isAmountHidden
-                  ? '${isIncome ? '+' : '−'}••••••'
-                  : '${isIncome ? '+' : '−'}${Fmt.money(entry.amount)}',
+                  ? '${isIncome ? '+' : ''}••••••'
+                  : '${isIncome ? '+' : ''}${Fmt.money(entry.amount)}',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,

@@ -27,16 +27,36 @@ class CategoryFormCard extends StatelessWidget {
             onChanged: c.setType,
             colorOf: (t) => t == EntryType.income ? p.income : p.expense,
           ),
-          const FieldLabel('Category name'),
+          const SizedBox(height: 12),
+          const FieldLabel('Category name (English)'),
           TextField(
             controller: c.nameCtrl,
             textCapitalization: TextCapitalization.sentences,
-            inputFormatters: [LengthLimitingTextInputFormatter(24)],
+            inputFormatters: [LengthLimitingTextInputFormatter(30)],
             onChanged: c.onNameChanged,
-            onSubmitted: (_) => c.create(),
-            decoration: InputDecoration(errorText: c.nameError?.tr),
+            decoration: InputDecoration(
+              hintText: 'e.g. Deposit, Savings, etc.'.tr,
+              errorText: c.nameError != null && (c.nameCtrl.text.isNotEmpty || c.nameBnCtrl.text.isEmpty)
+                  ? c.nameError!.tr
+                  : null,
+            ),
           ),
           const SizedBox(height: 12),
+          const FieldLabel('Category name (Bangla)'),
+          TextField(
+            controller: c.nameBnCtrl,
+            textCapitalization: TextCapitalization.sentences,
+            inputFormatters: [LengthLimitingTextInputFormatter(30)],
+            onChanged: c.onNameBnChanged,
+            onSubmitted: (_) => c.create(),
+            decoration: InputDecoration(
+              hintText: 'e.g. ডিপোজিট, সঞ্চয়, ইত্যাদি'.tr,
+              errorText: c.nameError != null && c.nameCtrl.text.isEmpty && c.nameBnCtrl.text.isNotEmpty
+                  ? c.nameError!.tr
+                  : null,
+            ),
+          ),
+          const SizedBox(height: 14),
           const FieldLabel('Pick an icon'),
           Wrap(
             spacing: 8,

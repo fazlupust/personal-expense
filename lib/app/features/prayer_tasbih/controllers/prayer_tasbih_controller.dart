@@ -140,6 +140,21 @@ class PrayerTasbihController extends GetxController {
   final List<ZikirItem> _allZikirs = <ZikirItem>[];
   List<ZikirItem> get allZikirs => List.unmodifiable(_allZikirs);
 
+  /// Returns all zikirs sorted descending by lifetime recitation count (most read first).
+  /// Ties maintain initial preset order.
+  List<ZikirItem> get sortedZikirs {
+    final list = List<ZikirItem>.from(_allZikirs);
+    list.sort((a, b) {
+      final countA = _zikirLifetimeCounts[a.id] ?? 0;
+      final countB = _zikirLifetimeCounts[b.id] ?? 0;
+      if (countB != countA) {
+        return countB.compareTo(countA);
+      }
+      return _allZikirs.indexOf(a).compareTo(_allZikirs.indexOf(b));
+    });
+    return list;
+  }
+
   late ZikirItem _selectedZikir;
   ZikirItem get selectedZikir => _selectedZikir;
 
@@ -387,19 +402,32 @@ class PrayerTasbihController extends GetxController {
     final dayMap = _zikirDailyCounts.putIfAbsent(todayKey, () => <String, int>{});
     dayMap[zId] = (dayMap[zId] ?? 0) + 1;
 
-    final targetReached = _targetCount > 0 && _currentCount >= _targetCount;
+    final cycleCompleted = _targetCount > 0 && (_currentCount % _targetCount == 0);
 
     if (_isVibrationEnabled) {
-      if (targetReached) {
+      if (cycleCompleted) {
         HapticFeedback.heavyImpact();
       } else {
         HapticFeedback.lightImpact();
       }
     }
 
-    if (targetReached) {
+    if (cycleCompleted) {
       _completedCycles++;
-      _currentCount = 0;
+      // Do NOT reset _currentCount to 0! Allow user to keep counting continuously (e.g. 34, 35 ... 100+).
+      if (Get.context != null) {
+        Get.snackbar(
+          '🎉 মাশাআল্লাহ!'.tr,
+          'আপনার $_targetCount বারের টার্গেট পূর্ণ হয়েছে (রাউন্ড: $_completedCycles)!'.tr,
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: const Color(0xFF1B5E20),
+          colorText: Colors.white,
+          icon: const Icon(Icons.celebration_rounded, color: Colors.white, size: 28),
+          duration: const Duration(seconds: 3),
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          borderRadius: 12,
+        );
+      }
     }
 
     _persistTasbihData();

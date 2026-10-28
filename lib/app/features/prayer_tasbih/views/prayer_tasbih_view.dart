@@ -28,6 +28,12 @@ class PrayerTasbihView extends StatelessWidget {
                 loc.nameBn.toLowerCase().contains(query);
           }).toList();
 
+          final filteredAreas = BangladeshLocation.dhakaAreas.where((loc) {
+            if (query.isEmpty) return true;
+            return loc.nameEn.toLowerCase().contains(query) ||
+                loc.nameBn.toLowerCase().contains(query);
+          }).toList();
+
           final filteredDistricts = BangladeshLocation.districts.where((loc) {
             if (query.isEmpty) return true;
             return loc.nameEn.toLowerCase().contains(query) ||
@@ -104,6 +110,31 @@ class PrayerTasbihView extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        if (filteredAreas.isNotEmpty) ...[
+                          Row(
+                            children: [
+                              Icon(Icons.location_on_rounded, size: 14, color: p.income),
+                              const SizedBox(width: 5),
+                              Text(
+                                'Dhaka & Areas'.tr,
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: p.income,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: filteredAreas.map((loc) {
+                              return _buildLocationChip(loc, c, p, isBn);
+                            }).toList(),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
                         if (filteredDivisions.isNotEmpty) ...[
                           Row(
                             children: [
@@ -153,7 +184,7 @@ class PrayerTasbihView extends StatelessWidget {
                             }).toList(),
                           ),
                         ],
-                        if (filteredDivisions.isEmpty && filteredDistricts.isEmpty)
+                        if (filteredDivisions.isEmpty && filteredAreas.isEmpty && filteredDistricts.isEmpty)
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 24),
                             child: Text(
@@ -493,14 +524,14 @@ class PrayerTasbihView extends StatelessWidget {
                           Container(
                             width: 7,
                             height: 7,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF55EFC4),
+                            decoration: BoxDecoration(
+                              color: currentWaqt.isWaqt ? const Color(0xFF55EFC4) : const Color(0xFFFFEAA7),
                               shape: BoxShape.circle,
                             ),
                           ),
                           const SizedBox(width: 5),
                           Text(
-                            'Active Waqt'.tr,
+                            currentWaqt.isWaqt ? 'Active Waqt'.tr : 'Sunnah / Nafl'.tr,
                             style: const TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
@@ -553,15 +584,17 @@ class PrayerTasbihView extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  '${'Next:'.tr} ${isBn ? nextPrayer.nameBn : nextPrayer.nameEn} (${DateFormat('h:mm a').format(nextPrayer.time)}) · ${c.timeUntilNextPrayer} ${'left'.tr}',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white.withOpacity(0.9),
+                if (schedule.isNextPrayerSoon(now, thresholdMinutes: 40)) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    '${'Next:'.tr} ${isBn ? nextPrayer.nameBn : nextPrayer.nameEn} (${DateFormat('h:mm a').format(nextPrayer.time)}) · ${c.timeUntilNextPrayer} ${'left'.tr}',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white.withOpacity(0.95),
+                    ),
                   ),
-                ),
+                ],
                 const SizedBox(height: 14),
 
                 // Button to open Digital Tasbih
@@ -670,9 +703,110 @@ class PrayerTasbihView extends StatelessWidget {
             ],
           ),
 
+          const SizedBox(height: 8),
+
+          // Sunrise & Sunset Card Row (সূর্যোদয় ও সূর্যাস্ত - নামাজের তালিকা থেকে আলাদা)
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                  decoration: BoxDecoration(
+                    color: p.card,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: p.line),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.wb_sunny_rounded, size: 15, color: Color(0xFFF59E0B)),
+                          const SizedBox(width: 5),
+                          Expanded(
+                            child: Text(
+                              'Sunrise'.tr,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: p.mute),
+                            ),
+                          ),
+                          Text(
+                            'الشروق',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                              color: p.mute.withOpacity(0.85),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        DateFormat('h:mm a').format(schedule.sunrise),
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          color: p.ink,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                  decoration: BoxDecoration(
+                    color: p.card,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: p.line),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.nights_stay_rounded, size: 15, color: Color(0xFFE17055)),
+                          const SizedBox(width: 5),
+                          Expanded(
+                            child: Text(
+                              'Sunset'.tr,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: p.mute),
+                            ),
+                          ),
+                          Text(
+                            'الغروب',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                              color: p.mute.withOpacity(0.85),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        DateFormat('h:mm a').format(schedule.sunset),
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          color: p.ink,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+
           const SizedBox(height: 16),
 
-          // All 5 Waqt & Sunrise Prayer Times List
+          // All 5 Waqt Prayer Times List (Excludes Sunrise / Sunset)
           Text(
             'Daily Prayer Times'.tr,
             style: TextStyle(
@@ -683,9 +817,9 @@ class PrayerTasbihView extends StatelessWidget {
           ),
           const SizedBox(height: 8),
 
-          ...schedule.items.map((item) {
+          ...schedule.waqtItems.map((item) {
             final isCurrent = item.prayer == currentWaqt.prayer && item.isWaqt;
-            final isNext = item.prayer == nextPrayer.prayer;
+            final isNext = item.prayer == nextPrayer.prayer && schedule.isNextPrayerSoon(now, thresholdMinutes: 40);
             final timeFormatted = DateFormat('h:mm a').format(item.time);
 
             return Container(

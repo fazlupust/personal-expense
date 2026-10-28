@@ -113,15 +113,12 @@ class TransactionService extends GetxService {
     await _collection.doc(tx.id).update(updateData);
   }
 
-  /// Soft delete transaction (sets is_deleted to true as per specification)
-  Future<void> softDeleteTransaction(String id) async {
+  /// Permanently delete transaction from Firestore
+  Future<void> deleteTransaction(String id) async {
     final docSnap = await _collection.doc(id).get();
     final uid = docSnap.data()?['user_id'] as String?;
 
-    await _collection.doc(id).update({
-      'is_deleted': true,
-      'updated_at': FieldValue.serverTimestamp(),
-    });
+    await _collection.doc(id).delete();
 
     if (uid != null) {
       try {
@@ -131,6 +128,9 @@ class TransactionService extends GetxService {
       } catch (_) {}
     }
   }
+
+  /// Alias for backward compatibility
+  Future<void> softDeleteTransaction(String id) => deleteTransaction(id);
 
   /// Stream mapping of {userId: transactionCount} for all active transactions across users
   Stream<Map<String, int>> streamAllUserTransactionCounts() {

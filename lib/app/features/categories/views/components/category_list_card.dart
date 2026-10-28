@@ -46,12 +46,32 @@ class CategoryListCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Text(
-                        cat.name.tr,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 15, color: p.ink),
-                      ),
+                      child: Builder(builder: (ctx) {
+                        final isBn = Get.locale?.languageCode == 'bn';
+                        final mainName = cat.displayName(isBn).isNotEmpty
+                            ? cat.displayName(isBn)
+                            : cat.name.tr;
+                        final subName = isBn ? cat.nameEn : cat.nameBn;
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              mainName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: p.ink),
+                            ),
+                            if (subName.isNotEmpty && subName != mainName)
+                              Text(
+                                subName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(fontSize: 11.5, color: p.mute),
+                              ),
+                          ],
+                        );
+                      }),
                     ),
                     if (isDefault) ...[
                       Container(
@@ -90,12 +110,14 @@ class CategoryListCard extends StatelessWidget {
 
   void _confirmDelete(BuildContext context, CategoryModel cat, bool isDefault) async {
     final p = context.pal;
+    final isBn = Get.locale?.languageCode == 'bn';
+    final nameToShow = cat.displayName(isBn).isNotEmpty ? cat.displayName(isBn) : cat.name.tr;
     final ok = await Get.dialog<bool>(
       AlertDialog(
         title: Text(isDefault ? 'Delete Default Category?'.tr : 'Delete Category'.tr),
         content: Text(isDefault
-            ? 'This is a default category. As a developer, are you sure you want to delete "${cat.name.tr}"?'.tr
-            : 'Are you sure you want to delete "${cat.name.tr}"?'.tr),
+            ? 'This is a default category. As a developer, are you sure you want to delete "$nameToShow"?'.tr
+            : 'Are you sure you want to delete "$nameToShow"?'.tr),
         actions: [
           TextButton(
             onPressed: () => Get.back(result: false),

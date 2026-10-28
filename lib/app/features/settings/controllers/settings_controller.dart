@@ -28,6 +28,7 @@ class SettingsController extends GetxController {
   bool showExpense = true;
   bool isExpenseHidden = false;
   bool showPrayerCard = true;
+  bool showWeatherCard = true;
 
   bool get isBalanceHidden => isIncomeHidden || isExpenseHidden;
 
@@ -143,6 +144,7 @@ class SettingsController extends GetxController {
       showExpense = true;
       isExpenseHidden = false;
       showPrayerCard = true;
+      showWeatherCard = true;
       budget = 0;
       categoryBudgets = {};
       return;
@@ -157,6 +159,7 @@ class SettingsController extends GetxController {
       showIncome = (m['show_income'] as bool?) ?? true;
       showExpense = (m['show_expense'] as bool?) ?? true;
       showPrayerCard = (m['show_prayer_card'] as bool?) ?? true;
+      showWeatherCard = (m['show_weather_card'] as bool?) ?? true;
       isIncomeHidden = (m['is_income_hidden'] as bool?) ?? !showIncome;
       isExpenseHidden = (m['is_expense_hidden'] as bool?) ?? !showExpense;
 
@@ -202,6 +205,10 @@ class SettingsController extends GetxController {
           showPrayerCard = data['show_prayer_card'] as bool;
           changed = true;
         }
+        if (data['show_weather_card'] is bool) {
+          showWeatherCard = data['show_weather_card'] as bool;
+          changed = true;
+        }
         if (changed) {
           await _prefs.setString(
             _userPrefsKey(uid),
@@ -217,6 +224,7 @@ class SettingsController extends GetxController {
               'is_income_hidden': isIncomeHidden,
               'is_expense_hidden': isExpenseHidden,
               'show_prayer_card': showPrayerCard,
+              'show_weather_card': showWeatherCard,
               'category_budgets': categoryBudgets,
             }),
           );
@@ -239,6 +247,7 @@ class SettingsController extends GetxController {
       'is_income_hidden': isIncomeHidden,
       'is_expense_hidden': isExpenseHidden,
       'show_prayer_card': showPrayerCard,
+      'show_weather_card': showWeatherCard,
       'category_budgets': categoryBudgets,
     });
     await _prefs.setString(_prefsKey, payload);
@@ -253,6 +262,7 @@ class SettingsController extends GetxController {
           'is_income_hidden': isIncomeHidden,
           'is_expense_hidden': isExpenseHidden,
           'show_prayer_card': showPrayerCard,
+          'show_weather_card': showWeatherCard,
         }, SetOptions(merge: true));
       } catch (_) {}
     }
@@ -345,6 +355,16 @@ class SettingsController extends GetxController {
 
   void togglePrayerCardVisibility() {
     setShowPrayerCard(!showPrayerCard);
+  }
+
+  void setShowWeatherCard(bool val) {
+    showWeatherCard = val;
+    _persist();
+    update();
+  }
+
+  void toggleWeatherCardVisibility() {
+    setShowWeatherCard(!showWeatherCard);
   }
 
   void toggleExpenseVisibility() {

@@ -249,6 +249,7 @@ class EntryFormController extends GetxController {
         ? existing!.userId
         : (Get.isRegistered<AuthService>() ? (Get.find<AuthService>().currentUid ?? '') : '');
 
+    final isEdit = existing != null;
     txCtrl.save(
       TransactionModel(
         id: existing?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
@@ -269,6 +270,20 @@ class EntryFormController extends GetxController {
         deviceInfo: existing?.deviceInfo,
       ),
     );
+
+    if (Get.context != null) {
+      Get.snackbar(
+        'Success'.tr,
+        (isEdit ? 'Transaction updated successfully.' : 'Transaction added successfully.').tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFF1B5E20),
+        colorText: Colors.white,
+        icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 24),
+        duration: const Duration(seconds: 3),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        borderRadius: 12,
+      );
+    }
     return true;
   }
 

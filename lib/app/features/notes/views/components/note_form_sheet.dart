@@ -428,11 +428,15 @@ class NoteFormSheet extends StatelessWidget {
                             AppButton(
                               'Delete Note',
                               style: AppButtonStyle.danger,
-                              onPressed: () {
+                              onPressed: () async {
                                 c.stopAllVoice();
                                 if (c.editingNote != null) {
-                                  c.delete(c.editingNote!);
-                                  Navigator.of(context).pop();
+                                  final note = c.editingNote!;
+                                  final ok = await _confirmDeleteNote(context, p);
+                                  if (ok == true && context.mounted) {
+                                    c.delete(note);
+                                    Navigator.of(context).pop();
+                                  }
                                 }
                               },
                             ),
@@ -448,6 +452,68 @@ class NoteFormSheet extends StatelessWidget {
         ),
         );
       },
+    );
+  }
+
+  Future<bool?> _confirmDeleteNote(BuildContext context, AppPalette p) {
+    return Get.dialog<bool>(
+      Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 360),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: p.card,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: p.line),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.delete_outline_rounded, color: p.expense, size: 36),
+              const SizedBox(height: 12),
+              Text(
+                'Delete Note?'.tr,
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: p.ink),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Are you sure you want to delete this note?'.tr,
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 13, color: p.mute),
+              ),
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Get.back(result: false),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: p.ink,
+                        side: BorderSide(color: p.line),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      child: Text('Cancel'.tr),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: () => Get.back(result: true),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: p.expense,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      child: Text('Delete'.tr),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

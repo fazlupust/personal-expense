@@ -241,10 +241,22 @@ class TransactionsController extends GetxController {
 
   Future<void> remove(String id) async {
     if (Get.isRegistered<TransactionService>()) {
-      await Get.find<TransactionService>().softDeleteTransaction(id);
-    } else {
-      entries.removeWhere((e) => e.id == id);
-      update();
+      await Get.find<TransactionService>().deleteTransaction(id);
+    }
+    entries.removeWhere((e) => e.id == id);
+    update();
+    if (Get.context != null) {
+      Get.snackbar(
+        'Success'.tr,
+        'Transaction deleted'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFF1B5E20),
+        colorText: Colors.white,
+        icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 24),
+        duration: const Duration(seconds: 3),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        borderRadius: 12,
+      );
     }
   }
 }

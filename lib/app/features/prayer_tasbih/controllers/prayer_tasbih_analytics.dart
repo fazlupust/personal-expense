@@ -51,12 +51,12 @@ extension PrayerTasbihAnalytics on PrayerTasbihController {
   int getZikirLifetimeCount(String zikirId) =>
       _zikirLifetimeCounts[zikirId] ?? 0;
 
-  /// Get list of Zikirs matching the active category filter
+  /// Get list of Zikirs matching the active category filter (sorted by recitations)
   List<ZikirItem> get filteredZikirs {
     if (_selectedCategoryFilter == ZikirCategory.all) {
-      return allZikirs;
+      return sortedZikirs;
     }
-    return allZikirs.where((z) => z.category == _selectedCategoryFilter).toList();
+    return sortedZikirs.where((z) => z.category == _selectedCategoryFilter).toList();
   }
 
   /// Total recitations matching active time and category filters
@@ -71,7 +71,14 @@ extension PrayerTasbihAnalytics on PrayerTasbihController {
   /// Get list of Zikirs sorted by recitation count (highest first)
   List<ZikirItem> getSortedZikirsByCount({TasbihTimeFilter? filter}) {
     final list = List<ZikirItem>.from(filteredZikirs);
-    list.sort((a, b) => getZikirCount(b.id, filter).compareTo(getZikirCount(a.id, filter)));
+    list.sort((a, b) {
+      final cntA = getZikirCount(a.id, filter ?? TasbihTimeFilter.allTime);
+      final cntB = getZikirCount(b.id, filter ?? TasbihTimeFilter.allTime);
+      if (cntB != cntA) {
+        return cntB.compareTo(cntA);
+      }
+      return _allZikirs.indexOf(a).compareTo(_allZikirs.indexOf(b));
+    });
     return list;
   }
 

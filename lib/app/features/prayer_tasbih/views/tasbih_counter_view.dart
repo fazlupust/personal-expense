@@ -300,7 +300,7 @@ class TasbihCounterView extends StatelessWidget {
               child: Obx(() {
                 final q = query.value;
                 final cat = selectedCategory.value;
-                final filtered = c.allZikirs.where((item) {
+                final filtered = c.sortedZikirs.where((item) {
                   if (cat != ZikirCategory.all && item.category != cat) {
                     return false;
                   }
@@ -458,7 +458,10 @@ class TasbihCounterView extends StatelessWidget {
       builder: (c) {
         final current = c.currentCount;
         final target = c.targetCount;
-        final progress = target > 0 ? (current / target).clamp(0.0, 1.0) : 0.0;
+        final cycleStep = (target > 0 && current > 0)
+            ? (((current - 1) % target) + 1)
+            : current;
+        final progress = target > 0 ? (cycleStep / target).clamp(0.0, 1.0) : 0.0;
         final zikir = c.selectedZikir;
 
         final content = SingleChildScrollView(
@@ -563,10 +566,10 @@ class TasbihCounterView extends StatelessWidget {
                       height: 34,
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
-                        itemCount: c.allZikirs.length,
+                        itemCount: c.sortedZikirs.length,
                         separatorBuilder: (_, __) => const SizedBox(width: 6),
                         itemBuilder: (ctx, i) {
-                          final item = c.allZikirs[i];
+                          final item = c.sortedZikirs[i];
                           final isSelected = item.id == zikir.id;
                           final isBn = Get.locale?.languageCode == 'bn';
                           final title = isBn ? item.titleBn : item.titleEn;

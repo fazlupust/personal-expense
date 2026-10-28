@@ -135,8 +135,18 @@ class CategoriesController extends GetxController {
   }
 
   void onNameChanged(String val) {
-    final trimmed = val.trim();
-    if (trimmed.isEmpty) {
+    _validateDuplicate();
+  }
+
+  void onNameBnChanged(String val) {
+    _validateDuplicate();
+  }
+
+  void _validateDuplicate() {
+    final en = nameCtrl.text.trim();
+    final bn = nameBnCtrl.text.trim();
+
+    if (en.isEmpty && bn.isEmpty) {
       if (nameError != null) {
         nameError = null;
         update();
@@ -144,7 +154,8 @@ class CategoriesController extends GetxController {
       return;
     }
 
-    if (isDuplicate(trimmed, formType)) {
+    if ((en.isNotEmpty && isDuplicate(en, formType)) ||
+        (bn.isNotEmpty && isDuplicate(bn, formType))) {
       nameError = 'That category already exists.';
       update();
     } else if (nameError != null) {
@@ -155,13 +166,7 @@ class CategoriesController extends GetxController {
 
   void setType(EntryType t) {
     formType = t;
-    // Re-check duplicate on type switch
-    final current = nameCtrl.text.trim();
-    if (current.isNotEmpty && isDuplicate(current, formType)) {
-      nameError = 'That category already exists.';
-    } else {
-      nameError = null;
-    }
+    _validateDuplicate();
     update();
   }
 
@@ -177,18 +182,32 @@ class CategoriesController extends GetxController {
     }
   }
 
+  String categoryDisplayName(EntryType t, String rawName, bool isBn) {
+    for (final c in categories) {
+      if (c.type == t && (c.nameEn == rawName || c.nameBn == rawName || c.name == rawName)) {
+        return c.displayName(isBn);
+      }
+    }
+    for (final d in AppConstants.defaultCategories) {
+      if (d.type == t && (d.nameEn == rawName || d.nameBn == rawName || d.name == rawName)) {
+        return d.displayName(isBn);
+      }
+    }
+    return rawName.tr;
+  }
+
   Future<void> create() async {
     final name = nameCtrl.text.trim();
     final nameBn = nameBnCtrl.text.trim();
-    final effective = name.isNotEmpty ? name : nameBn;
 
-    if (effective.isEmpty) {
+    if (name.isEmpty && nameBn.isEmpty) {
       nameError = 'Enter a category name.';
       update();
       return;
     }
 
-    if (isDuplicate(effective, formType)) {
+    if ((name.isNotEmpty && isDuplicate(name, formType)) ||
+        (nameBn.isNotEmpty && isDuplicate(nameBn, formType))) {
       nameError = 'That category already exists.';
       update();
       Get.snackbar(
@@ -230,7 +249,12 @@ class CategoriesController extends GetxController {
         'Success'.tr,
         'Category created successfully'.tr,
         snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 2),
+        backgroundColor: const Color(0xFF1B5E20),
+        colorText: Colors.white,
+        icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 24),
+        duration: const Duration(seconds: 3),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        borderRadius: 12,
       );
     } catch (_) {
       nameError = 'That category already exists.';
@@ -266,7 +290,12 @@ class CategoriesController extends GetxController {
         'Success'.tr,
         'Category deleted successfully'.tr,
         snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 2),
+        backgroundColor: const Color(0xFF1B5E20),
+        colorText: Colors.white,
+        icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 24),
+        duration: const Duration(seconds: 3),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        borderRadius: 12,
       );
     }
   }

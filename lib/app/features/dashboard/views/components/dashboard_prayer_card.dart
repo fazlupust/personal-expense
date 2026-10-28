@@ -37,6 +37,8 @@ class DashboardPrayerCard extends StatelessWidget {
     final nextPrayerName = isBn ? nextPrayer.nameBn : nextPrayer.nameEn;
     final nextPrayerTime = DateFormat('h:mm a').format(nextPrayer.time);
 
+    final isNextSoon = schedule.isNextPrayerSoon(now, thresholdMinutes: 40);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -95,7 +97,7 @@ class DashboardPrayerCard extends StatelessWidget {
                         children: [
                           Flexible(
                             child: Text(
-                              '$currentWaqtName ${'Waqt'.tr}',
+                              currentWaqt.isWaqt ? '$currentWaqtName ${'Waqt'.tr}' : currentWaqtName,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
@@ -109,15 +111,17 @@ class DashboardPrayerCard extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF10B981).withOpacity(0.15),
+                              color: currentWaqt.isWaqt
+                                  ? const Color(0xFF10B981).withOpacity(0.15)
+                                  : const Color(0xFFF59E0B).withOpacity(0.15),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
-                              'Now'.tr,
-                              style: const TextStyle(
+                              currentWaqt.isWaqt ? 'Now'.tr : 'Sunnah'.tr,
+                              style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w700,
-                                color: Color(0xFF059669),
+                                color: currentWaqt.isWaqt ? const Color(0xFF059669) : const Color(0xFFD97706),
                               ),
                             ),
                           ),
@@ -174,16 +178,17 @@ class DashboardPrayerCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                       ],
-                      Text(
-                        '${'Next:'.tr} $nextPrayerName ($nextPrayerTime) · $countdownStr ${'left'.tr}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w500,
-                          color: p.mute,
+                      if (isNextSoon)
+                        Text(
+                          '${'Next:'.tr} $nextPrayerName ($nextPrayerTime) · $countdownStr ${'left'.tr}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF0D9488),
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 ),

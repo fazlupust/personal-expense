@@ -480,7 +480,12 @@ class NotesController extends GetxController {
           'Success'.tr,
           (editingNote != null ? 'Note updated successfully.' : 'Note saved successfully.').tr,
           snackPosition: SnackPosition.BOTTOM,
-          duration: const Duration(seconds: 2),
+          backgroundColor: const Color(0xFF1B5E20),
+          colorText: Colors.white,
+          icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 24),
+          duration: const Duration(seconds: 3),
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          borderRadius: 12,
         );
       }
       return true;

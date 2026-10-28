@@ -52,9 +52,10 @@ class TransactionTable extends StatelessWidget {
                   () {
                     final e = rows[i];
                     final isDue = e.account.trim().toLowerCase() == 'due';
-                    final sign = e.type == EntryType.income ? '+' : '−';
+                    final sign = e.type == EntryType.income ? '+' : '';
                     final color = e.type == EntryType.income ? p.income : p.expense;
                     final note = e.noteText(isBn).trim();
+                    final catName = cats.categoryDisplayName(e.type, e.category, isBn);
 
                     return DataRow(
                       onSelectChanged: (_) => showEntrySheet(context, entry: e),
@@ -68,7 +69,7 @@ class TransactionTable extends StatelessWidget {
                           style: TextStyle(fontWeight: FontWeight.w700, color: color),
                         )),
                         DataCell(Text(Fmt.date(e.date, 'd MMM'))),
-                        DataCell(Text('${cats.emojiOf(e.type, e.category)} ${e.category.tr}')),
+                        DataCell(Text('${cats.emojiOf(e.type, e.category)} $catName')),
                         DataCell(Text(
                           !isDue ? '–' : '$sign${Fmt.money(e.amount)}',
                           style: TextStyle(
@@ -98,7 +99,7 @@ class TransactionTable extends StatelessWidget {
                   cells: [
                     DataCell(Text('Total'.tr, style: bold)),
                     DataCell(Text(
-                      '${net < 0 ? '−' : (net > 0 ? '+' : '')}${Fmt.money(net.abs())}',
+                      '${net < 0 ? '' : (net > 0 ? '+' : '')}${Fmt.money(net.abs())}',
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         color: net < 0 ? p.expense : (net > 0 ? p.income : p.ink),
@@ -112,7 +113,7 @@ class TransactionTable extends StatelessWidget {
                     DataCell(Text(
                       dueNet == 0
                           ? '–'
-                          : '${dueNet < 0 ? '−' : (dueNet > 0 ? '+' : '')}${Fmt.money(dueNet.abs())}',
+                          : '${dueNet < 0 ? '' : (dueNet > 0 ? '+' : '')}${Fmt.money(dueNet.abs())}',
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         color: dueNet < 0 ? p.expense : (dueNet > 0 ? p.income : p.ink),

@@ -106,11 +106,8 @@ class NoteService extends GetxService {
     });
   }
 
-  /// Soft delete a note (sets is_active to false)
+  /// Permanently delete a note from Firestore
   Future<void> deleteNote(String noteId) async {
-    await _collection.doc(noteId).update({
-      'is_active': false,
-      'updated_at': FieldValue.serverTimestamp(),
-    });
+    await _collection.doc(noteId).delete();
   }
 }

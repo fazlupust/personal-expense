@@ -76,6 +76,51 @@ class BangladeshLocation {
     ),
   ];
 
+  static const List<BangladeshLocation> dhakaAreas = [
+    BangladeshLocation(
+      id: 'dhaka_center',
+      nameEn: 'Dhaka (Center)',
+      nameBn: 'ঢাকা (সদর)',
+      latitude: 23.8103,
+      longitude: 90.4125,
+    ),
+    BangladeshLocation(
+      id: 'mirpur',
+      nameEn: 'Mirpur',
+      nameBn: 'মিরপুর',
+      latitude: 23.8071,
+      longitude: 90.3686,
+    ),
+    BangladeshLocation(
+      id: 'uttara',
+      nameEn: 'Uttara',
+      nameBn: 'উত্তরা',
+      latitude: 23.8759,
+      longitude: 90.3795,
+    ),
+    BangladeshLocation(
+      id: 'farmgate',
+      nameEn: 'Farmgate',
+      nameBn: 'ফার্মগেট',
+      latitude: 23.7570,
+      longitude: 90.3894,
+    ),
+    BangladeshLocation(
+      id: 'gazipur',
+      nameEn: 'Gazipur',
+      nameBn: 'গাজীপুর',
+      latitude: 23.9999,
+      longitude: 90.4203,
+    ),
+    BangladeshLocation(
+      id: 'lion',
+      nameEn: 'Lion / Lalbagh',
+      nameBn: 'লায়ন / লালবাগ',
+      latitude: 23.7188,
+      longitude: 90.3882,
+    ),
+  ];
+
   static const List<BangladeshLocation> districts = [
     BangladeshLocation(
       id: 'pabna',
@@ -200,6 +245,7 @@ class BangladeshLocation {
 
   static List<BangladeshLocation> get allLocations => [
         ...divisions,
+        ...dhakaAreas,
         ...districts,
       ];
 
@@ -384,6 +430,43 @@ class DailyPrayerSchedule {
         ),
       ];
 
+  /// 5 Daily Farz Prayers only (Fajr, Dhuhr, Asr, Maghrib, Isha)
+  List<PrayerTimeItem> get waqtItems => items.where((i) => i.isWaqt).toList();
+
+  /// Astronomical sunset time (matches Maghrib start)
+  DateTime get sunset => maghrib;
+
+  /// True if a Farz waqt prayer is currently ongoing right now
+  bool isFarzWaqtActive(DateTime now) {
+    if (!now.isBefore(fajr) && now.isBefore(sunrise)) return true; // Fajr
+    if (!now.isBefore(dhuhr) && now.isBefore(asr)) return true; // Dhuhr
+    if (!now.isBefore(asr) && now.isBefore(maghrib)) return true; // Asr
+    if (!now.isBefore(maghrib) && now.isBefore(isha)) return true; // Maghrib
+    if (!now.isBefore(isha) || now.isBefore(fajr)) return true; // Isha
+    return false; // Between sunrise and dhuhr (Ishraq/Chasht - no farz waqt)
+  }
+
+  /// True if current time is between sunrise and dhuhr (Ishraq & Chasht time)
+  bool isIshraqChashtTime(DateTime now) {
+    return !now.isBefore(sunrise) && now.isBefore(dhuhr);
+  }
+
+  /// Duration until the next upcoming prayer starts
+  Duration getTimeUntilNextPrayer(DateTime now) {
+    final next = getNextPrayer(now);
+    var target = next.time;
+    if (target.isBefore(now)) {
+      target = target.add(const Duration(days: 1));
+    }
+    return target.difference(now);
+  }
+
+  /// Whether the next prayer is starting soon (default: within 40 minutes)
+  bool isNextPrayerSoon(DateTime now, {int thresholdMinutes = 40}) {
+    final diff = getTimeUntilNextPrayer(now);
+    return diff.inMinutes >= 0 && diff.inMinutes <= thresholdMinutes;
+  }
+
   /// Determine current active waqt based on DateTime.now()
   PrayerTimeItem getCurrentWaqt(DateTime now) {
     if (now.isBefore(fajr)) {
@@ -402,8 +485,17 @@ class DailyPrayerSchedule {
     } else if (now.isBefore(sunrise)) {
       return items.firstWhere((i) => i.prayer == PrayerName.fajr);
     } else if (now.isBefore(dhuhr)) {
-      // Between sunrise and dhuhr (Ishraq / Chasht)
-      return items.firstWhere((i) => i.prayer == PrayerName.fajr);
+      // Between sunrise and dhuhr (Ishraq / Chasht - Duha)
+      return PrayerTimeItem(
+        prayer: PrayerName.sunrise,
+        nameEn: 'Ishraq / Chasht',
+        nameBn: 'ইশরাক ও চাশত',
+        arabicName: 'صلاة الضحى',
+        time: sunrise.add(const Duration(minutes: 15)),
+        endTime: dhuhr,
+        isWaqt: false,
+        icon: '☀️',
+      );
     } else if (now.isBefore(asr)) {
       return items.firstWhere((i) => i.prayer == PrayerName.dhuhr);
     } else if (now.isBefore(maghrib)) {
@@ -415,12 +507,10 @@ class DailyPrayerSchedule {
     }
   }
 
-  /// Get the next upcoming prayer time item
+  /// Get the next upcoming waqt prayer item (skips astronomical solar events like sunrise)
   PrayerTimeItem getNextPrayer(DateTime now) {
     if (now.isBefore(fajr)) {
       return items.firstWhere((i) => i.prayer == PrayerName.fajr);
-    } else if (now.isBefore(sunrise)) {
-      return items.firstWhere((i) => i.prayer == PrayerName.sunrise);
     } else if (now.isBefore(dhuhr)) {
       return items.firstWhere((i) => i.prayer == PrayerName.dhuhr);
     } else if (now.isBefore(asr)) {
