@@ -431,7 +431,7 @@ class PrayerTasbihController extends GetxController {
           '🎉 মাশাআল্লাহ!'.tr,
           'আপনার $_targetCount বারের টার্গেট পূর্ণ হয়েছে (রাউন্ড: $_completedCycles)!'.tr,
           snackPosition: SnackPosition.TOP,
-          backgroundColor: const Color(0xFF1B5E20),
+          backgroundColor: const Color(0xFF1F8A5B),
           colorText: Colors.white,
           icon: const Icon(Icons.celebration_rounded, color: Colors.white, size: 28),
           duration: const Duration(seconds: 3),

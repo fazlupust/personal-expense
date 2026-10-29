@@ -222,7 +222,12 @@ class CategoriesController extends GetxController {
         'Alert'.tr,
         'That category already exists.'.tr,
         snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 2),
+        backgroundColor: const Color(0xFFDC2626),
+        colorText: Colors.white,
+        icon: const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 24),
+        duration: const Duration(seconds: 3),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        borderRadius: 12,
       );
       return;
     }
@@ -257,7 +262,7 @@ class CategoriesController extends GetxController {
         'Success'.tr,
         'Category created successfully'.tr,
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFF1B5E20),
+        backgroundColor: const Color(0xFF1F8A5B),
         colorText: Colors.white,
         icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 24),
         duration: const Duration(seconds: 3),
@@ -280,7 +285,12 @@ class CategoriesController extends GetxController {
           'Alert'.tr,
           'Default categories cannot be deleted.'.tr,
           snackPosition: SnackPosition.BOTTOM,
-          duration: const Duration(seconds: 2),
+          backgroundColor: const Color(0xFF1F8A5B),
+          colorText: Colors.white,
+          icon: const Icon(Icons.info_outline_rounded, color: Colors.white, size: 24),
+          duration: const Duration(seconds: 3),
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          borderRadius: 12,
         );
       }
       return;
@@ -298,7 +308,7 @@ class CategoriesController extends GetxController {
         'Success'.tr,
         'Category deleted successfully'.tr,
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFF1B5E20),
+        backgroundColor: const Color(0xFF1F8A5B),
         colorText: Colors.white,
         icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 24),
         duration: const Duration(seconds: 3),

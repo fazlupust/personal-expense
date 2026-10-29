@@ -32,6 +32,11 @@ class AppUpdateDialog extends StatelessWidget {
             'Error'.tr,
             'Unable to open link'.tr,
             snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: const Color(0xFFDC2626),
+            colorText: Colors.white,
+            icon: const Icon(Icons.error_outline_rounded, color: Colors.white, size: 24),
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            borderRadius: 12,
           );
         }
       } catch (_) {
@@ -39,6 +44,11 @@ class AppUpdateDialog extends StatelessWidget {
           'Error'.tr,
           'Unable to open link'.tr,
           snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color(0xFFDC2626),
+          colorText: Colors.white,
+          icon: const Icon(Icons.error_outline_rounded, color: Colors.white, size: 24),
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          borderRadius: 12,
         );
       }
     }

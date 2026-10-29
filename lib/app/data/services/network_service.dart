@@ -110,7 +110,7 @@ class NetworkService extends GetxService {
         'Back Online'.tr,
         'Internet connection restored.'.tr,
         snackPosition: SnackPosition.TOP,
-        backgroundColor: const Color(0xFF1B5E20),
+        backgroundColor: const Color(0xFF1F8A5B),
         colorText: Colors.white,
         icon: const Icon(Icons.wifi_rounded, color: Colors.white, size: 26),
         duration: const Duration(seconds: 3),

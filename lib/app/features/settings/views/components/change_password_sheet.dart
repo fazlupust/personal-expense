@@ -47,7 +47,6 @@ class _ChangePasswordSheetState extends State<ChangePasswordSheet> {
   }
 
   Future<void> _submit() async {
-    final p = context.pal;
     final currentPass = _currentPasswordCtrl.text.trim();
     final newPass = _newPasswordCtrl.text.trim();
     final confirmPass = _confirmPasswordCtrl.text.trim();
@@ -81,8 +80,16 @@ class _ChangePasswordSheetState extends State<ChangePasswordSheet> {
     if (hasError) return;
 
     if (!Get.isRegistered<AuthService>() || !Get.find<AuthService>().isLoggedIn) {
-      Get.snackbar('Alert'.tr, 'You must be logged in to change password.'.tr,
-          snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        'Alert'.tr,
+        'You must be logged in to change password.'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFFDC2626),
+        colorText: Colors.white,
+        icon: const Icon(Icons.lock_outline_rounded, color: Colors.white, size: 24),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        borderRadius: 12,
+      );
       return;
     }
 
@@ -103,9 +110,12 @@ class _ChangePasswordSheetState extends State<ChangePasswordSheet> {
         'Success'.tr,
         'Password changed successfully'.tr,
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: p.income.withOpacity(0.15),
-        colorText: p.ink,
+        backgroundColor: const Color(0xFF1F8A5B),
+        colorText: Colors.white,
+        icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 24),
         duration: const Duration(seconds: 3),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        borderRadius: 12,
       );
     } on FirebaseAuthException catch (e) {
       String msg = 'Failed to update password. Please try again.'.tr;
@@ -118,10 +128,27 @@ class _ChangePasswordSheetState extends State<ChangePasswordSheet> {
       } else if (e.code == 'requires-recent-login') {
         msg = 'Please sign in again before changing password.'.tr;
       }
-      Get.snackbar('Alert'.tr, msg, snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        'Alert'.tr,
+        msg,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFFDC2626),
+        colorText: Colors.white,
+        icon: const Icon(Icons.error_outline_rounded, color: Colors.white, size: 24),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        borderRadius: 12,
+      );
     } catch (e) {
-      Get.snackbar('Alert'.tr, 'Failed to update password. Please try again.'.tr,
-          snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        'Alert'.tr,
+        'Failed to update password. Please try again.'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFFDC2626),
+        colorText: Colors.white,
+        icon: const Icon(Icons.error_outline_rounded, color: Colors.white, size: 24),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        borderRadius: 12,
+      );
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);

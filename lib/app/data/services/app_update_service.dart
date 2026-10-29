@@ -192,7 +192,12 @@ class AppUpdateService extends GetxService {
       'Check for Updates'.tr,
       'Checking for updates...'.tr,
       snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 1),
+      backgroundColor: const Color(0xFF1F8A5B),
+      colorText: Colors.white,
+      icon: const Icon(Icons.sync_rounded, color: Colors.white, size: 24),
+      duration: const Duration(seconds: 2),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      borderRadius: 12,
     );
 
     await _loadLocalVersion();
@@ -203,6 +208,11 @@ class AppUpdateService extends GetxService {
         'Check for Updates'.tr,
         'Unable to check for updates right now.'.tr,
         snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFFDC2626),
+        colorText: Colors.white,
+        icon: const Icon(Icons.error_outline_rounded, color: Colors.white, size: 24),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        borderRadius: 12,
       );
       return;
     }
@@ -212,6 +222,11 @@ class AppUpdateService extends GetxService {
         'Check for Updates'.tr,
         '${'You are using the latest version.'.tr} (v$_cachedCurrentVersion)',
         snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFF1F8A5B),
+        colorText: Colors.white,
+        icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 24),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        borderRadius: 12,
       );
       return;
     }

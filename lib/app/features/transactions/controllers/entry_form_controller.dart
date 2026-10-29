@@ -281,7 +281,7 @@ class EntryFormController extends GetxController {
           'Success'.tr,
           (isEdit ? 'Transaction updated successfully.' : 'Transaction added successfully.').tr,
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: const Color(0xFF1B5E20),
+          backgroundColor: const Color(0xFF1F8A5B),
           colorText: Colors.white,
           icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 24),
           duration: const Duration(seconds: 3),

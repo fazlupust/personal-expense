@@ -362,7 +362,12 @@ class _DataExportSheetState extends State<DataExportSheet> {
           'Copied to Clipboard'.tr,
           'Sharing failed. Content copied to clipboard!'.tr,
           snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color(0xFF1F8A5B),
+          colorText: Colors.white,
+          icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 24),
           duration: const Duration(seconds: 3),
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          borderRadius: 12,
         );
       }
     }
@@ -374,11 +379,13 @@ class _DataExportSheetState extends State<DataExportSheet> {
       title.tr,
       'Copied to clipboard! You can paste it into Excel or Google Sheets.'.tr,
       snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: context.pal.card,
-      colorText: context.pal.ink,
+      backgroundColor: const Color(0xFF1F8A5B),
+      colorText: Colors.white,
+      icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 24),
       duration: const Duration(seconds: 3),
       maxWidth: 420,
       margin: const EdgeInsets.all(14),
+      borderRadius: 12,
     );
   }
 
@@ -424,7 +431,12 @@ class _DataExportSheetState extends State<DataExportSheet> {
         'Export Failed'.tr,
         'Could not share file: $e'.tr,
         snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFFDC2626),
+        colorText: Colors.white,
+        icon: const Icon(Icons.error_outline_rounded, color: Colors.white, size: 24),
         duration: const Duration(seconds: 3),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        borderRadius: 12,
       );
     }
   }
@@ -1001,8 +1013,13 @@ class _DataExportSheetState extends State<DataExportSheet> {
                           'Success'.tr,
                           'Backup JSON copied to clipboard!'.tr,
                           snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: const Color(0xFF1F8A5B),
+                          colorText: Colors.white,
+                          icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 24),
                           duration: const Duration(seconds: 2),
                           maxWidth: 420,
+                          margin: const EdgeInsets.all(14),
+                          borderRadius: 12,
                         );
                       },
                     ),
@@ -1156,9 +1173,13 @@ class _DataExportSheetState extends State<DataExportSheet> {
                           title.tr,
                           'Copied to clipboard!'.tr,
                           snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: const Color(0xFF1F8A5B),
+                          colorText: Colors.white,
+                          icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 24),
                           duration: const Duration(seconds: 2),
                           maxWidth: 400,
                           margin: const EdgeInsets.all(12),
+                          borderRadius: 12,
                         );
                       },
                     ),
@@ -1267,33 +1288,38 @@ class _DataExportSheetState extends State<DataExportSheet> {
     final isSelected = _selectedTab == index;
     return InkWell(
       onTap: () => setState(() => _selectedTab = index),
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(10),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 7),
         decoration: BoxDecoration(
           color: isSelected ? p.income : p.bg,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: isSelected ? p.income : p.line,
             width: 1,
           ),
         ),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               icon,
-              size: 14,
+              size: 13,
               color: isSelected ? Colors.white : p.mute,
             ),
-            const SizedBox(width: 5),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected ? Colors.white : p.ink,
+            const SizedBox(width: 3),
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  color: isSelected ? Colors.white : p.ink,
+                ),
               ),
             ),
           ],
@@ -2134,177 +2160,215 @@ class _DataExportSheetState extends State<DataExportSheet> {
 
     final todayStr = DataExportSheet.formatIsoDate(DateTime.now());
 
+    final maxHeight = MediaQuery.sizeOf(context).height * 0.90;
+
     return Container(
-      constraints: const BoxConstraints(maxWidth: 580),
+      constraints: BoxConstraints(maxWidth: 580, maxHeight: maxHeight),
       margin: EdgeInsets.only(
         bottom: MediaQuery.viewInsetsOf(context).bottom,
       ),
-      padding: const EdgeInsets.fromLTRB(18, 16, 18, 24),
       decoration: BoxDecoration(
         color: p.card,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
         border: Border.all(color: p.line),
       ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Drag handle
-            Center(
-              child: Container(
-                width: 38,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: p.line,
-                  borderRadius: BorderRadius.circular(2),
-                ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // 1. FROZEN PRIMARY COLOR HEADER
+          Container(
+            padding: const EdgeInsets.fromLTRB(18, 12, 14, 14),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [p.income, p.income.withOpacity(0.92)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
             ),
-            const SizedBox(height: 14),
-
-            // Header
-            Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(9),
-                  decoration: BoxDecoration(
-                    color: p.income.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(Icons.backup_rounded, color: p.income, size: 22),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Export Data'.tr,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: p.ink,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Export tab-wise or all together'.tr,
-                        style: TextStyle(fontSize: 12.5, color: p.mute),
-                      ),
-                    ],
+                // Drag handle
+                Center(
+                  child: Container(
+                    width: 38,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.45),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-                IconButton(
-                  icon: Icon(Icons.close_rounded, size: 22, color: p.mute),
-                  tooltip: 'Close'.tr,
-                  onPressed: () => Navigator.of(context).pop(),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(9),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.cloud_upload_rounded, color: Colors.white, size: 22),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Export Data'.tr,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Export tab-wise or all together'.tr,
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              color: Colors.white.withOpacity(0.85),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded, size: 22, color: Colors.white),
+                      tooltip: 'Close'.tr,
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
                 ),
               ],
             ),
-            const SizedBox(height: 14),
+          ),
 
-            // 3-Card Counts summary: Transactions, Notes, Zikir
-            Row(
+          // 2. FROZEN CONTROLS: SUMMARY COUNTS & TAB SWITCHER
+          Container(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+            decoration: BoxDecoration(
+              color: p.card,
+              border: Border(bottom: BorderSide(color: p.line)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: p.bg,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: p.line),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Transactions'.tr,
-                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: p.mute),
+                // 3-Card Counts summary: Transactions, Notes, Zikir
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: p.bg,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: p.line),
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '$txCount',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: p.income),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Transactions'.tr,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: p.mute),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '$txCount',
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: p.income),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: p.bg,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: p.line),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Notes & Debts'.tr,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: p.mute),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '$notesCount',
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: p.acc),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: p.bg,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: p.line),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Zikir Logs'.tr,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: p.mute),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '$tasbihCount',
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: const Color(0xFF10B981)),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: p.bg,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: p.line),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Notes & Debts'.tr,
-                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: p.mute),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '$notesCount',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: p.acc),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: p.bg,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: p.line),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Zikir Logs'.tr,
-                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: p.mute),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '$tasbihCount',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: const Color(0xFF10B981)),
-                        ),
-                      ],
-                    ),
-                  ),
+                const SizedBox(height: 10),
+
+                // 4-Tab row
+                Row(
+                  children: [
+                    Expanded(child: _buildTabChip(0, 'All in One'.tr, Icons.layers_rounded, p)),
+                    const SizedBox(width: 5),
+                    Expanded(child: _buildTabChip(1, 'Transactions'.tr, Icons.table_chart_rounded, p)),
+                    const SizedBox(width: 5),
+                    Expanded(child: _buildTabChip(2, 'Notes'.tr, Icons.note_alt_rounded, p)),
+                    const SizedBox(width: 5),
+                    Expanded(child: _buildTabChip(3, 'Zikir'.tr, Icons.fingerprint_rounded, p)),
+                  ],
                 ),
               ],
             ),
-            const SizedBox(height: 14),
+          ),
 
-            // Tab chips row
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              child: Row(
+          // 3. SCROLLABLE BODY CONTENT
+          Flexible(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(18, 14, 18, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _buildTabChip(0, 'All in One'.tr, Icons.layers_rounded, p),
-                  const SizedBox(width: 8),
-                  _buildTabChip(1, 'Transactions'.tr, Icons.table_chart_rounded, p),
-                  const SizedBox(width: 8),
-                  _buildTabChip(2, 'Notes'.tr, Icons.note_alt_rounded, p),
-                  const SizedBox(width: 8),
-                  _buildTabChip(3, 'Zikir'.tr, Icons.fingerprint_rounded, p),
-                ],
-              ),
-            ),
-            const SizedBox(height: 14),
-
-            // Live Loader Banner when generating or sharing
-            if (_loadingAction != null) ...[
+                  // Live Loader Banner when generating or sharing
+                  if (_loadingAction != null) ...[
               Container(
                 margin: const EdgeInsets.only(bottom: 14),
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -2432,6 +2496,9 @@ class _DataExportSheetState extends State<DataExportSheet> {
           ],
         ),
       ),
-    );
+    ),
+  ],
+),
+);
   }
 }

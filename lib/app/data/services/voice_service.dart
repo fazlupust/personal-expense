@@ -1,12 +1,9 @@
 import 'dart:async';
-import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
-
-import '../../features/settings/controllers/settings_controller.dart';
 
 class VoiceService {
   VoiceService._();
@@ -78,7 +75,12 @@ class VoiceService {
           'Voice Input'.tr,
           'Microphone not available or permission denied'.tr,
           snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color(0xFF1F8A5B),
+          colorText: Colors.white,
+          icon: const Icon(Icons.mic_off_rounded, color: Colors.white, size: 24),
           duration: const Duration(seconds: 2),
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          borderRadius: 12,
         );
         return false;
       }

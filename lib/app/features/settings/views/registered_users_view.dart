@@ -41,7 +41,12 @@ class _RegisteredUsersViewState extends State<RegisteredUsersView> {
             AppConstants.appName.tr,
             'Phone number copied to clipboard'.tr,
             snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: const Color(0xFF1F8A5B),
+            colorText: Colors.white,
+            icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 24),
             duration: const Duration(seconds: 2),
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            borderRadius: 12,
           );
         }
       }
@@ -52,7 +57,12 @@ class _RegisteredUsersViewState extends State<RegisteredUsersView> {
           AppConstants.appName.tr,
           'Phone number copied to clipboard'.tr,
           snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color(0xFF1F8A5B),
+          colorText: Colors.white,
+          icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 24),
           duration: const Duration(seconds: 2),
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          borderRadius: 12,
         );
       }
     }
@@ -236,7 +246,12 @@ class _RegisteredUsersViewState extends State<RegisteredUsersView> {
                                   AppConstants.appName.tr,
                                   'Phone number copied'.tr,
                                   snackPosition: SnackPosition.BOTTOM,
+                                  backgroundColor: const Color(0xFF1F8A5B),
+                                  colorText: Colors.white,
+                                  icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 24),
                                   duration: const Duration(seconds: 2),
+                                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                  borderRadius: 12,
                                 );
                               },
                             ),

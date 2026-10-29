@@ -319,7 +319,7 @@ class TransactionsController extends GetxController {
         'Success'.tr,
         'Transaction deleted'.tr,
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFF0D9488),
+        backgroundColor: const Color(0xFF1F8A5B),
         colorText: Colors.white,
         icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 24),
         duration: const Duration(seconds: 3),

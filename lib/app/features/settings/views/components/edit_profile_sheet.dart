@@ -113,7 +113,12 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
             'Success'.tr,
             'Profile updated successfully'.tr,
             snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: const Color(0xFF1F8A5B),
+            colorText: Colors.white,
+            icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 24),
             duration: const Duration(seconds: 2),
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            borderRadius: 12,
           );
         }
       }
@@ -124,6 +129,11 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
             'Error'.tr,
             e.toString(),
             snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: const Color(0xFFDC2626),
+            colorText: Colors.white,
+            icon: const Icon(Icons.error_outline_rounded, color: Colors.white, size: 24),
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            borderRadius: 12,
           );
         }
       }

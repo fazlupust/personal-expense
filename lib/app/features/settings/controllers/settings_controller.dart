@@ -408,9 +408,13 @@ class SettingsController extends GetxController {
       AppConstants.appName.tr,
       'Settings saved.'.tr,
       snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: const Color(0xFF1F8A5B),
+      colorText: Colors.white,
+      icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 24),
       duration: const Duration(seconds: 2),
       maxWidth: 400,
       margin: const EdgeInsets.all(12),
+      borderRadius: 12,
     );
   }
 }
