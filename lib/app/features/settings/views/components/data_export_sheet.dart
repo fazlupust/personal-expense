@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:archive/archive.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:excel/excel.dart' hide Border;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -340,8 +341,8 @@ class _DataExportSheetState extends State<DataExportSheet> {
         'show_prayer_card': sc.showPrayerCard,
         'show_weather_card': sc.showWeatherCard,
       },
-      'transactions': tc.entries.map((e) => e.toMap()).toList(),
-      'notes': nc.notes.map((n) => n.toMap()).toList(),
+      'transactions': tc.entries.map((e) => e.toJson()).toList(),
+      'notes': nc.notes.map((n) => n.toJson()).toList(),
       'tasbih': {
         'lifetime_total': ptc?.lifetimeTotal ?? 0,
         'today_total': ptc?.todayTotal ?? 0,
@@ -356,7 +357,16 @@ class _DataExportSheetState extends State<DataExportSheet> {
             }).toList(),
       },
     };
-    return const JsonEncoder.withIndent('  ').convert(map);
+    final encoder = JsonEncoder.withIndent('  ', (nonEncodable) {
+      if (nonEncodable is Timestamp) {
+        return nonEncodable.toDate().toIso8601String();
+      }
+      if (nonEncodable is DateTime) {
+        return nonEncodable.toIso8601String();
+      }
+      return nonEncodable.toString();
+    });
+    return encoder.convert(map);
   }
 
   Future<void> _shareFile(

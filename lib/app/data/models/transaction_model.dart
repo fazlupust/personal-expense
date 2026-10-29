@@ -87,6 +87,30 @@ class TransactionModel {
     };
   }
 
+  /// JSON serialization for export/backup (ISO-8601 strings, encodable by standard jsonEncode)
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'user_id': userId,
+      'category_id': categoryId,
+      'category_name_bn': categoryNameBn,
+      'category_name_en': categoryNameEn,
+      'type': type.name,
+      'amount': amount,
+      'note_bn': noteBn,
+      'note_en': noteEn,
+      'date': date.toIso8601String(),
+      'transaction_date': date.toIso8601String(),
+      'is_deleted': isDeleted,
+      'account': account,
+      'latitude': latitude,
+      'longitude': longitude,
+      'device_info': deviceInfo,
+      'created_at': createdAt?.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
+    };
+  }
+
   factory TransactionModel.fromMap(Map<String, dynamic> map, String docId) {
     DateTime parseDate(dynamic val) {
       if (val is Timestamp) return val.toDate();
