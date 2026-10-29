@@ -662,18 +662,32 @@ class _TasbihHistoryViewState extends State<TasbihHistoryView> {
                                   const SizedBox(width: 8),
                                   // Recitation count badge
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3.5),
+                                    padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
                                     decoration: BoxDecoration(
-                                      color: count > 0 ? p.income : p.bg,
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                        color: count > 0 ? p.income : p.line,
-                                      ),
+                                      gradient: count > 0
+                                          ? const LinearGradient(
+                                              colors: [Color(0xFF0D9488), Color(0xFF10B981)],
+                                              begin: Alignment.topLeft,
+                                              end: Alignment.bottomRight,
+                                            )
+                                          : null,
+                                      color: count > 0 ? null : p.bg,
+                                      borderRadius: BorderRadius.circular(9),
+                                      boxShadow: count > 0
+                                          ? [
+                                              BoxShadow(
+                                                color: const Color(0xFF10B981).withOpacity(0.30),
+                                                blurRadius: 6,
+                                                offset: const Offset(0, 2),
+                                              ),
+                                            ]
+                                          : null,
+                                      border: count > 0 ? null : Border.all(color: p.line),
                                     ),
                                     child: Text(
                                       c.isCountHidden ? '***' : '$count ${'Times'.tr}',
                                       style: TextStyle(
-                                        fontSize: 13.5,
+                                        fontSize: 15,
                                         fontWeight: FontWeight.w800,
                                         color: count > 0 ? Colors.white : p.mute,
                                         letterSpacing: c.isCountHidden ? 2 : 0,
@@ -1272,18 +1286,32 @@ class _TasbihHistoryViewState extends State<TasbihHistoryView> {
                                   ),
                                   const SizedBox(width: 10),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                    padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
                                     decoration: BoxDecoration(
-                                      color: entry.jikirCount > 0 ? p.income : p.bg,
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                        color: entry.jikirCount > 0 ? p.income : p.line,
-                                      ),
+                                      gradient: entry.jikirCount > 0
+                                          ? const LinearGradient(
+                                              colors: [Color(0xFF0D9488), Color(0xFF10B981)],
+                                              begin: Alignment.topLeft,
+                                              end: Alignment.bottomRight,
+                                            )
+                                          : null,
+                                      color: entry.jikirCount > 0 ? null : p.bg,
+                                      borderRadius: BorderRadius.circular(9),
+                                      boxShadow: entry.jikirCount > 0
+                                          ? [
+                                              BoxShadow(
+                                                color: const Color(0xFF10B981).withOpacity(0.30),
+                                                blurRadius: 6,
+                                                offset: const Offset(0, 2),
+                                              ),
+                                            ]
+                                          : null,
+                                      border: entry.jikirCount > 0 ? null : Border.all(color: p.line),
                                     ),
                                     child: Text(
                                       c.isCountHidden ? '***' : '${entry.jikirCount} ${'Times'.tr}',
                                       style: TextStyle(
-                                        fontSize: 13.5,
+                                        fontSize: 15,
                                         fontWeight: FontWeight.w800,
                                         color: entry.jikirCount > 0 ? Colors.white : p.mute,
                                         letterSpacing: c.isCountHidden ? 2 : 0,
