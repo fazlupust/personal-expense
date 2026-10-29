@@ -29,6 +29,12 @@ class SettingsController extends GetxController {
   bool isExpenseHidden = false;
   bool showPrayerCard = false;
   bool showWeatherCard = false;
+  DateTime? budgetAlertDismissedUntil;
+
+  bool get isBudgetAlertDismissed {
+    if (budgetAlertDismissedUntil == null) return false;
+    return DateTime.now().isBefore(budgetAlertDismissedUntil!);
+  }
 
   bool get isBalanceHidden => isIncomeHidden || isExpenseHidden;
 
@@ -120,6 +126,7 @@ class SettingsController extends GetxController {
     isExpenseHidden = false;
     showPrayerCard = false;
     showWeatherCard = false;
+    budgetAlertDismissedUntil = null;
   }
 
   @override
@@ -134,6 +141,12 @@ class SettingsController extends GetxController {
   void _load([String? uidOverride]) {
     final uid = uidOverride ?? _currentUid;
     final key = _userPrefsKey(uid);
+    final dismissedStr = _prefs.getString('${key}_budget_dismissed_until');
+    if (dismissedStr != null && dismissedStr.isNotEmpty) {
+      budgetAlertDismissedUntil = DateTime.tryParse(dismissedStr);
+    } else {
+      budgetAlertDismissedUntil = null;
+    }
     var raw = _prefs.getString(key);
     if (raw == null && uid.isEmpty) {
       raw = _prefs.getString(AppConstants.prefsSettings);
@@ -292,6 +305,20 @@ class SettingsController extends GetxController {
   void setCategoryBudgets(Map<String, double> map) {
     categoryBudgets = Map.from(map);
     _persist();
+    update();
+  }
+
+  String get _budgetDismissedKey => '${_prefsKey}_budget_dismissed_until';
+
+  void dismissBudgetAlert(DateTime until) {
+    budgetAlertDismissedUntil = until;
+    _prefs.setString(_budgetDismissedKey, until.toIso8601String());
+    update();
+  }
+
+  void resetBudgetAlertDismissal() {
+    budgetAlertDismissedUntil = null;
+    _prefs.remove(_budgetDismissedKey);
     update();
   }
 

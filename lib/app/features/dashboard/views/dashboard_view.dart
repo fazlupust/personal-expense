@@ -156,6 +156,7 @@ class DashboardView extends StatelessWidget {
   Widget _buildBudgetAlertBanner(
     BuildContext context, {
     required AppPalette p,
+    required SettingsController s,
     required bool totalExceeded,
     required double totalOver,
     required Map<String, double> exceededCategories,
@@ -187,49 +188,67 @@ class DashboardView extends StatelessWidget {
       ),
       child: Material(
         color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(14),
-          onTap: () => showBudgetManagementSheet(context),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: p.expense.withOpacity(0.15),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(Icons.warning_amber_rounded, color: p.expense, size: 22),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: p.expense,
+        child: Padding(
+          padding: const EdgeInsets.only(left: 12, top: 10, bottom: 10, right: 8),
+          child: Row(
+            children: [
+              Expanded(
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(10),
+                  onTap: () => showBudgetManagementSheet(context),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: p.expense.withOpacity(0.15),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.warning_amber_rounded, color: p.expense, size: 20),
                         ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: p.ink.withOpacity(0.85),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: p.expense,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                subtitle,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w500,
+                                  color: p.ink.withOpacity(0.85),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              ),
+              const SizedBox(width: 6),
+              InkWell(
+                borderRadius: BorderRadius.circular(8),
+                onTap: () => showBudgetManagementSheet(context),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
                   decoration: BoxDecoration(
                     color: p.expense,
                     borderRadius: BorderRadius.circular(8),
@@ -242,6 +261,287 @@ class DashboardView extends StatelessWidget {
                       color: Colors.white,
                     ),
                   ),
+                ),
+              ),
+              const SizedBox(width: 6),
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () => _showDismissBudgetAlertSheet(context, p, s),
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: p.expense.withOpacity(0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.close_rounded,
+                      size: 16,
+                      color: p.expense,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showDismissBudgetAlertSheet(BuildContext context, AppPalette p, SettingsController s) {
+    final now = DateTime.now();
+    final nextMonth = DateTime(now.year, now.month + 1, 1);
+    final nextWeek = now.add(const Duration(days: 7));
+    final tomorrow = DateTime(now.year, now.month, now.day + 1);
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      constraints: const BoxConstraints(maxWidth: 540),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
+        child: Material(
+          color: p.card,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+          clipBehavior: Clip.antiAlias,
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Header Bar
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: p.expense,
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.notifications_off_outlined, color: Colors.white, size: 22),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Dismiss Budget Alert'.tr,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      InkWell(
+                        onTap: () => Navigator.of(ctx).pop(),
+                        borderRadius: BorderRadius.circular(20),
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.close_rounded, color: Colors.white, size: 18),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 16, 18, 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                        child: Text(
+                          'Choose how long to hide this alert:'.tr,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: p.ink.withOpacity(0.7),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      _buildDismissOptionItem(
+                        ctx,
+                        p: p,
+                        icon: Icons.calendar_month_rounded,
+                        title: 'Hide for this month'.tr,
+                        subtitle: 'Will not alert you again until next month'.tr,
+                        isRecommended: true,
+                        onTap: () {
+                          Navigator.of(ctx).pop();
+                          _applyDismissal(s, p, nextMonth);
+                        },
+                      ),
+                      const SizedBox(height: 10),
+                      _buildDismissOptionItem(
+                        ctx,
+                        p: p,
+                        icon: Icons.date_range_rounded,
+                        title: 'Hide for 1 week (7 days)'.tr,
+                        subtitle: 'Will not alert you for the next 7 days'.tr,
+                        onTap: () {
+                          Navigator.of(ctx).pop();
+                          _applyDismissal(s, p, nextWeek);
+                        },
+                      ),
+                      const SizedBox(height: 10),
+                      _buildDismissOptionItem(
+                        ctx,
+                        p: p,
+                        icon: Icons.today_rounded,
+                        title: 'Hide for today'.tr,
+                        subtitle: 'Will not alert you until tomorrow'.tr,
+                        onTap: () {
+                          Navigator.of(ctx).pop();
+                          _applyDismissal(s, p, tomorrow);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _applyDismissal(SettingsController s, AppPalette p, DateTime until) {
+    s.dismissBudgetAlert(until);
+    Get.snackbar(
+      'Budget alert hidden'.tr,
+      'Alert has been dismissed.'.tr,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: p.ink.withOpacity(0.92),
+      colorText: Colors.white,
+      icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 22),
+      mainButton: TextButton(
+        onPressed: () {
+          s.resetBudgetAlertDismissal();
+          if (Get.isSnackbarOpen) Get.closeCurrentSnackbar();
+        },
+        child: Text(
+          'Undo'.tr,
+          style: const TextStyle(
+            color: Color(0xFF6EE7B7),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+      duration: const Duration(seconds: 4),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      borderRadius: 12,
+    );
+  }
+
+  Widget _buildDismissOptionItem(
+    BuildContext context, {
+    required AppPalette p,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+    bool isRecommended = false,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isRecommended ? p.expense.withOpacity(0.06) : p.bg,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isRecommended ? p.expense.withOpacity(0.4) : p.line,
+          width: isRecommended ? 1.4 : 1.0,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(9),
+                  decoration: BoxDecoration(
+                    color: isRecommended ? p.expense.withOpacity(0.14) : p.ink.withOpacity(0.06),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 20,
+                    color: isRecommended ? p.expense : p.ink.withOpacity(0.8),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w700,
+                                color: p.ink,
+                              ),
+                            ),
+                          ),
+                          if (isRecommended) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: p.expense,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                'Recommended'.tr,
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        subtitle,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w500,
+                          color: p.ink.withOpacity(0.65),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 14,
+                  color: p.ink.withOpacity(0.4),
                 ),
               ],
             ),
@@ -272,7 +572,7 @@ class DashboardView extends StatelessWidget {
             exceededCategories[entry.key] = entry.value - catBudget;
           }
         }
-        final hasBudgetAlert = totalBudgetExceeded || exceededCategories.isNotEmpty;
+        final hasBudgetAlert = (totalBudgetExceeded || exceededCategories.isNotEmpty) && !s.isBudgetAlertDismissed;
 
         return ContentWrap(
           child: Column(
@@ -284,6 +584,7 @@ class DashboardView extends StatelessWidget {
                 _buildBudgetAlertBanner(
                   context,
                   p: p,
+                  s: s,
                   totalExceeded: totalBudgetExceeded,
                   totalOver: expense - s.budget,
                   exceededCategories: exceededCategories,

@@ -561,6 +561,41 @@ void main() {
       reloaded.dispose();
     });
 
+    test('SettingsController dismissBudgetAlert, isBudgetAlertDismissed, and resetBudgetAlertDismissal', () async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+      final controller = SettingsController(prefs);
+      controller.onInit();
+
+      expect(controller.isBudgetAlertDismissed, isFalse);
+      expect(controller.budgetAlertDismissedUntil, isNull);
+
+      // Dismiss for 7 days
+      final futureDate = DateTime.now().add(const Duration(days: 7));
+      controller.dismissBudgetAlert(futureDate);
+
+      expect(controller.isBudgetAlertDismissed, isTrue);
+      expect(controller.budgetAlertDismissedUntil, isNotNull);
+
+      // Reload controller to verify persistence
+      final reloaded = SettingsController(prefs);
+      reloaded.onInit();
+      expect(reloaded.isBudgetAlertDismissed, isTrue);
+
+      // Reset dismissal
+      reloaded.resetBudgetAlertDismissal();
+      expect(reloaded.isBudgetAlertDismissed, isFalse);
+      expect(reloaded.budgetAlertDismissedUntil, isNull);
+
+      // Expired date should return isBudgetAlertDismissed = false
+      final pastDate = DateTime.now().subtract(const Duration(days: 1));
+      controller.dismissBudgetAlert(pastDate);
+      expect(controller.isBudgetAlertDismissed, isFalse);
+
+      controller.dispose();
+      reloaded.dispose();
+    });
+
     test('UserModel supports profile editing with designation, email, and address', () {
       const user = UserModel(
         uid: 'user_123',
