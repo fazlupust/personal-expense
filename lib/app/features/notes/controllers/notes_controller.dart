@@ -78,8 +78,27 @@ class NotesController extends GetxController {
       final p = _prefs;
       if (p == null) return;
       final key = _effectiveCacheKey(uidOverride);
-      final raw = p.getString(key);
-      if (raw != null && raw.isNotEmpty) {
+      String? raw = p.getString(key);
+      if (raw == null || raw.isEmpty || raw == '[]') {
+        // Fallback 1: Default cache key without UID
+        final defaultRaw = p.getString(_cacheKey);
+        if (defaultRaw != null && defaultRaw.isNotEmpty && defaultRaw != '[]') {
+          raw = defaultRaw;
+        } else {
+          // Fallback 2: Any cached key starting with prefix
+          for (final k in p.getKeys()) {
+            if (k.startsWith(_cacheKey)) {
+              final val = p.getString(k);
+              if (val != null && val.isNotEmpty && val != '[]') {
+                raw = val;
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      if (raw != null && raw.isNotEmpty && raw != '[]') {
         final decoded = jsonDecode(raw) as List<dynamic>;
         notes = decoded
             .map((e) => NoteModel.fromJson(Map<String, dynamic>.from(e as Map)))

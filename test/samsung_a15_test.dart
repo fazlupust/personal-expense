@@ -406,6 +406,39 @@ void main() {
     expect(find.text('Tab 3: Zikir & Tasbih'.tr), findsOneWidget);
   });
 
+  testWidgets('DataExportSheet loads NotesController and exports notes into Multi-Tab Excel without empty sheet', (tester) async {
+    final nc = Get.isRegistered<NotesController>() ? Get.find<NotesController>() : Get.put(NotesController());
+    nc.notes = [
+      NoteModel(
+        id: 'note_1',
+        title: 'বাজারের দেনা',
+        personName: 'রহিম ভাই',
+        amount: 500.0,
+        notes: 'চাল ডাল কেনা হয়েছে',
+        date: DateTime(2026, 10, 29, 14, 0),
+      ),
+      NoteModel(
+        id: 'note_2',
+        title: 'বাড়ি ভাড়া পরিশোধ',
+        personName: 'মালিক সাহেব',
+        amount: 15000.0,
+        notes: 'অক্টোবর মাসের ভাড়া',
+        date: DateTime(2026, 10, 28, 10, 30),
+      ),
+    ];
+
+    final tc = Get.find<TransactionsController>();
+    final bytes = DataExportSheet.generateMultiTabExcel(tc, nc, null);
+    expect(bytes, isNotNull);
+    expect(bytes!.isNotEmpty, isTrue);
+
+    final csv = DataExportSheet.generateNotesCsv(nc);
+    expect(csv.contains('বাজারের দেনা'), isTrue);
+    expect(csv.contains('রহিম ভাই'), isTrue);
+    expect(csv.contains('500.00'), isTrue);
+    expect(csv.contains('বাড়ি ভাড়া পরিশোধ'), isTrue);
+  });
+
   testWidgets('Samsung Galaxy A15 AppUpdateDialog renders cleanly without overflow in optional and forced mode', (tester) async {
     tester.view.physicalSize = const Size(1080, 2340);
     tester.view.devicePixelRatio = 2.625;

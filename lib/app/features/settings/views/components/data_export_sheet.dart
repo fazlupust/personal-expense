@@ -284,6 +284,39 @@ class _DataExportSheetState extends State<DataExportSheet> {
   int _selectedTab = 0; // 0: All in One, 1: Transactions, 2: Notes & Debts, 3: Zikir Logs
   BuildContext? _loadingDialogContext;
 
+  @override
+  void initState() {
+    super.initState();
+    // Ensure NotesController is registered & refreshed with latest notes
+    final nc = Get.isRegistered<NotesController>()
+        ? Get.find<NotesController>()
+        : Get.put(NotesController(), permanent: true);
+    nc.addListener(_onControllerUpdate);
+    nc.refreshNotes();
+
+    final ptc = Get.isRegistered<PrayerTasbihController>()
+        ? Get.find<PrayerTasbihController>()
+        : Get.put(PrayerTasbihController(), permanent: true);
+    ptc.addListener(_onControllerUpdate);
+  }
+
+  void _onControllerUpdate() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
+  void dispose() {
+    if (Get.isRegistered<NotesController>()) {
+      Get.find<NotesController>().removeListener(_onControllerUpdate);
+    }
+    if (Get.isRegistered<PrayerTasbihController>()) {
+      Get.find<PrayerTasbihController>().removeListener(_onControllerUpdate);
+    }
+    super.dispose();
+  }
+
   String _generateTransactionsCsv(TransactionsController tc) => DataExportSheet.generateTransactionsCsv(tc);
 
   String _generateNotesCsv(NotesController nc) => DataExportSheet.generateNotesCsv(nc);
@@ -1974,7 +2007,7 @@ class _DataExportSheetState extends State<DataExportSheet> {
   Widget _buildFullBackupCard({
     required BuildContext context,
     required TransactionsController tc,
-    required NotesController? nc,
+    required NotesController nc,
     required SettingsController sc,
     required PrayerTasbihController? ptc,
     required int txCount,
@@ -2039,7 +2072,7 @@ class _DataExportSheetState extends State<DataExportSheet> {
                 onPressed: _loadingAction != null
                     ? null
                     : () {
-                        final jsonStr = _generateFullJsonBackup(tc, nc ?? NotesController(), sc, ptc);
+                        final jsonStr = _generateFullJsonBackup(tc, nc, sc, ptc);
                         _previewData(context, jsonStr, 'Full Data Backup (JSON)');
                       },
               ),
@@ -2062,7 +2095,7 @@ class _DataExportSheetState extends State<DataExportSheet> {
                         await Future<void>.delayed(const Duration(milliseconds: 600));
                         _dismissLoadingDialog();
                         if (!mounted) return;
-                        final jsonStr = _generateFullJsonBackup(tc, nc ?? NotesController(), sc, ptc);
+                        final jsonStr = _generateFullJsonBackup(tc, nc, sc, ptc);
                         await _shareFile(
                           this.context,
                           content: jsonStr,
@@ -2095,7 +2128,7 @@ class _DataExportSheetState extends State<DataExportSheet> {
                         await Future<void>.delayed(const Duration(milliseconds: 700));
                         _dismissLoadingDialog();
                         if (!mounted) return;
-                        final jsonStr = _generateFullJsonBackup(tc, nc ?? NotesController(), sc, ptc);
+                        final jsonStr = _generateFullJsonBackup(tc, nc, sc, ptc);
                         setState(() => _loadingAction = null);
                         _showBackupSuccessSheet(this.context, jsonStr, txCount, notesCount, tasbihCount);
                       },
@@ -2146,14 +2179,16 @@ class _DataExportSheetState extends State<DataExportSheet> {
   Widget build(BuildContext context) {
     final p = context.pal;
     final tc = Get.find<TransactionsController>();
-    final nc = Get.isRegistered<NotesController>() ? Get.find<NotesController>() : null;
+    final nc = Get.isRegistered<NotesController>()
+        ? Get.find<NotesController>()
+        : Get.put(NotesController(), permanent: true);
     final sc = Get.find<SettingsController>();
     final ptc = Get.isRegistered<PrayerTasbihController>()
         ? Get.find<PrayerTasbihController>()
         : (Get.put(PrayerTasbihController(), permanent: true));
 
     final txCount = tc.entries.length;
-    final notesCount = nc?.notes.length ?? 0;
+    final notesCount = nc.notes.length;
     final tasbihCount = ptc.historyEntries.isNotEmpty
         ? ptc.historyEntries.length
         : ptc.zikirLifetimeCounts.values.where((c) => c > 0).length;
@@ -2440,10 +2475,8 @@ class _DataExportSheetState extends State<DataExportSheet> {
               const SizedBox(height: 10),
 
               // Option 2: Notes & Debts CSV
-              if (nc != null) ...[
-                _buildNotesCsvCard(context: context, nc: nc, todayStr: todayStr, p: p),
-                const SizedBox(height: 10),
-              ],
+              _buildNotesCsvCard(context: context, nc: nc, todayStr: todayStr, p: p),
+              const SizedBox(height: 10),
 
               // Option 3: Zikir & Tasbih CSV
               _buildZikirCsvCard(context: context, ptc: ptc, todayStr: todayStr, p: p),
@@ -2469,11 +2502,9 @@ class _DataExportSheetState extends State<DataExportSheet> {
               _buildTransactionsCsvCard(context: context, tc: tc, todayStr: todayStr, p: p),
             ] else if (_selectedTab == 2) ...[
               // Tab 2: Notes & Debts
-              if (nc != null) ...[
-                _buildNotesExcelCard(context: context, nc: nc, todayStr: todayStr, p: p),
-                const SizedBox(height: 10),
-                _buildNotesCsvCard(context: context, nc: nc, todayStr: todayStr, p: p),
-              ],
+              _buildNotesExcelCard(context: context, nc: nc, todayStr: todayStr, p: p),
+              const SizedBox(height: 10),
+              _buildNotesCsvCard(context: context, nc: nc, todayStr: todayStr, p: p),
             ] else if (_selectedTab == 3) ...[
               // Tab 3: Zikir Logs
               _buildZikirExcelCard(context: context, ptc: ptc, todayStr: todayStr, p: p),
