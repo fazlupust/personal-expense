@@ -300,6 +300,28 @@ class PrayerTimeItem {
   }
 }
 
+class HijriDateInfo {
+  final int day;
+  final int month;
+  final int year;
+  final String monthNameBn;
+  final String monthNameEn;
+  final String formattedBn;
+  final String formattedEn;
+
+  const HijriDateInfo({
+    required this.day,
+    required this.month,
+    required this.year,
+    required this.monthNameBn,
+    required this.monthNameEn,
+    required this.formattedBn,
+    required this.formattedEn,
+  });
+
+  String format({bool isBn = true}) => isBn ? formattedBn : formattedEn;
+}
+
 /// Prohibited / Haram times for performing Salah
 class ProhibitedTimeItem {
   final String id;
@@ -351,6 +373,13 @@ class DailyPrayerSchedule {
   final DateTime iftar;
   final DateTime tahajjudStart;
   final String hijriDate;
+  final int hijriDay;
+  final int hijriMonth;
+  final int hijriYear;
+  final String hijriMonthBn;
+  final String hijriMonthEn;
+  final String hijriDateBn;
+  final String hijriDateEn;
 
   DailyPrayerSchedule({
     required this.date,
@@ -365,7 +394,16 @@ class DailyPrayerSchedule {
     required this.iftar,
     required this.tahajjudStart,
     required this.hijriDate,
+    this.hijriDay = 1,
+    this.hijriMonth = 1,
+    this.hijriYear = 1448,
+    this.hijriMonthBn = '',
+    this.hijriMonthEn = '',
+    this.hijriDateBn = '',
+    this.hijriDateEn = '',
   });
+
+  String formatHijriDate({bool isBn = true}) => isBn ? hijriDateBn : hijriDateEn;
 
   List<PrayerTimeItem> get items => [
         PrayerTimeItem(
@@ -613,6 +651,7 @@ class PrayerTimeCalculator {
     required BangladeshLocation location,
     bool isHanafi = true,
     double timezone = 6.0,
+    int hijriAdjustmentDays = -1,
   }) {
     final jd = _julianDate(date.year, date.month, date.day);
     final d = jd - 2451545.0;
@@ -682,8 +721,8 @@ class PrayerTimeCalculator {
     final nightDuration = fajrDate.difference(maghribDate.subtract(const Duration(days: 1)));
     final tahajjudStart = fajrDate.subtract(Duration(minutes: (nightDuration.inMinutes / 3).round()));
 
-    // Hijri date approximation
-    final hijri = _calculateHijri(date);
+    // Hijri date calculation with Bangladesh moon sighting offset
+    final hijriInfo = calculateHijri(date, adjustmentDays: hijriAdjustmentDays);
 
     return DailyPrayerSchedule(
       date: date,
@@ -697,18 +736,45 @@ class PrayerTimeCalculator {
       sehriEnd: sehriDate,
       iftar: iftarDate,
       tahajjudStart: tahajjudStart,
-      hijriDate: hijri,
+      hijriDate: hijriInfo.formattedBn,
+      hijriDay: hijriInfo.day,
+      hijriMonth: hijriInfo.month,
+      hijriYear: hijriInfo.year,
+      hijriMonthBn: hijriInfo.monthNameBn,
+      hijriMonthEn: hijriInfo.monthNameEn,
+      hijriDateBn: hijriInfo.formattedBn,
+      hijriDateEn: hijriInfo.formattedEn,
     );
   }
 
-  static String _calculateHijri(DateTime date) {
-    // Kuwaiti Algorithm for Hijri date
-    final jd = _julianDate(date.year, date.month, date.day) + 0.5;
+  /// Converts ASCII digits to Bengali digits (e.g. 1448 -> ১৪৪৮)
+  static String toBanglaDigits(dynamic input) {
+    const enToBn = {
+      '0': '০',
+      '1': '১',
+      '2': '২',
+      '3': '৩',
+      '4': '৪',
+      '5': '৫',
+      '6': '৬',
+      '7': '৭',
+      '8': '৮',
+      '9': '৯',
+    };
+    return input.toString().split('').map((char) => enToBn[char] ?? char).join('');
+  }
+
+  /// Accurate Kuwaiti Algorithm for Hijri date conversion.
+  /// [adjustmentDays]: In Bangladesh (Islamic Foundation), moon sighting is typically
+  /// 1 day behind the astronomical/Saudi tabular calendar (default: -1).
+  static HijriDateInfo calculateHijri(DateTime date, {int adjustmentDays = -1}) {
+    final adjustedDate = date.add(Duration(days: adjustmentDays));
+    final jd = _julianDate(adjustedDate.year, adjustedDate.month, adjustedDate.day) + 0.5;
     final l = (jd - 1948440 + 10632).floor();
     final n = ((l - 1) / 10631).floor();
     final l2 = l - 10631 * n + 354;
-    final j = ((10985 - l2) / 5316).floor() * ((50 * l2 + 17719) / 17719).floor() +
-        (l2 / 5670).floor() * ((43 * l2 + 15238) / 15238).floor();
+    final j = ((10985 - l2) / 5316).floor() * ((50 * l2) / 17719).floor() +
+        (l2 / 5670).floor() * ((43 * l2) / 15238).floor();
     final l3 = l2 - ((30 - j) / 15).floor() * ((17719 * j) / 50).floor() -
         (j / 16).floor() * ((15238 * j) / 43).floor() + 29;
     final month = ((24 * l3) / 709).floor();
@@ -730,9 +796,39 @@ class PrayerTimeCalculator {
       'জিলহজ্জ'
     ];
 
+    const islamicMonthsEn = [
+      'Muharram',
+      'Safar',
+      'Rabi al-Awwal',
+      'Rabi al-Thani',
+      'Jumada al-Awwal',
+      'Jumada al-Thani',
+      'Rajab',
+      'Sha\'ban',
+      'Ramadan',
+      'Shawwal',
+      'Dhu al-Qi\'dah',
+      'Dhu al-Hijjah'
+    ];
+
     final mIdx = (month - 1).clamp(0, 11);
-    final mName = islamicMonthsBn[mIdx];
-    return '$day $mName $year হিজরি';
+    final monthBn = islamicMonthsBn[mIdx];
+    final monthEn = islamicMonthsEn[mIdx];
+    final dayBn = toBanglaDigits(day);
+    final yearBn = toBanglaDigits(year);
+
+    final hijriDateBn = '$dayBn $monthBn $yearBn হিজরি';
+    final hijriDateEn = '$day $monthEn $year AH';
+
+    return HijriDateInfo(
+      day: day,
+      month: month,
+      year: year,
+      monthNameBn: monthBn,
+      monthNameEn: monthEn,
+      formattedBn: hijriDateBn,
+      formattedEn: hijriDateEn,
+    );
   }
 
   /// Formats remaining time until next prayer accurately without ever displaying '0 m' or '0 s'.

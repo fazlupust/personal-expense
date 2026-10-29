@@ -301,7 +301,7 @@ class PrayerTasbihView extends StatelessWidget {
     final currentWaqt = c.currentWaqt ?? schedule.getCurrentWaqt(now);
     final nextPrayer = c.nextPrayer ?? schedule.getNextPrayer(now);
 
-    final gregorianDateStr = DateFormat('EEEE, d MMMM yyyy').format(now);
+    final gregorianDateStr = DateFormat('EEEE, d MMMM yyyy', isBn ? 'bn' : 'en').format(now);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -420,7 +420,7 @@ class PrayerTasbihView extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        schedule.hijriDate,
+                        isBn ? schedule.hijriDateBn : schedule.hijriDateEn,
                         style: TextStyle(
                           fontSize: 16.5,
                           fontWeight: FontWeight.w800,
@@ -438,6 +438,59 @@ class PrayerTasbihView extends StatelessWidget {
                       ),
                     ],
                   ),
+                ),
+                PopupMenuButton<int>(
+                  tooltip: isBn ? 'হিজরি তারিখ সমন্বয়' : 'Adjust Hijri Date',
+                  icon: Icon(Icons.tune_rounded, color: p.income, size: 20),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  color: p.card,
+                  onSelected: (offset) => c.setHijriOffset(offset),
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: -2,
+                      child: Text(
+                        isBn ? 'সমন্বয়: -২ দিন' : 'Offset: -2 days',
+                        style: TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: c.hijriOffsetDays == -2 ? FontWeight.w800 : FontWeight.w500,
+                          color: c.hijriOffsetDays == -2 ? p.income : p.ink,
+                        ),
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: -1,
+                      child: Text(
+                        isBn ? 'সমন্বয়: -১ দিন (বাংলাদেশ)' : 'Offset: -1 day (Bangladesh)',
+                        style: TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: c.hijriOffsetDays == -1 ? FontWeight.w800 : FontWeight.w500,
+                          color: c.hijriOffsetDays == -1 ? p.income : p.ink,
+                        ),
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 0,
+                      child: Text(
+                        isBn ? 'সমন্বয়: ০ দিন (সৌদি / গ্লোবাল)' : 'Offset: 0 days (Saudi / Global)',
+                        style: TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: c.hijriOffsetDays == 0 ? FontWeight.w800 : FontWeight.w500,
+                          color: c.hijriOffsetDays == 0 ? p.income : p.ink,
+                        ),
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 1,
+                      child: Text(
+                        isBn ? 'সমন্বয়: +১ দিন' : 'Offset: +1 day',
+                        style: TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: c.hijriOffsetDays == 1 ? FontWeight.w800 : FontWeight.w500,
+                          color: c.hijriOffsetDays == 1 ? p.income : p.ink,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

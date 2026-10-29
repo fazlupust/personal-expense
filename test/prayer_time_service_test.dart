@@ -174,5 +174,51 @@ void main() {
       expect(sunset20.bufferMinutes, equals(20));
       expect(sunset20.end.difference(sunset20.start).inMinutes, equals(20));
     });
+
+    test('Calculates accurate Hijri date (month, day, year) with BD offset', () {
+      final oct29 = DateTime(2026, 10, 29);
+      final schedule = PrayerTimeCalculator.calculate(
+        date: oct29,
+        location: BangladeshLocation.defaultLocation,
+        hijriAdjustmentDays: -1, // Bangladesh standard offset
+      );
+
+      // Verify year is 1448 AH (NOT 1449)
+      expect(schedule.hijriYear, equals(1448));
+
+      // Verify month is Jumada al-Awwal (month 5, NOT Muharram)
+      expect(schedule.hijriMonth, equals(5));
+      expect(schedule.hijriMonthBn, equals('জমাদিউল আউয়াল'));
+      expect(schedule.hijriMonthEn, equals('Jumada al-Awwal'));
+
+      // Verify day is 16 in Bangladesh
+      expect(schedule.hijriDay, equals(16));
+
+      // Verify Bengali numerals and string formatting
+      expect(schedule.hijriDateBn, equals('১৬ জমাদিউল আউয়াল ১৪৪৮ হিজরি'));
+      expect(schedule.hijriDateEn, equals('16 Jumada al-Awwal 1448 AH'));
+      expect(schedule.hijriDate, equals('১৬ জমাদিউল আউয়াল ১৪৪৮ হিজরি'));
+
+      // Test historical Bangladesh Islamic dates
+      // Ramadan 1, 1445 AH (March 12, 2024 in BD)
+      final ramadan2024 = PrayerTimeCalculator.calculateHijri(DateTime(2024, 3, 12), adjustmentDays: -1);
+      expect(ramadan2024.day, equals(1));
+      expect(ramadan2024.month, equals(9));
+      expect(ramadan2024.monthNameBn, equals('রমজান'));
+      expect(ramadan2024.year, equals(1445));
+
+      // Eid al-Fitr 1445 AH (April 11, 2024 in BD)
+      final eid2024 = PrayerTimeCalculator.calculateHijri(DateTime(2024, 4, 11), adjustmentDays: -1);
+      expect(eid2024.day, equals(1));
+      expect(eid2024.month, equals(10));
+      expect(eid2024.monthNameBn, equals('শাওয়াল'));
+      expect(eid2024.year, equals(1445));
+
+      // Global / Saudi offset (0 adjustment) for Oct 29, 2026 is 17 Jumada al-Awwal 1448
+      final saudiDate = PrayerTimeCalculator.calculateHijri(oct29, adjustmentDays: 0);
+      expect(saudiDate.day, equals(17));
+      expect(saudiDate.month, equals(5));
+      expect(saudiDate.year, equals(1448));
+    });
   });
 }

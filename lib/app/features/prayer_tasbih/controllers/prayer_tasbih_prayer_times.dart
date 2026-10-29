@@ -8,12 +8,21 @@ extension PrayerTasbihPrayerTimes on PrayerTasbihController {
       date: now,
       location: _selectedLocation,
       isHanafi: _isHanafi,
+      hijriAdjustmentDays: _hijriOffsetDays,
     );
     _updatePrayerCountdown();
   }
 
   void _updatePrayerCountdown() {
     final now = DateTime.now();
+    // Midnight rollover: recalculate if day changed
+    if (now.year != _schedule.date.year ||
+        now.month != _schedule.date.month ||
+        now.day != _schedule.date.day) {
+      _recalculatePrayerTimes();
+      return;
+    }
+
     final newCurrentWaqt = _schedule.getCurrentWaqt(now);
     final newNextPrayer = _schedule.getNextPrayer(now);
 
@@ -47,6 +56,14 @@ extension PrayerTasbihPrayerTimes on PrayerTasbihController {
     _isHanafi = !_isHanafi;
     _recalculatePrayerTimes();
     _saveLocation();
+  }
+
+  Future<void> setHijriOffset(int offset) async {
+    _hijriOffsetDays = offset;
+    _recalculatePrayerTimes();
+    update();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_userKey('prayer_hijri_offset', _currentUid), _hijriOffsetDays);
   }
 
   Future<void> toggleProhibitedAlert() async {

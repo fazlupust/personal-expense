@@ -338,6 +338,7 @@ extension PrayerTasbihFirestoreSync on PrayerTasbihController {
     final locationId = prefs.getString(_userKey('prayer_location_id', uid)) ?? 'dhaka';
     _selectedLocation = BangladeshLocation.findById(locationId);
     _isHanafi = prefs.getBool(_userKey('prayer_is_hanafi', uid)) ?? true;
+    _hijriOffsetDays = prefs.getInt(_userKey('prayer_hijri_offset', uid)) ?? -1;
     _recalculatePrayerTimes();
 
     _isVibrationEnabled = prefs.getBool(_userKey('tasbih_vibrate', uid)) ?? true;

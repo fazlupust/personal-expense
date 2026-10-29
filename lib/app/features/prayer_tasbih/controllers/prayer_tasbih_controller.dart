@@ -126,6 +126,9 @@ class PrayerTasbihController extends GetxController {
   bool _isHanafi = true;
   bool get isHanafi => _isHanafi;
 
+  int _hijriOffsetDays = -1;
+  int get hijriOffsetDays => _hijriOffsetDays;
+
   late DailyPrayerSchedule _schedule;
   DailyPrayerSchedule get schedule => _schedule;
 
