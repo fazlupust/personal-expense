@@ -8,7 +8,7 @@ import '../../../data/models/tasbih_entry_model.dart';
 import '../../../routes/app_routes.dart';
 import '../controllers/prayer_tasbih_controller.dart';
 
-class TasbihHistoryView extends StatelessWidget {
+class TasbihHistoryView extends StatefulWidget {
   const TasbihHistoryView({super.key});
 
   static String formatDateLabel(String dateStr, bool isBn) {
@@ -36,12 +36,33 @@ class TasbihHistoryView extends StatelessWidget {
   }
 
   @override
+  State<TasbihHistoryView> createState() => _TasbihHistoryViewState();
+}
+
+class _TasbihHistoryViewState extends State<TasbihHistoryView> {
+  late final TextEditingController _searchCtrl;
+  final RxString _searchQuery = ''.obs;
+  final RxInt _selectedTab = 0.obs; // 0 = Zikir Overview, 1 = Daily History Logs
+
+  @override
+  void initState() {
+    super.initState();
+    _searchCtrl = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  String formatDateLabel(String dateStr, bool isBn) =>
+      TasbihHistoryView.formatDateLabel(dateStr, isBn);
+
+  @override
   Widget build(BuildContext context) {
     final p = context.pal;
     final isBn = Get.locale?.languageCode == 'bn';
-    final searchCtrl = TextEditingController();
-    final searchQuery = ''.obs;
-    final selectedTab = 0.obs; // 0 = Zikir Overview, 1 = Daily History Logs
 
     return GetBuilder<PrayerTasbihController>(
       init: Get.isRegistered<PrayerTasbihController>()
@@ -106,12 +127,12 @@ class TasbihHistoryView extends StatelessWidget {
                         Expanded(
                           child: InkWell(
                             borderRadius: BorderRadius.circular(9),
-                            onTap: () => selectedTab.value = 0,
+                            onTap: () => _selectedTab.value = 0,
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 180),
                               padding: const EdgeInsets.symmetric(vertical: 9.5),
                               decoration: BoxDecoration(
-                                gradient: selectedTab.value == 0
+                                gradient: _selectedTab.value == 0
                                     ? const LinearGradient(
                                         colors: [Color(0xFF0D9488), Color(0xFF10B981)],
                                         begin: Alignment.topLeft,
@@ -119,7 +140,7 @@ class TasbihHistoryView extends StatelessWidget {
                                       )
                                     : null,
                                 borderRadius: BorderRadius.circular(9),
-                                boxShadow: selectedTab.value == 0
+                                boxShadow: _selectedTab.value == 0
                                     ? [
                                         BoxShadow(
                                           color: const Color(0xFF10B981).withOpacity(0.30),
@@ -136,7 +157,7 @@ class TasbihHistoryView extends StatelessWidget {
                                   Icon(
                                     Icons.format_list_bulleted_rounded,
                                     size: 17,
-                                    color: selectedTab.value == 0 ? Colors.white : p.mute,
+                                    color: _selectedTab.value == 0 ? Colors.white : p.mute,
                                   ),
                                   const SizedBox(width: 6),
                                   Flexible(
@@ -147,7 +168,7 @@ class TasbihHistoryView extends StatelessWidget {
                                       style: TextStyle(
                                         fontSize: 14.5,
                                         fontWeight: FontWeight.w700,
-                                        color: selectedTab.value == 0 ? Colors.white : p.ink,
+                                        color: _selectedTab.value == 0 ? Colors.white : p.ink,
                                       ),
                                     ),
                                   ),
@@ -159,12 +180,12 @@ class TasbihHistoryView extends StatelessWidget {
                         Expanded(
                           child: InkWell(
                             borderRadius: BorderRadius.circular(9),
-                            onTap: () => selectedTab.value = 1,
+                            onTap: () => _selectedTab.value = 1,
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 180),
                               padding: const EdgeInsets.symmetric(vertical: 9.5),
                               decoration: BoxDecoration(
-                                gradient: selectedTab.value == 1
+                                gradient: _selectedTab.value == 1
                                     ? const LinearGradient(
                                         colors: [Color(0xFF0D9488), Color(0xFF10B981)],
                                         begin: Alignment.topLeft,
@@ -172,7 +193,7 @@ class TasbihHistoryView extends StatelessWidget {
                                       )
                                     : null,
                                 borderRadius: BorderRadius.circular(9),
-                                boxShadow: selectedTab.value == 1
+                                boxShadow: _selectedTab.value == 1
                                     ? [
                                         BoxShadow(
                                           color: const Color(0xFF10B981).withOpacity(0.30),
@@ -189,7 +210,7 @@ class TasbihHistoryView extends StatelessWidget {
                                   Icon(
                                     Icons.cloud_sync_rounded,
                                     size: 17,
-                                    color: selectedTab.value == 1 ? Colors.white : p.mute,
+                                    color: _selectedTab.value == 1 ? Colors.white : p.mute,
                                   ),
                                   const SizedBox(width: 6),
                                   Flexible(
@@ -200,7 +221,7 @@ class TasbihHistoryView extends StatelessWidget {
                                       style: TextStyle(
                                         fontSize: 14.5,
                                         fontWeight: FontWeight.w700,
-                                        color: selectedTab.value == 1 ? Colors.white : p.ink,
+                                        color: _selectedTab.value == 1 ? Colors.white : p.ink,
                                       ),
                                     ),
                                   ),
@@ -215,14 +236,14 @@ class TasbihHistoryView extends StatelessWidget {
 
                   // Content Body
                   Expanded(
-                    child: selectedTab.value == 0
+                    child: _selectedTab.value == 0
                         ? _buildZikirOverviewTab(
                             context: context,
                             c: c,
                             p: p,
                             isBn: isBn,
-                            searchCtrl: searchCtrl,
-                            searchQuery: searchQuery,
+                            searchCtrl: _searchCtrl,
+                            searchQuery: _searchQuery,
                             totalCount: totalCount,
                             maxCount: maxCount,
                           )
@@ -233,7 +254,7 @@ class TasbihHistoryView extends StatelessWidget {
                             isBn: isBn,
                             onSelectDate: (dateKey) {
                               c.selectHistoryDate(dateKey);
-                              selectedTab.value = 0;
+                              _selectedTab.value = 0;
                             },
                           ),
                   ),
@@ -844,7 +865,7 @@ class TasbihHistoryView extends StatelessWidget {
                             onTap: () {
                               setState(() {
                                 tempYear = y;
-                                if (tempMonth == null) tempMonth = now.month;
+                                tempMonth ??= now.month;
                               });
                             },
                             child: AnimatedContainer(

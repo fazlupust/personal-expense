@@ -459,7 +459,7 @@ class TasbihCounterView extends StatelessWidget {
         ),
       ),
       isScrollControlled: true,
-    );
+    ).whenComplete(() => searchCtrl.dispose());
   }
 
   @override
@@ -1325,7 +1325,7 @@ class TasbihCounterView extends StatelessWidget {
     if (cycleStep == 0) {
       currentPhaseText = 'শুরু করুন: ১ম পর্ব - সুবহানাল্লাহ (৩৩ বার)';
     } else if (cycleStep <= 33) {
-      currentPhaseText = '১ম পর্ব: সুবহানাল্লাহ (${cycleStep}/৩৩ বার)';
+      currentPhaseText = '১ম পর্ব: সুবহানাল্লাহ ($cycleStep/৩৩ বার)';
     } else if (cycleStep <= 66) {
       currentPhaseText = '২য় পর্ব: আলহামদুলিল্লাহ (${cycleStep - 33}/৩৩ বার)';
     } else if (cycleStep <= 99) {
@@ -1597,7 +1597,7 @@ class TasbihCounterView extends StatelessWidget {
     } else if (cycleStep == 0) {
       currentPhaseText = 'শুরু: ব্যথার স্থানে হাত রেখে ৩ বার বলুন';
     } else if (cycleStep <= 3) {
-      currentPhaseText = '১ম পর্ব: বিসমিল্লাহ (${cycleStep}/৩ বার)';
+      currentPhaseText = '১ম পর্ব: বিসমিল্লাহ ($cycleStep/৩ বার)';
     } else {
       currentPhaseText = '২য় পর্ব: দোয়া (${cycleStep - 3}/৭ বার)';
     }

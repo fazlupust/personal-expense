@@ -46,7 +46,6 @@ class _WeatherCheckSheetContentState extends State<_WeatherCheckSheetContent> {
     final p = context.pal;
     final isBn = Get.locale?.languageCode == 'bn';
     final ws = WeatherService.to;
-    final settings = Get.find<SettingsController>();
 
     // Calculate sunrise / sunset for the selected city
     final loc = _findLocation(_selectedCity);
