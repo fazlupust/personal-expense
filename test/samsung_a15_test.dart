@@ -335,5 +335,72 @@ void main() {
     expect(tester.takeException(), isNull, reason: 'DataExportSheet should render cleanly without overflow');
     expect(find.text('Export Data'.tr), findsOneWidget);
     expect(find.text('Transactions (CSV)'.tr), findsOneWidget);
+
+    // Scroll to Backup button, tap it and verify loader spinner renders while generating
+    await tester.scrollUntilVisible(
+      find.text('Backup'.tr),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Backup'.tr));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.byType(CircularProgressIndicator), findsWidgets);
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('Samsung Galaxy A15 DataExportSheet multi-tab Excel and tab-switching work cleanly', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2340);
+    tester.view.devicePixelRatio = 2.625;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        translations: AppTranslations(),
+        locale: const Locale('bn'),
+        theme: AppTheme.light,
+        home: const Scaffold(
+          body: DataExportSheet(),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Verify Tab 0 (All in One) has Multi-Tab Excel Workbook
+    expect(find.text('Multi-Tab Excel Workbook (.xlsx)'.tr), findsOneWidget);
+    expect(find.text('Share Excel'.tr), findsAtLeastNWidgets(1));
+
+    // Tap Transactions tab chip (by icon to distinguish from summary header)
+    await tester.tap(find.byIcon(Icons.table_chart_rounded).first);
+    await tester.pumpAndSettle();
+    expect(find.text('Transactions (Excel .xlsx)'.tr), findsOneWidget);
+
+    // Tap Notes & Debts tab chip
+    await tester.tap(find.byIcon(Icons.note_alt_rounded).first);
+    await tester.pumpAndSettle();
+    expect(find.text('Notes & Debts (Excel .xlsx)'.tr), findsOneWidget);
+
+    // Tap Zikir tab chip
+    await tester.ensureVisible(find.byIcon(Icons.fingerprint_rounded).first);
+    await tester.tap(find.byIcon(Icons.fingerprint_rounded).first);
+    await tester.pumpAndSettle();
+    expect(find.text('Zikir & Tasbih (Excel .xlsx)'.tr), findsOneWidget);
+
+    // Switch back to All in One
+    await tester.ensureVisible(find.byIcon(Icons.layers_rounded).first);
+    await tester.tap(find.byIcon(Icons.layers_rounded).first);
+    await tester.pumpAndSettle();
+    expect(find.text('Multi-Tab Excel Workbook (.xlsx)'.tr), findsOneWidget);
+
+    // Tap Preview Tabs icon
+    await tester.tap(find.byTooltip('Preview Tabs'.tr));
+    await tester.pumpAndSettle();
+    expect(find.text('Worksheet Tabs'.tr), findsOneWidget);
+    expect(find.text('Tab 1: Transactions'.tr), findsOneWidget);
+    expect(find.text('Tab 2: Notes & Debts'.tr), findsOneWidget);
+    expect(find.text('Tab 3: Zikir & Tasbih'.tr), findsOneWidget);
   });
 }

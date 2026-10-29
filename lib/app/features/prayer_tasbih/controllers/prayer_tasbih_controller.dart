@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
@@ -319,7 +320,9 @@ class PrayerTasbihController extends GetxController {
     _loadTasbihData();
     _bindAuth();
 
-    if (!Get.testMode) {
+    final isTesting = Get.testMode || (!kIsWeb && Platform.environment.containsKey('FLUTTER_TEST'));
+    if (!isTesting) {
+      syncOnlineHijriDate();
       _countdownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
         _updatePrayerCountdown();
       });

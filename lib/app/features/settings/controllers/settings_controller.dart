@@ -27,8 +27,8 @@ class SettingsController extends GetxController {
   bool isIncomeHidden = false;
   bool showExpense = true;
   bool isExpenseHidden = false;
-  bool showPrayerCard = true;
-  bool showWeatherCard = true;
+  bool showPrayerCard = false;
+  bool showWeatherCard = false;
 
   bool get isBalanceHidden => isIncomeHidden || isExpenseHidden;
 
@@ -118,6 +118,8 @@ class SettingsController extends GetxController {
     showExpense = true;
     isIncomeHidden = false;
     isExpenseHidden = false;
+    showPrayerCard = false;
+    showWeatherCard = false;
   }
 
   @override
@@ -143,8 +145,8 @@ class SettingsController extends GetxController {
       isIncomeHidden = false;
       showExpense = true;
       isExpenseHidden = false;
-      showPrayerCard = true;
-      showWeatherCard = true;
+      showPrayerCard = false;
+      showWeatherCard = false;
       budget = 0;
       categoryBudgets = {};
       return;
@@ -158,8 +160,8 @@ class SettingsController extends GetxController {
       defaultAccount = (m['account'] as String?) ?? defaultAccount;
       showIncome = (m['show_income'] as bool?) ?? true;
       showExpense = (m['show_expense'] as bool?) ?? true;
-      showPrayerCard = (m['show_prayer_card'] as bool?) ?? true;
-      showWeatherCard = (m['show_weather_card'] as bool?) ?? true;
+      showPrayerCard = (m['show_prayer_card'] as bool?) ?? false;
+      showWeatherCard = (m['show_weather_card'] as bool?) ?? false;
       isIncomeHidden = (m['is_income_hidden'] as bool?) ?? !showIncome;
       isExpenseHidden = (m['is_expense_hidden'] as bool?) ?? !showExpense;
 

@@ -122,28 +122,38 @@ class _AccountBreakdown extends StatelessWidget {
       children: [
         for (final e in data.entries)
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 7),
+            padding: const EdgeInsets.symmetric(vertical: 8),
             child: Row(
               children: [
                 SizedBox(
-                  width: 100,
-                  child: Text(e.key.tr,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 13, color: p.mute)),
+                  width: 95,
+                  child: Text(
+                    e.key.tr,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 15.5,
+                      fontWeight: FontWeight.w700,
+                      color: p.ink,
+                    ),
+                  ),
                 ),
                 Expanded(
                   child: Text(
                     '${'In'.tr} ${Fmt.money(e.value[0])} · ${'Out'.tr} ${Fmt.money(e.value[1])}',
-                    style: TextStyle(fontSize: 12, color: p.mute),
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w500,
+                      color: p.mute,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Text(
                   '${e.value[0] - e.value[1] < 0 ? '−' : ''}${Fmt.money((e.value[0] - e.value[1]).abs())}',
                   style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 15.5,
+                    fontWeight: FontWeight.w800,
                     color: e.value[0] - e.value[1] < 0 ? p.expense : p.income,
                   ),
                 ),

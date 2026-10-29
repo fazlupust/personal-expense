@@ -21,6 +21,9 @@ class NotesView extends StatelessWidget {
       appBar: CustomAppBar(
         title: 'Personal Notes & Debts'.tr,
         showBackButton: true,
+        showLanguageToggle: false,
+        showThemeToggle: false,
+        showLogout: false,
         actions: [
           GetBuilder<NotesController>(
             builder: (c) => IconButton(
@@ -153,14 +156,19 @@ class NotesView extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              'Total Calculated Amount'.tr,
-                              style: TextStyle(
-                                fontSize: 13.5,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.white.withOpacity(0.85),
+                            Expanded(
+                              child: Text(
+                                'Total Calculated Amount'.tr,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.white.withOpacity(0.85),
+                                ),
                               ),
                             ),
+                            const SizedBox(width: 8),
                             InkWell(
                               onTap: c.toggleAmountVisibility,
                               borderRadius: BorderRadius.circular(12),

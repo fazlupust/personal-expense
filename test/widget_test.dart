@@ -1,14 +1,18 @@
+import 'dart:convert';
+import 'package:archive/archive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:personal_expense/app/data/models/category_model.dart';
 import 'package:personal_expense/app/data/models/entry_type.dart';
 import 'package:personal_expense/app/data/models/note_model.dart';
+import 'package:personal_expense/app/data/models/transaction_model.dart';
 import 'package:personal_expense/app/data/models/user_model.dart';
 import 'package:personal_expense/app/data/services/app_update_service.dart';
 import 'package:get/get.dart';
 import 'package:personal_expense/app/features/categories/controllers/categories_controller.dart';
 import 'package:personal_expense/app/features/notes/controllers/notes_controller.dart';
 import 'package:personal_expense/app/features/settings/controllers/settings_controller.dart';
+import 'package:personal_expense/app/features/settings/views/components/data_export_sheet.dart';
 import 'package:personal_expense/app/features/transactions/controllers/entry_form_controller.dart';
 import 'package:personal_expense/app/features/transactions/controllers/transactions_controller.dart';
 import 'package:personal_expense/app/core/constants/app_constants.dart';
@@ -241,25 +245,24 @@ void main() {
     });
 
     test('setShowPrayerCard toggles showPrayerCard and persists state', () async {
-      expect(settings.showPrayerCard, isTrue);
-
-      settings.setShowPrayerCard(false);
+      // Default on install is false (user opts in via checkbox)
       expect(settings.showPrayerCard, isFalse);
 
-      settings.togglePrayerCardVisibility();
+      settings.setShowPrayerCard(true);
       expect(settings.showPrayerCard, isTrue);
 
-      settings.setShowPrayerCard(false);
+      settings.togglePrayerCardVisibility();
+      expect(settings.showPrayerCard, isFalse);
+
+      settings.setShowPrayerCard(true);
       final restored = SettingsController(prefs);
       restored.onInit();
-      expect(restored.showPrayerCard, isFalse);
+      expect(restored.showPrayerCard, isTrue);
       restored.dispose();
     });
 
     test('visibility states persist to SharedPreferences across app reload', () async {
-      settings.toggleBalanceVisibility(); // isBalanceHidden = true
-      settings.toggleIncomeVisibility();  // isIncomeHidden = true
-      settings.toggleExpenseVisibility(); // isExpenseHidden = true
+      settings.toggleBalanceVisibility(); // Sets isIncomeHidden and isExpenseHidden to true -> isBalanceHidden is true
 
       // Verify that re-initializing with the same SharedPreferences preserves all 3 hidden states
       final restored = SettingsController(prefs);
@@ -678,7 +681,7 @@ void main() {
       entryFormCtrl.noteCtrl.text = 'Lunch with 20 tk';
 
       // Saving should succeed (return true) without blocking
-      final success = entryFormCtrl.save();
+      final success = await entryFormCtrl.save();
       expect(success, isTrue, reason: 'Expense saving must never be blocked even if budget is exceeded');
 
       // Verify transaction was added to entries
@@ -693,6 +696,86 @@ void main() {
       Get.delete<SettingsController>();
       Get.delete<TransactionsController>();
       Get.delete<CategoriesController>();
+    });
+  });
+
+  group('Excel and CSV Data Export Font & Encoding Tests', () {
+    testWidgets('DataExportSheet generates UTF-8 BOM CSV and Calibri font Excel without square boxes', (tester) async {
+      // Set locale to Bengali to ensure Bengali app language doesn't convert export dates to Bangla numerals
+      Get.locale = const Locale('bn');
+
+      final prefs = await SharedPreferences.getInstance();
+      final settings = SettingsController(prefs);
+      Get.put<SettingsController>(settings);
+
+      final txCtrl = TransactionsController();
+      Get.put<TransactionsController>(txCtrl);
+      // Add a test entry with Bengali note
+      final now = DateTime(2026, 10, 29, 14, 30);
+      await txCtrl.save(
+        TransactionModel(
+          id: 'test_tx_1',
+          userId: 'user_test',
+          categoryId: 'groceries',
+          categoryNameBn: 'মুদি বাজার',
+          categoryNameEn: 'Groceries',
+          type: EntryType.expense,
+          amount: 250.0,
+          account: 'Cash',
+          noteBn: 'আলু, পেঁয়াজ এবং কাঁচামরিচ ক্রয়',
+          noteEn: 'Groceries purchase',
+          date: now,
+        ),
+      );
+
+      final notesCtrl = NotesController();
+      Get.put<NotesController>(notesCtrl);
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: DataExportSheet(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final state = tester.state(find.byType(DataExportSheet));
+      expect(state, isNotNull);
+
+      // Verify that CSV generation starts with UTF-8 BOM (\uFEFF) and uses ASCII numbers for date/time
+      final csv = DataExportSheet.generateTransactionsCsv(txCtrl);
+      expect(csv.startsWith('\uFEFF'), isTrue, reason: 'CSV must start with UTF-8 BOM for Microsoft Excel compatibility');
+      expect(csv.contains('2026-10-29'), isTrue, reason: 'Date must be standard ISO ASCII digits');
+      expect(csv.contains('02:30 PM'), isTrue, reason: 'Time must be standard 12-hour ASCII digits');
+      expect(csv.contains('আলু, পেঁয়াজ এবং কাঁচামরিচ ক্রয়'), isTrue, reason: 'Bengali note must be preserved in CSV');
+
+      // Verify that Multi-Tab Excel has patched Calibri font in xl/styles.xml and ASCII dates
+      final excelBytes = DataExportSheet.generateMultiTabExcel(txCtrl, notesCtrl, null);
+      expect(excelBytes, isNotNull);
+      final archive = ZipDecoder().decodeBytes(excelBytes!);
+      final stylesFile = archive.findFile('xl/styles.xml');
+      expect(stylesFile, isNotNull);
+      final stylesXml = utf8.decode(stylesFile!.content as List<int>);
+      expect(stylesXml.contains('Calibri'), isTrue, reason: 'Excel default font must be Calibri for universal Bengali rendering');
+      expect(stylesXml.contains('Arial'), isFalse, reason: 'Default Arial font must be replaced with Calibri');
+      expect(stylesXml.contains('<font/>'), isFalse, reason: 'Empty font tags must be replaced with complete font definition');
+      expect(stylesXml.contains('charset val="1"'), isTrue, reason: 'Charset 1 (Unicode default) must be present for Bengali glyph linking');
+
+      // Verify sharedStrings has English ISO date and preserved Bengali note
+      final stringsFile = archive.findFile('xl/sharedStrings.xml');
+      expect(stringsFile, isNotNull);
+      final stringsXml = utf8.decode(stringsFile!.content as List<int>);
+      expect(stringsXml.contains('2026-10-29'), isTrue, reason: 'Date in Excel must be standard ISO ASCII date');
+      expect(stringsXml.contains('02:30 PM'), isTrue, reason: 'Time in Excel must be standard ASCII time');
+      expect(stringsXml.contains('আলু, পেঁয়াজ এবং কাঁচামরিচ ক্রয়'), isTrue, reason: 'Bengali note must be in sharedStrings');
+
+      settings.dispose();
+      txCtrl.dispose();
+      notesCtrl.dispose();
+      Get.delete<SettingsController>();
+      Get.delete<TransactionsController>();
+      Get.delete<NotesController>();
     });
   });
 }

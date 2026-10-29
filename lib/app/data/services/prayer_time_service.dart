@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 import 'dart:math' as math;
 import 'package:intl/intl.dart';
 
@@ -380,6 +383,7 @@ class DailyPrayerSchedule {
   final String hijriMonthEn;
   final String hijriDateBn;
   final String hijriDateEn;
+  final bool isOnlineSynced;
 
   DailyPrayerSchedule({
     required this.date,
@@ -401,9 +405,56 @@ class DailyPrayerSchedule {
     this.hijriMonthEn = '',
     this.hijriDateBn = '',
     this.hijriDateEn = '',
+    this.isOnlineSynced = false,
   });
 
   String formatHijriDate({bool isBn = true}) => isBn ? hijriDateBn : hijriDateEn;
+
+  DailyPrayerSchedule copyWith({
+    DateTime? date,
+    BangladeshLocation? location,
+    DateTime? fajr,
+    DateTime? sunrise,
+    DateTime? dhuhr,
+    DateTime? asr,
+    DateTime? maghrib,
+    DateTime? isha,
+    DateTime? sehriEnd,
+    DateTime? iftar,
+    DateTime? tahajjudStart,
+    String? hijriDate,
+    int? hijriDay,
+    int? hijriMonth,
+    int? hijriYear,
+    String? hijriMonthBn,
+    String? hijriMonthEn,
+    String? hijriDateBn,
+    String? hijriDateEn,
+    bool? isOnlineSynced,
+  }) {
+    return DailyPrayerSchedule(
+      date: date ?? this.date,
+      location: location ?? this.location,
+      fajr: fajr ?? this.fajr,
+      sunrise: sunrise ?? this.sunrise,
+      dhuhr: dhuhr ?? this.dhuhr,
+      asr: asr ?? this.asr,
+      maghrib: maghrib ?? this.maghrib,
+      isha: isha ?? this.isha,
+      sehriEnd: sehriEnd ?? this.sehriEnd,
+      iftar: iftar ?? this.iftar,
+      tahajjudStart: tahajjudStart ?? this.tahajjudStart,
+      hijriDate: hijriDate ?? this.hijriDate,
+      hijriDay: hijriDay ?? this.hijriDay,
+      hijriMonth: hijriMonth ?? this.hijriMonth,
+      hijriYear: hijriYear ?? this.hijriYear,
+      hijriMonthBn: hijriMonthBn ?? this.hijriMonthBn,
+      hijriMonthEn: hijriMonthEn ?? this.hijriMonthEn,
+      hijriDateBn: hijriDateBn ?? this.hijriDateBn,
+      hijriDateEn: hijriDateEn ?? this.hijriDateEn,
+      isOnlineSynced: isOnlineSynced ?? this.isOnlineSynced,
+    );
+  }
 
   List<PrayerTimeItem> get items => [
         PrayerTimeItem(
@@ -829,6 +880,119 @@ class PrayerTimeCalculator {
       formattedBn: hijriDateBn,
       formattedEn: hijriDateEn,
     );
+  }
+
+  /// Creates formatted HijriDateInfo from given day, month, and year.
+  static HijriDateInfo createHijriInfo({
+    required int day,
+    required int month,
+    required int year,
+  }) {
+    const islamicMonthsBn = [
+      'মুহাররম',
+      'সফর',
+      'রবিউল আউয়াল',
+      'রবিউস সানি',
+      'জমাদিউল আউয়াল',
+      'জমাদিউস সানি',
+      'রজব',
+      'শাবান',
+      'রমজান',
+      'শাওয়াল',
+      'জিলকদ',
+      'জিলহজ্জ'
+    ];
+
+    const islamicMonthsEn = [
+      'Muharram',
+      'Safar',
+      'Rabi al-Awwal',
+      'Rabi al-Thani',
+      'Jumada al-Awwal',
+      'Jumada al-Thani',
+      'Rajab',
+      'Sha\'ban',
+      'Ramadan',
+      'Shawwal',
+      'Dhu al-Qi\'dah',
+      'Dhu al-Hijjah'
+    ];
+
+    final mIdx = (month - 1).clamp(0, 11);
+    final monthBn = islamicMonthsBn[mIdx];
+    final monthEn = islamicMonthsEn[mIdx];
+    final dayBn = toBanglaDigits(day);
+    final yearBn = toBanglaDigits(year);
+
+    final hijriDateBn = '$dayBn $monthBn $yearBn হিজরি';
+    final hijriDateEn = '$day $monthEn $year AH';
+
+    return HijriDateInfo(
+      day: day,
+      month: month,
+      year: year,
+      monthNameBn: monthBn,
+      monthNameEn: monthEn,
+      formattedBn: hijriDateBn,
+      formattedEn: hijriDateEn,
+    );
+  }
+
+  /// Fetches verified online Hijri date from Aladhan API with timeout.
+  /// Returns null if offline or on network failure.
+  static Future<HijriDateInfo?> fetchOnlineHijriDate(DateTime date, {int adjustmentDays = -1}) async {
+    try {
+      final dateStr = DateFormat('dd-MM-yyyy').format(date);
+      final url = Uri.parse('https://api.aladhan.com/v1/timingsByCity/$dateStr?city=Dhaka&country=Bangladesh&method=1');
+
+      final client = HttpClient();
+      client.connectionTimeout = const Duration(seconds: 4);
+      final request = await client.getUrl(url);
+      final response = await request.close().timeout(const Duration(seconds: 4));
+
+      if (response.statusCode == 200) {
+        final body = await response.transform(utf8.decoder).join();
+        final data = jsonDecode(body) as Map<String, dynamic>;
+        final hijri = data['data']?['date']?['hijri'] as Map<String, dynamic>?;
+        if (hijri != null) {
+          final rawDay = int.tryParse(hijri['day']?.toString() ?? '');
+          final rawMonth = int.tryParse(hijri['month']?['number']?.toString() ?? '');
+          final rawYear = int.tryParse(hijri['year']?.toString() ?? '');
+
+          if (rawDay != null && rawMonth != null && rawYear != null) {
+            // Apply Bangladesh regional offset (default: -1 day from Saudi HJCoSA calendar)
+            var adjustedDay = rawDay + adjustmentDays;
+            var adjustedMonth = rawMonth;
+            var adjustedYear = rawYear;
+
+            if (adjustedDay < 1) {
+              adjustedMonth -= 1;
+              if (adjustedMonth < 1) {
+                adjustedMonth = 12;
+                adjustedYear -= 1;
+              }
+              adjustedDay += 30;
+            } else if (adjustedDay > 30) {
+              adjustedDay -= 30;
+              adjustedMonth += 1;
+              if (adjustedMonth > 12) {
+                adjustedMonth = 1;
+                adjustedYear += 1;
+              }
+            }
+
+            return createHijriInfo(
+              day: adjustedDay,
+              month: adjustedMonth,
+              year: adjustedYear,
+            );
+          }
+        }
+      }
+    } catch (_) {
+      // Offline or network timeout - fallback gracefully
+    }
+    return null;
   }
 
   /// Formats remaining time until next prayer accurately without ever displaying '0 m' or '0 s'.

@@ -419,13 +419,47 @@ class PrayerTasbihView extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        isBn ? schedule.hijriDateBn : schedule.hijriDateEn,
-                        style: TextStyle(
-                          fontSize: 16.5,
-                          fontWeight: FontWeight.w800,
-                          color: p.income,
-                        ),
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              isBn ? schedule.hijriDateBn : schedule.hijriDateEn,
+                              style: TextStyle(
+                                fontSize: 16.5,
+                                fontWeight: FontWeight.w800,
+                                color: p.income,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (schedule.isOnlineSynced) ...[
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 5.5, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: p.income.withOpacity(0.14),
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(color: p.income.withOpacity(0.3), width: 0.8),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.cloud_done_rounded, size: 12, color: p.income),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    'Live'.tr,
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w800,
+                                      color: p.income,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                       const SizedBox(height: 2),
                       Text(
@@ -444,8 +478,32 @@ class PrayerTasbihView extends StatelessWidget {
                   icon: Icon(Icons.tune_rounded, color: p.income, size: 20),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   color: p.card,
-                  onSelected: (offset) => c.setHijriOffset(offset),
+                  onSelected: (val) {
+                    if (val == 99) {
+                      c.syncOnlineHijriDate(force: true);
+                    } else {
+                      c.setHijriOffset(val);
+                    }
+                  },
                   itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 99,
+                      child: Row(
+                        children: [
+                          Icon(Icons.sync_rounded, size: 16, color: p.income),
+                          const SizedBox(width: 8),
+                          Text(
+                            isBn ? 'অনলাইন থেকে রি-সিঙ্ক' : 'Re-sync Online',
+                            style: TextStyle(
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w700,
+                              color: p.income,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuDivider(),
                     PopupMenuItem(
                       value: -2,
                       child: Text(

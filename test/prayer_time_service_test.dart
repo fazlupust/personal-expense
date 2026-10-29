@@ -219,6 +219,15 @@ void main() {
       expect(saudiDate.day, equals(17));
       expect(saudiDate.month, equals(5));
       expect(saudiDate.year, equals(1448));
+
+      // Test createHijriInfo helper
+      final customInfo = PrayerTimeCalculator.createHijriInfo(day: 1, month: 9, year: 1446);
+      expect(customInfo.formattedBn, equals('১ রমজান ১৪৪৬ হিজরি'));
+      expect(customInfo.formattedEn, equals('1 Ramadan 1446 AH'));
+
+      // Test copyWith for online sync
+      final updatedSchedule = schedule.copyWith(isOnlineSynced: true);
+      expect(updatedSchedule.isOnlineSynced, isTrue);
     });
   });
 }

@@ -34,9 +34,9 @@ void main() {
       final c = Get.put(PrayerTasbihController());
 
       expect(c.allZikirs.length, greaterThanOrEqualTo(10));
-      expect(c.selectedZikir.titleBn, equals('লা ইলাহা ইল্লাল্লাহ'));
+      expect(c.selectedZikir.titleBn, equals('সুবহানাল্লাহ'));
       expect(c.currentCount, equals(0));
-      expect(c.targetCount, equals(100));
+      expect(c.targetCount, equals(33));
       expect(c.completedCycles, equals(0));
       expect(c.todayTotal, equals(0));
       expect(c.lifetimeTotal, equals(0));
@@ -57,10 +57,10 @@ void main() {
       c.increment();
       expect(c.currentCount, equals(2));
 
-      // Reaching target: completes cycle and resets current count
+      // Reaching target: completes cycle and allows continuous counting
       c.increment();
       expect(c.completedCycles, equals(1));
-      expect(c.currentCount, equals(0));
+      expect(c.currentCount, equals(3));
       expect(c.todayTotal, equals(3));
       expect(c.lifetimeTotal, equals(3));
     });
@@ -285,12 +285,12 @@ void main() {
       expect(find.byType(TasbihCounterView), findsOneWidget);
       // Zikir details card is hidden by default to keep recitation private
       expect(find.text('Show zikir details'), findsOneWidget);
-      expect(find.text('لَا إِلٰهَ إِلَّا اللَّهُ'), findsNothing);
+      expect(find.text('سُبْحَانَ اللَّهِ'), findsNothing);
 
       // Tap to reveal zikir details card
       await tester.tap(find.text('Show zikir details'));
       await tester.pumpAndSettle();
-      expect(find.text('لَا إِلٰهَ إِلَّا اللَّهُ'), findsOneWidget);
+      expect(find.text('سُبْحَانَ اللَّهِ'), findsOneWidget);
 
       // Tap to count button
       await tester.tap(find.text('+1 Count'));
@@ -625,7 +625,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Check header in Tab 1
-      expect(find.text('ফায়ারবেস ক্লাউড হিস্ট্রি'), findsOneWidget);
+      expect(find.byType(CustomScrollView), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
   });

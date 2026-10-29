@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get/get.dart';
 import 'entry_type.dart';
 
 class TransactionModel {
@@ -50,8 +51,19 @@ class TransactionModel {
   }
 
   // Backward compatibility getters for existing UI
-  String get category => categoryNameEn.isNotEmpty ? categoryNameEn : categoryNameBn;
-  String get note => noteEn ?? noteBn ?? '';
+  String get category {
+    final isBn = Get.locale?.languageCode == 'bn';
+    if (isBn && categoryNameBn.isNotEmpty) return categoryNameBn;
+    if (categoryNameEn.isNotEmpty) return categoryNameEn;
+    return categoryNameBn;
+  }
+
+  String get note {
+    final isBn = Get.locale?.languageCode == 'bn';
+    if (isBn && (noteBn?.isNotEmpty ?? false)) return noteBn!;
+    if (noteEn?.isNotEmpty ?? false) return noteEn!;
+    return noteBn ?? '';
+  }
 
   Map<String, dynamic> toMap() {
     return {

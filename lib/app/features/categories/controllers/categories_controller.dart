@@ -137,10 +137,16 @@ class CategoriesController extends GetxController {
   }
 
   void onNameChanged(String val) {
+    if (nameCtrl.text != val) {
+      nameCtrl.text = val;
+    }
     _validateDuplicate();
   }
 
   void onNameBnChanged(String val) {
+    if (nameBnCtrl.text != val) {
+      nameBnCtrl.text = val;
+    }
     _validateDuplicate();
   }
 

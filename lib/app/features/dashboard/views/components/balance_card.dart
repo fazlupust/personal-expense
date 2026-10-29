@@ -31,13 +31,17 @@ class BalanceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final s = Get.isRegistered<SettingsController>() ? SettingsController.to : null;
+    final s = Get.isRegistered<SettingsController>()
+        ? SettingsController.to
+        : null;
     final incomeHidden = isIncomeHidden || (s?.isIncomeHidden ?? false);
     final expenseHidden = isExpenseHidden || (s?.isExpenseHidden ?? false);
     final hidden = isHidden || incomeHidden || expenseHidden;
     final toggle = onToggleVisibility ?? s?.toggleBalanceVisibility;
-    final toggleIncome = onToggleIncomeVisibility ?? s?.toggleIncomeVisibility ?? toggle;
-    final toggleExpense = onToggleExpenseVisibility ?? s?.toggleExpenseVisibility;
+    final toggleIncome =
+        onToggleIncomeVisibility ?? s?.toggleIncomeVisibility ?? toggle;
+    final toggleExpense =
+        onToggleExpenseVisibility ?? s?.toggleExpenseVisibility;
     final net = income - expense;
     final over = budget > 0 && expense > budget;
 
@@ -48,11 +52,7 @@ class BalanceCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
         gradient: const LinearGradient(
-          colors: [
-            Color(0xFF0F4730),
-            Color(0xFF165E40),
-            Color(0xFF207B54),
-          ],
+          colors: [Color(0xFF0F4730), Color(0xFF165E40), Color(0xFF207B54)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -63,10 +63,7 @@ class BalanceCard extends StatelessWidget {
             offset: const Offset(0, 10),
           ),
         ],
-        border: Border.all(
-          color: Colors.white.withOpacity(0.14),
-          width: 1,
-        ),
+        border: Border.all(color: Colors.white.withOpacity(0.14), width: 1),
       ),
       child: Stack(
         children: [
@@ -108,11 +105,16 @@ class BalanceCard extends StatelessWidget {
                   children: [
                     Flexible(
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.12),
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: Colors.white.withOpacity(0.15)),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.15),
+                          ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -149,7 +151,10 @@ class BalanceCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(16),
                             onTap: toggle,
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
                               margin: const EdgeInsets.only(right: 6),
                               decoration: BoxDecoration(
                                 color: Colors.white.withOpacity(0.12),
@@ -159,7 +164,9 @@ class BalanceCard extends StatelessWidget {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(
-                                    hidden ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                                    hidden
+                                        ? Icons.visibility_off_rounded
+                                        : Icons.visibility_rounded,
                                     size: 14,
                                     color: Colors.white.withOpacity(0.9),
                                   ),
@@ -177,7 +184,10 @@ class BalanceCard extends StatelessWidget {
                             ),
                           ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.10),
                             borderRadius: BorderRadius.circular(16),
@@ -221,7 +231,9 @@ class BalanceCard extends StatelessWidget {
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        hidden ? '${AppConstants.currency} ••••••' : Fmt.money(net),
+                        hidden
+                            ? '${AppConstants.currency} ••••••'
+                            : Fmt.money(net),
                         style: TextStyle(
                           fontSize: hidden ? 34 : 38,
                           fontWeight: FontWeight.w900,
@@ -284,7 +296,10 @@ class BalanceCard extends StatelessWidget {
                 if (budget > 0) ...[
                   const SizedBox(height: 16),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.black.withOpacity(0.18),
                       borderRadius: BorderRadius.circular(14),
@@ -313,18 +328,20 @@ class BalanceCard extends StatelessWidget {
                               child: Text(
                                 (expenseHidden || hidden)
                                     ? (over
-                                        ? '${'Over budget by'.tr} ••••••'
-                                        : '•••••• ${'left of'.tr} ${hidden ? '••••••' : Fmt.money(budget)}')
+                                          ? '${'Over budget by'.tr} ••••••'
+                                          : '•••••• ${'left of'.tr} ${hidden ? '••••••' : Fmt.money(budget)}')
                                     : (over
-                                        ? '${'Over budget by'.tr} ${Fmt.money(expense - budget)}'
-                                        : '${Fmt.money(budget - expense)} ${'left of'.tr} ${Fmt.money(budget)}'),
+                                          ? '${'Over budget by'.tr} ${Fmt.money(expense - budget)}'
+                                          : '${Fmt.money(budget - expense)} ${'left of'.tr} ${Fmt.money(budget)}'),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 textAlign: TextAlign.end,
                                 style: TextStyle(
                                   fontSize: 12.5,
                                   fontWeight: FontWeight.w700,
-                                  color: over ? const Color(0xFFFF9488) : const Color(0xFF5DFFB2),
+                                  color: over
+                                      ? const Color(0xFFFF9488)
+                                      : const Color(0xFF5DFFB2),
                                 ),
                               ),
                             ),
@@ -340,7 +357,9 @@ class BalanceCard extends StatelessWidget {
                             minHeight: 6,
                             backgroundColor: Colors.white.withOpacity(0.20),
                             valueColor: AlwaysStoppedAnimation(
-                              over ? const Color(0xFFFF5252) : const Color(0xFF4EFA9D),
+                              over
+                                  ? const Color(0xFFFF5252)
+                                  : const Color(0xFF4EFA9D),
                             ),
                           ),
                         ),
@@ -374,7 +393,9 @@ class _GlassMetricBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final iconColor = isIncome ? const Color(0xFF5DFFB2) : const Color(0xFFFF9488);
+    final iconColor = isIncome
+        ? const Color(0xFF5DFFB2)
+        : const Color(0xFFFF9488);
     final circleBg = isIncome
         ? const Color(0xFF2ECC71).withOpacity(0.22)
         : const Color(0xFFE74C3C).withOpacity(0.22);
@@ -391,13 +412,12 @@ class _GlassMetricBox extends StatelessWidget {
           Container(
             width: 30,
             height: 30,
-            decoration: BoxDecoration(
-              color: circleBg,
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: circleBg, shape: BoxShape.circle),
             child: Center(
               child: Icon(
-                isIncome ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded,
+                isIncome
+                    ? Icons.arrow_downward_rounded
+                    : Icons.arrow_upward_rounded,
                 color: iconColor,
                 size: 17,
               ),
@@ -417,7 +437,7 @@ class _GlassMetricBox extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 12.5,
+                          fontSize: 14.5,
                           fontWeight: FontWeight.w500,
                           color: Colors.white.withOpacity(0.85),
                         ),
@@ -431,7 +451,9 @@ class _GlassMetricBox extends StatelessWidget {
                         child: Padding(
                           padding: const EdgeInsets.all(2.0),
                           child: Icon(
-                            isHidden ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                            isHidden
+                                ? Icons.visibility_off_rounded
+                                : Icons.visibility_rounded,
                             size: 14,
                             color: isHidden
                                 ? const Color(0xFFFFB3A7)
@@ -448,7 +470,7 @@ class _GlassMetricBox extends StatelessWidget {
                   child: Text(
                     isHidden ? '••••••' : Fmt.money(amount),
                     style: TextStyle(
-                      fontSize: isHidden ? 17.5 : 16.5,
+                      fontSize: isHidden ? 17.5 : 18.5,
                       fontWeight: FontWeight.w800,
                       letterSpacing: isHidden ? 1.5 : 0,
                       color: Colors.white,

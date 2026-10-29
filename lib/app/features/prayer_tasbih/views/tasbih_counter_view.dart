@@ -401,7 +401,7 @@ class TasbihCounterView extends StatelessWidget {
                                 maxLines: item.id == 'post_prayer_sea_foam' ? 3 : 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  fontSize: item.id == 'post_prayer_sea_foam' ? 17 : 19.5,
+                                  fontSize: item.id == 'post_prayer_sea_foam' ? 19 : 22.5,
                                   fontWeight: FontWeight.w700,
                                   color: p.income,
                                   height: 1.35,
@@ -741,10 +741,13 @@ class TasbihCounterView extends StatelessWidget {
                         zikir.arabic,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: zikir.arabic.length > 80 ? 17.5 : 21,
+                          fontSize: zikir.arabic.length > 80
+                              ? 20
+                              : (zikir.arabic.length > 40 ? 24 : 29),
                           fontWeight: FontWeight.w700,
                           color: p.income,
-                          height: zikir.arabic.length > 80 ? 1.45 : 1.3,
+                          height: zikir.arabic.length > 80 ? 1.45 : 1.38,
+                          letterSpacing: 0.3,
                         ),
                       ),
                       const SizedBox(height: 5),

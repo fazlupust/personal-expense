@@ -402,33 +402,50 @@ class EntryFormSheet extends StatelessWidget {
                                 child: AppButton(
                                   'Cancel',
                                   style: AppButtonStyle.cancel,
-                                  onPressed: () => Navigator.of(context).pop(),
+                                  onPressed: (f.isSaving || f.isDeleting)
+                                      ? null
+                                      : () => Navigator.of(context).pop(),
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: AppButton(
-                                  'Submit',
-                                  onPressed: () {
-                                    if (f.save()) Navigator.of(context).pop();
-                                  },
+                                  f.isSaving
+                                      ? (f.isEdit ? 'Updating...'.tr : 'Saving...'.tr)
+                                      : 'Submit',
+                                  isLoading: f.isSaving,
+                                  onPressed: (f.isSaving || f.isDeleting)
+                                      ? null
+                                      : () async {
+                                          final ok = await f.save();
+                                          if (ok && context.mounted) {
+                                            Navigator.of(context).pop();
+                                          }
+                                        },
                                 ),
                               ),
                             ],
                           ),
 
-                          if (f.isEdit)
+                          if (f.isEdit) ...[
+                            const SizedBox(height: 10),
                             AppButton(
-                              'Delete entry',
+                              f.isDeleting ? 'Deleting entry...'.tr : 'Delete entry',
                               style: AppButtonStyle.danger,
-                              onPressed: () async {
-                                final ok = await _confirmDeleteEntry(context, p);
-                                if (ok == true && context.mounted) {
-                                  Navigator.of(context).pop();
-                                  f.delete();
-                                }
-                              },
+                              isLoading: f.isDeleting,
+                              onPressed: (f.isSaving || f.isDeleting)
+                                  ? null
+                                  : () async {
+                                      final ok = await _confirmDeleteEntry(context, p);
+                                      if (ok == true && context.mounted) {
+                                        final delOk = await f.delete();
+                                        if (delOk && context.mounted) {
+                                          Navigator.of(context).pop();
+                                        }
+                                      }
+                                    },
                             ),
+                          ],
                         ],
                       ),
                     ),

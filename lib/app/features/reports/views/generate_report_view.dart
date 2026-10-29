@@ -311,16 +311,23 @@ class GenerateReportView extends StatelessWidget {
                               children: [
                                 for (final a in byAccount.entries)
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 6),
+                                    padding: const EdgeInsets.symmetric(vertical: 7),
                                     child: Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text(a.key.tr, style: TextStyle(fontSize: 14, color: p.ink)),
+                                        Text(
+                                          a.key.tr,
+                                          style: TextStyle(
+                                            fontSize: 15.5,
+                                            fontWeight: FontWeight.w700,
+                                            color: p.ink,
+                                          ),
+                                        ),
                                         Text(
                                           Fmt.money(a.value),
                                           style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w700,
+                                            fontSize: 15.5,
+                                            fontWeight: FontWeight.w800,
                                             color: p.ink,
                                           ),
                                         ),

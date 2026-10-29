@@ -45,14 +45,14 @@ class CategoryBars extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
               child: Row(
                 children: [
-                  Flexible(
-                    flex: 4,
+                  Expanded(
+                    flex: 5,
                     child: Text(
                       '${cats.emojiOf(type, e.key)} ${e.key.tr}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 14.5,
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: p.ink,
                       ),
@@ -65,26 +65,46 @@ class CategoryBars extends StatelessWidget {
                       borderRadius: BorderRadius.circular(5),
                       child: LinearProgressIndicator(
                         value: total > 0 ? (e.value / total).clamp(0.0, 1.0).toDouble() : 0,
-                        minHeight: 10,
+                        minHeight: 8,
                         backgroundColor: p.line,
                         valueColor: AlwaysStoppedAnimation(color),
                       ),
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Flexible(
-                    flex: 4,
-                    child: Text(
-                      '${isHidden ? '••••••' : Fmt.money(e.value)} · ${Fmt.count(total > 0 ? (e.value / total * 100).round() : 0)}%',
-                      textAlign: TextAlign.right,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: isHidden ? 1.0 : null,
-                        color: p.ink,
-                      ),
+                  Expanded(
+                    flex: 5,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            isHidden ? '••••••' : Fmt.money(e.value),
+                            textAlign: TextAlign.right,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: isHidden ? 1.0 : null,
+                              color: p.ink,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 5),
+                        SizedBox(
+                          width: 38,
+                          child: Text(
+                            '${Fmt.count(total > 0 ? (e.value / total * 100).round() : 0)}%',
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w600,
+                              color: p.mute,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],

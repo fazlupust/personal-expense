@@ -26,6 +26,8 @@ class EntryFormController extends GetxController {
 
   bool isListeningAmount = false;
   bool isListeningNote = false;
+  bool isSaving = false;
+  bool isDeleting = false;
 
   bool get isEdit => existing != null;
 
@@ -180,7 +182,7 @@ class EntryFormController extends GetxController {
   }
 
   /// Returns true when the entry was saved.
-  bool save() {
+  Future<bool> save() async {
     final a = double.tryParse(amountCtrl.text.trim());
     if (a == null || a <= 0) {
       amountError = 'Enter a valid amount.';
@@ -188,103 +190,110 @@ class EntryFormController extends GetxController {
       return false;
     }
     amountError = null;
+    isSaving = true;
+    update();
 
-    final selCategory = _categories.firstWhereOrNull((c) => c.name == category);
-    final catNameBn = selCategory?.nameBn ?? (category ?? 'Other');
-    final catNameEn = selCategory?.nameEn ?? (category ?? 'Other');
-    final catId = selCategory?.id ?? 'other';
-    final txCtrl = Get.find<TransactionsController>();
+    try {
+      final selCategory = _categories.firstWhereOrNull((c) => c.name == category);
+      final catNameBn = selCategory?.nameBn ?? (category ?? 'Other');
+      final catNameEn = selCategory?.nameEn ?? (category ?? 'Other');
+      final catId = selCategory?.id ?? 'other';
+      final txCtrl = Get.find<TransactionsController>();
 
-    // Budget exceeded notification check
-    if (type == EntryType.expense && Get.isRegistered<SettingsController>()) {
-      final s = SettingsController.to;
-      final txDate = date;
-      final monthExpenseEntries = txCtrl.entries.where((e) =>
-          e.date.year == txDate.year &&
-          e.date.month == txDate.month &&
-          e.type == EntryType.expense &&
-          e.id != existing?.id);
+      // Budget exceeded notification check
+      if (type == EntryType.expense && Get.isRegistered<SettingsController>()) {
+        final s = SettingsController.to;
+        final txDate = date;
+        final monthExpenseEntries = txCtrl.entries.where((e) =>
+            e.date.year == txDate.year &&
+            e.date.month == txDate.month &&
+            e.type == EntryType.expense &&
+            e.id != existing?.id);
 
-      final catName = category ?? 'Other';
-      final currentCatSpent = monthExpenseEntries
-              .where((e) => e.category == catName)
-              .fold(0.0, (acc, e) => acc + e.amount) +
-          a;
-      final currentTotalSpent =
-          monthExpenseEntries.fold(0.0, (acc, e) => acc + e.amount) + a;
+        final catName = category ?? 'Other';
+        final currentCatSpent = monthExpenseEntries
+                .where((e) => e.category == catName)
+                .fold(0.0, (acc, e) => acc + e.amount) +
+            a;
+        final currentTotalSpent =
+            monthExpenseEntries.fold(0.0, (acc, e) => acc + e.amount) + a;
 
-      final catBudget = s.getCategoryBudget(catName);
-      final totalBudget = s.budget;
+        final catBudget = s.getCategoryBudget(catName);
+        final totalBudget = s.budget;
 
-      final catExceeded = catBudget > 0 && currentCatSpent > catBudget;
-      final totalExceeded = totalBudget > 0 && currentTotalSpent > totalBudget;
+        final catExceeded = catBudget > 0 && currentCatSpent > catBudget;
+        final totalExceeded = totalBudget > 0 && currentTotalSpent > totalBudget;
 
-      if (catExceeded && totalExceeded) {
-        final alertTitle = '⚠️ Budget Limits Exceeded!'.tr;
-        final alertMessage =
-            '${'Category'.tr} "${catName.tr}" & ${'Total monthly budget'.tr} ${'have both been exceeded!'.tr} (${'Spent'.tr}: ${AppConstants.currency}${Fmt.money(currentCatSpent)} / ${'Budget'.tr}: ${AppConstants.currency}${Fmt.money(catBudget)})';
-        Future.delayed(const Duration(milliseconds: 350), () {
-          _notifyBudgetAlert(title: alertTitle, message: alertMessage);
-        });
-      } else if (catExceeded) {
-        final over = currentCatSpent - catBudget;
-        final alertTitle = '⚠️ Category Budget Exceeded!'.tr;
-        final alertMessage =
-            '${'Budget for'.tr} "${catName.tr}" ${'exceeded by'.tr} ${AppConstants.currency}${Fmt.money(over)} (${'Spent'.tr}: ${AppConstants.currency}${Fmt.money(currentCatSpent)} / ${'Budget'.tr}: ${AppConstants.currency}${Fmt.money(catBudget)})';
-        Future.delayed(const Duration(milliseconds: 350), () {
-          _notifyBudgetAlert(title: alertTitle, message: alertMessage);
-        });
-      } else if (totalExceeded) {
-        final over = currentTotalSpent - totalBudget;
-        final alertTitle = '⚠️ Total Monthly Budget Exceeded!'.tr;
-        final alertMessage =
-            '${'Total monthly budget exceeded by'.tr} ${AppConstants.currency}${Fmt.money(over)} (${'Spent'.tr}: ${AppConstants.currency}${Fmt.money(currentTotalSpent)} / ${'Budget'.tr}: ${AppConstants.currency}${Fmt.money(totalBudget)})';
-        Future.delayed(const Duration(milliseconds: 350), () {
-          _notifyBudgetAlert(title: alertTitle, message: alertMessage);
-        });
+        if (catExceeded && totalExceeded) {
+          final alertTitle = '⚠️ Budget Limits Exceeded!'.tr;
+          final alertMessage =
+              '${'Category'.tr} "${catName.tr}" & ${'Total monthly budget'.tr} ${'have both been exceeded!'.tr} (${'Spent'.tr}: ${AppConstants.currency}${Fmt.money(currentCatSpent)} / ${'Budget'.tr}: ${AppConstants.currency}${Fmt.money(catBudget)})';
+          Future.delayed(const Duration(milliseconds: 350), () {
+            _notifyBudgetAlert(title: alertTitle, message: alertMessage);
+          });
+        } else if (catExceeded) {
+          final over = currentCatSpent - catBudget;
+          final alertTitle = '⚠️ Category Budget Exceeded!'.tr;
+          final alertMessage =
+              '${'Budget for'.tr} "${catName.tr}" ${'exceeded by'.tr} ${AppConstants.currency}${Fmt.money(over)} (${'Spent'.tr}: ${AppConstants.currency}${Fmt.money(currentCatSpent)} / ${'Budget'.tr}: ${AppConstants.currency}${Fmt.money(catBudget)})';
+          Future.delayed(const Duration(milliseconds: 350), () {
+            _notifyBudgetAlert(title: alertTitle, message: alertMessage);
+          });
+        } else if (totalExceeded) {
+          final over = currentTotalSpent - totalBudget;
+          final alertTitle = '⚠️ Total Monthly Budget Exceeded!'.tr;
+          final alertMessage =
+              '${'Total monthly budget exceeded by'.tr} ${AppConstants.currency}${Fmt.money(over)} (${'Spent'.tr}: ${AppConstants.currency}${Fmt.money(currentTotalSpent)} / ${'Budget'.tr}: ${AppConstants.currency}${Fmt.money(totalBudget)})';
+          Future.delayed(const Duration(milliseconds: 350), () {
+            _notifyBudgetAlert(title: alertTitle, message: alertMessage);
+          });
+        }
       }
-    }
 
-    final effectiveUid = (existing != null && existing!.userId.isNotEmpty)
-        ? existing!.userId
-        : (Get.isRegistered<AuthService>() ? (Get.find<AuthService>().currentUid ?? '') : '');
+      final effectiveUid = (existing != null && existing!.userId.isNotEmpty)
+          ? existing!.userId
+          : (Get.isRegistered<AuthService>() ? (Get.find<AuthService>().currentUid ?? '') : '');
 
-    final isEdit = existing != null;
-    txCtrl.save(
-      TransactionModel(
-        id: existing?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
-        userId: effectiveUid,
-        categoryId: catId,
-        categoryNameBn: catNameBn,
-        categoryNameEn: catNameEn,
-        type: type,
-        amount: a,
-        noteBn: noteCtrl.text.trim(),
-        noteEn: noteCtrl.text.trim(),
-        account: account,
-        date: date,
-        createdAt: existing?.createdAt ?? DateTime.now(),
-        updatedAt: DateTime.now(),
-        latitude: existing?.latitude,
-        longitude: existing?.longitude,
-        deviceInfo: existing?.deviceInfo,
-      ),
-    );
-
-    if (Get.context != null) {
-      Get.snackbar(
-        'Success'.tr,
-        (isEdit ? 'Transaction updated successfully.' : 'Transaction added successfully.').tr,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFF1B5E20),
-        colorText: Colors.white,
-        icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 24),
-        duration: const Duration(seconds: 3),
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        borderRadius: 12,
+      final isEdit = existing != null;
+      await txCtrl.save(
+        TransactionModel(
+          id: existing?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+          userId: effectiveUid,
+          categoryId: catId,
+          categoryNameBn: catNameBn,
+          categoryNameEn: catNameEn,
+          type: type,
+          amount: a,
+          noteBn: noteCtrl.text.trim(),
+          noteEn: noteCtrl.text.trim(),
+          account: account,
+          date: date,
+          createdAt: existing?.createdAt ?? DateTime.now(),
+          updatedAt: DateTime.now(),
+          latitude: existing?.latitude,
+          longitude: existing?.longitude,
+          deviceInfo: existing?.deviceInfo,
+        ),
       );
+
+      if (Get.context != null) {
+        Get.snackbar(
+          'Success'.tr,
+          (isEdit ? 'Transaction updated successfully.' : 'Transaction added successfully.').tr,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color(0xFF1B5E20),
+          colorText: Colors.white,
+          icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 24),
+          duration: const Duration(seconds: 3),
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          borderRadius: 12,
+        );
+      }
+      return true;
+    } finally {
+      isSaving = false;
+      update();
     }
-    return true;
   }
 
   void _notifyBudgetAlert({required String title, required String message}) {
@@ -311,8 +320,17 @@ class EntryFormController extends GetxController {
     }
   }
 
-  Future<void> delete() async {
+  Future<bool> delete() async {
     final e = existing;
-    if (e != null) await Get.find<TransactionsController>().remove(e.id);
+    if (e == null) return false;
+    isDeleting = true;
+    update();
+    try {
+      await Get.find<TransactionsController>().remove(e.id);
+      return true;
+    } finally {
+      isDeleting = false;
+      update();
+    }
   }
 }
