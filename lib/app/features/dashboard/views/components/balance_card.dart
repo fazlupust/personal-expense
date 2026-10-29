@@ -52,18 +52,22 @@ class BalanceCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
         gradient: const LinearGradient(
-          colors: [Color(0xFF0F4730), Color(0xFF165E40), Color(0xFF207B54)],
+          colors: [
+            Color(0xFF136444), // Azan Waqt rich Islamic green (not muddy deep black)
+            Color(0xFF1B8058), // Vibrant emerald
+            Color(0xFF269D6E), // Bright emerald-teal highlight
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF0F4730).withOpacity(0.35),
+            color: const Color(0xFF136444).withOpacity(0.30),
             blurRadius: 22,
-            offset: const Offset(0, 10),
+            offset: const Offset(0, 8),
           ),
         ],
-        border: Border.all(color: Colors.white.withOpacity(0.14), width: 1),
+        border: Border.all(color: Colors.white.withOpacity(0.18), width: 1.2),
       ),
       child: Stack(
         children: [
@@ -110,19 +114,26 @@ class BalanceCard extends StatelessWidget {
                           vertical: 5,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.12),
+                          color: Colors.white.withOpacity(0.16),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.15),
+                            color: Colors.white.withOpacity(0.24),
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.06),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.account_balance_wallet_outlined,
-                              size: 13,
-                              color: Colors.white.withOpacity(0.95),
+                              size: 13.5,
+                              color: Colors.white,
                             ),
                             const SizedBox(width: 6),
                             Flexible(
@@ -130,10 +141,10 @@ class BalanceCard extends StatelessWidget {
                                 'Balance this month'.tr,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white.withOpacity(0.95),
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
                                   letterSpacing: 0.2,
                                 ),
                               ),
@@ -152,13 +163,23 @@ class BalanceCard extends StatelessWidget {
                             onTap: toggle,
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
+                                horizontal: 9,
+                                vertical: 4.5,
                               ),
                               margin: const EdgeInsets.only(right: 6),
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.12),
+                                color: Colors.white.withOpacity(0.18),
                                 borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.24),
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.06),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -168,15 +189,15 @@ class BalanceCard extends StatelessWidget {
                                         ? Icons.visibility_off_rounded
                                         : Icons.visibility_rounded,
                                     size: 14,
-                                    color: Colors.white.withOpacity(0.9),
+                                    color: Colors.white,
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
                                     hidden ? 'Show'.tr : 'Hide'.tr,
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white.withOpacity(0.9),
+                                    style: const TextStyle(
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
                                     ),
                                   ),
                                 ],
@@ -186,11 +207,21 @@ class BalanceCard extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 10,
-                            vertical: 4,
+                            vertical: 4.5,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.10),
+                            color: Colors.white.withOpacity(0.18),
                             borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.24),
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.06),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -397,29 +428,53 @@ class _GlassMetricBox extends StatelessWidget {
         ? const Color(0xFF5DFFB2)
         : const Color(0xFFFF9488);
     final circleBg = isIncome
-        ? const Color(0xFF2ECC71).withOpacity(0.22)
-        : const Color(0xFFE74C3C).withOpacity(0.22);
+        ? const Color(0xFF2ECC71).withOpacity(0.28)
+        : const Color(0xFFE74C3C).withOpacity(0.28);
+    final circleBorder = isIncome
+        ? const Color(0xFF5DFFB2).withOpacity(0.45)
+        : const Color(0xFFFF9488).withOpacity(0.45);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.13),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.16)),
+        gradient: LinearGradient(
+          colors: [
+            Colors.white.withOpacity(0.20),
+            Colors.white.withOpacity(0.11),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.28),
+          width: 1.1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.10),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Row(
         children: [
           Container(
-            width: 30,
-            height: 30,
-            decoration: BoxDecoration(color: circleBg, shape: BoxShape.circle),
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: circleBg,
+              shape: BoxShape.circle,
+              border: Border.all(color: circleBorder, width: 1.1),
+            ),
             child: Center(
               child: Icon(
                 isIncome
                     ? Icons.arrow_downward_rounded
                     : Icons.arrow_upward_rounded,
                 color: iconColor,
-                size: 17,
+                size: 18,
               ),
             ),
           ),
@@ -437,9 +492,10 @@ class _GlassMetricBox extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 14.5,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white.withOpacity(0.85),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white.withOpacity(0.92),
+                          letterSpacing: 0.1,
                         ),
                       ),
                     ),
@@ -457,7 +513,7 @@ class _GlassMetricBox extends StatelessWidget {
                             size: 14,
                             color: isHidden
                                 ? const Color(0xFFFFB3A7)
-                                : Colors.white.withOpacity(0.85),
+                                : Colors.white.withOpacity(0.9),
                           ),
                         ),
                       ),
@@ -472,7 +528,7 @@ class _GlassMetricBox extends StatelessWidget {
                     style: TextStyle(
                       fontSize: isHidden ? 17.5 : 18.5,
                       fontWeight: FontWeight.w800,
-                      letterSpacing: isHidden ? 1.5 : 0,
+                      letterSpacing: isHidden ? 1.5 : -0.2,
                       color: Colors.white,
                     ),
                   ),
