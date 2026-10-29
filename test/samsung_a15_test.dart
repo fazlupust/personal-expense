@@ -19,6 +19,8 @@ import 'package:personal_expense/app/features/notes/views/notes_view.dart';
 import 'package:personal_expense/app/data/models/note_model.dart';
 import 'package:personal_expense/app/features/reports/views/generate_report_view.dart';
 import 'package:personal_expense/app/features/settings/views/components/data_export_sheet.dart';
+import 'package:personal_expense/app/core/widgets/app_update_dialog.dart';
+import 'package:personal_expense/app/data/models/app_update_model.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -402,5 +404,110 @@ void main() {
     expect(find.text('Tab 1: Transactions'.tr), findsOneWidget);
     expect(find.text('Tab 2: Notes & Debts'.tr), findsOneWidget);
     expect(find.text('Tab 3: Zikir & Tasbih'.tr), findsOneWidget);
+  });
+
+  testWidgets('Samsung Galaxy A15 AppUpdateDialog renders cleanly without overflow in optional and forced mode', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2340);
+    tester.view.devicePixelRatio = 2.625;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        theme: AppTheme.light,
+        translations: AppTranslations(),
+        locale: const Locale('en'),
+        home: const Scaffold(
+          body: AppUpdateDialog(
+            currentVersion: '1.0.0',
+            updateModel: AppUpdateModel(
+              isActive: true,
+              isForceUpdate: false,
+              latestVersion: '2.0.0',
+              minVersion: '1.0.0',
+              title: 'Update Available',
+              message: 'A brand new version is available with multiple worksheets, fast exports, and cleaner styling. Update now to explore the best features.',
+              playStoreUrl: 'https://play.google.com',
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull, reason: 'AppUpdateDialog should render without overflow on Samsung A15');
+    expect(find.text('Update Available'), findsOneWidget);
+    expect(find.text('Update Later'.tr), findsOneWidget);
+    expect(find.text('Update Now'.tr), findsOneWidget);
+  });
+
+  testWidgets('Samsung Galaxy A15 update picker sheet renders without overflow', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2340);
+    tester.view.devicePixelRatio = 2.625;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        theme: AppTheme.light,
+        translations: AppTranslations(),
+        locale: const Locale('en'),
+        home: Scaffold(
+          body: Builder(
+            builder: (ctx) => ElevatedButton(
+              onPressed: () {
+                final p = ctx.pal;
+                showModalBottomSheet(
+                  context: ctx,
+                  isScrollControlled: true,
+                  backgroundColor: p.card,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+                  ),
+                  builder: (sheetCtx) => SafeArea(
+                    child: Container(
+                      constraints: BoxConstraints(
+                        maxWidth: 580,
+                        maxHeight: MediaQuery.sizeOf(sheetCtx).height * 0.90,
+                      ),
+                      child: SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        padding: EdgeInsets.only(
+                          left: 18,
+                          right: 18,
+                          top: 14,
+                          bottom: MediaQuery.paddingOf(sheetCtx).bottom + 16,
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('App Update Dialogs (Status Test)'.tr),
+                            Text('Optional Update (Update Later + Update Now)'.tr),
+                            Text('Forced Update (Mandatory Update)'.tr),
+                            Text('Check Real Cloud Update'.tr),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+              child: const Text('Open Update Picker'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open Update Picker'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull, reason: 'Update picker sheet should render cleanly without overflow');
+    expect(find.text('App Update Dialogs (Status Test)'.tr), findsOneWidget);
+    expect(find.text('Optional Update (Update Later + Update Now)'.tr), findsOneWidget);
+    expect(find.text('Forced Update (Mandatory Update)'.tr), findsOneWidget);
+    expect(find.text('Check Real Cloud Update'.tr), findsOneWidget);
   });
 }

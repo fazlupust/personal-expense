@@ -83,9 +83,10 @@ class AppUpdateDialog extends StatelessWidget {
           ),
           child: Padding(
             padding: const EdgeInsets.all(22),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
                 // Top Icon with soft gradient background
                 Container(
                   width: 68,
@@ -351,6 +352,7 @@ class AppUpdateDialog extends StatelessWidget {
             ),
           ),
         ),
+      ),
       ),
     );
   }

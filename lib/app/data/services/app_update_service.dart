@@ -271,115 +271,149 @@ class AppUpdateService extends GetxService {
     final p = context.pal;
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       backgroundColor: p.card,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
       ),
       builder: (ctx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: p.line,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 14),
-              Row(
-                children: [
-                  Icon(Icons.system_update_rounded, size: 20, color: p.income),
-                  const SizedBox(width: 8),
-                  Text(
-                    'App Update Dialogs (Status Test)'.tr,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: p.ink,
+        child: Container(
+          constraints: BoxConstraints(
+            maxWidth: 580,
+            maxHeight: MediaQuery.sizeOf(ctx).height * 0.90,
+          ),
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: EdgeInsets.only(
+              left: 18,
+              right: 18,
+              top: 14,
+              bottom: MediaQuery.paddingOf(ctx).bottom + 16,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: p.line,
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                leading: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: p.income.withOpacity(0.12),
-                    shape: BoxShape.circle,
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(7),
+                      decoration: BoxDecoration(
+                        color: p.income.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(Icons.system_update_rounded, size: 20, color: p.income),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'App Update Dialogs (Status Test)'.tr,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: p.ink,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.close_rounded, size: 20, color: p.mute),
+                      onPressed: () => Navigator.pop(ctx),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      splashRadius: 18,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                  visualDensity: VisualDensity.compact,
+                  leading: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: p.income.withOpacity(0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.rocket_launch_rounded, color: p.income, size: 20),
                   ),
-                  child: Icon(Icons.rocket_launch_rounded, color: p.income, size: 20),
-                ),
-                title: Text(
-                  'Optional Update (Update Later + Update Now)'.tr,
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: p.ink),
-                ),
-                subtitle: Text(
-                  'AppUpdateStatus.optional — দুটি বাটনসহ ডায়ালগ দেখতে চাপুন'.tr,
-                  style: TextStyle(fontSize: 12, color: p.mute),
-                ),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  showTestOptionalDialog();
-                },
-              ),
-              Divider(height: 1, color: p.line.withOpacity(0.5)),
-              ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                leading: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: p.expense.withOpacity(0.12),
-                    shape: BoxShape.circle,
+                  title: Text(
+                    'Optional Update (Update Later + Update Now)'.tr,
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: p.ink),
                   ),
-                  child: Icon(Icons.warning_amber_rounded, color: p.expense, size: 20),
-                ),
-                title: Text(
-                  'Forced Update (Mandatory Update)'.tr,
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: p.ink),
-                ),
-                subtitle: Text(
-                  'AppUpdateStatus.forced — বাধ্যতামূলক আপডেট (একটি বাটন) দেখতে চাপুন'.tr,
-                  style: TextStyle(fontSize: 12, color: p.mute),
-                ),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  showTestForcedDialog();
-                },
-              ),
-              Divider(height: 1, color: p.line.withOpacity(0.5)),
-              ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                leading: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: p.line.withOpacity(0.5),
-                    shape: BoxShape.circle,
+                  subtitle: Text(
+                    'AppUpdateStatus.optional — দুটি বাটনসহ ডায়ালগ দেখতে চাপুন'.tr,
+                    style: TextStyle(fontSize: 12, color: p.mute),
                   ),
-                  child: Icon(Icons.cloud_sync_rounded, color: p.ink, size: 20),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    showTestOptionalDialog();
+                  },
                 ),
-                title: Text(
-                  'Check Real Cloud Update'.tr,
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: p.ink),
+                Divider(height: 1, color: p.line.withOpacity(0.5)),
+                ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                  visualDensity: VisualDensity.compact,
+                  leading: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: p.expense.withOpacity(0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.warning_amber_rounded, color: p.expense, size: 20),
+                  ),
+                  title: Text(
+                    'Forced Update (Mandatory Update)'.tr,
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: p.ink),
+                  ),
+                  subtitle: Text(
+                    'AppUpdateStatus.forced — বাধ্যতামূলক আপডেট (একটি বাটন) দেখতে চাপুন'.tr,
+                    style: TextStyle(fontSize: 12, color: p.mute),
+                  ),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    showTestForcedDialog();
+                  },
                 ),
-                subtitle: Text(
-                  'Firebase Firestore ডেটাবেজ থেকে সরাসরি আসল চেক'.tr,
-                  style: TextStyle(fontSize: 12, color: p.mute),
+                Divider(height: 1, color: p.line.withOpacity(0.5)),
+                ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                  visualDensity: VisualDensity.compact,
+                  leading: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: p.line.withOpacity(0.5),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.cloud_sync_rounded, color: p.ink, size: 20),
+                  ),
+                  title: Text(
+                    'Check Real Cloud Update'.tr,
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: p.ink),
+                  ),
+                  subtitle: Text(
+                    'Firebase Firestore ডেটাবেজ থেকে সরাসরি আসল চেক'.tr,
+                    style: TextStyle(fontSize: 12, color: p.mute),
+                  ),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    checkManually();
+                  },
                 ),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  checkManually();
-                },
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
