@@ -419,24 +419,36 @@ class PrayerTasbihView extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Text(
+                        isBn ? schedule.hijriDateBn : schedule.hijriDateEn,
+                        style: TextStyle(
+                          fontSize: 15.5,
+                          fontWeight: FontWeight.w800,
+                          color: p.income,
+                          letterSpacing: -0.2,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 3),
                       Row(
                         children: [
                           Flexible(
                             child: Text(
-                              isBn ? schedule.hijriDateBn : schedule.hijriDateEn,
+                              gregorianDateStr,
                               style: TextStyle(
-                                fontSize: 16.5,
-                                fontWeight: FontWeight.w800,
-                                color: p.income,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: p.mute,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           if (schedule.isOnlineSynced) ...[
-                            const SizedBox(width: 6),
+                            const SizedBox(width: 8),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 5.5, vertical: 2),
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
                               decoration: BoxDecoration(
                                 color: p.income.withOpacity(0.14),
                                 borderRadius: BorderRadius.circular(6),
@@ -445,8 +457,8 @@ class PrayerTasbihView extends StatelessWidget {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.cloud_done_rounded, size: 12, color: p.income),
-                                  const SizedBox(width: 3),
+                                  Icon(Icons.cloud_done_rounded, size: 11, color: p.income),
+                                  const SizedBox(width: 3.5),
                                   Text(
                                     'Live'.tr,
                                     style: TextStyle(
@@ -461,21 +473,15 @@ class PrayerTasbihView extends StatelessWidget {
                           ],
                         ],
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        gregorianDateStr,
-                        style: TextStyle(
-                          fontSize: 13.5,
-                          fontWeight: FontWeight.w600,
-                          color: p.mute,
-                        ),
-                      ),
                     ],
                   ),
                 ),
                 PopupMenuButton<int>(
                   tooltip: isBn ? 'হিজরি তারিখ সমন্বয়' : 'Adjust Hijri Date',
                   icon: Icon(Icons.tune_rounded, color: p.income, size: 20),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  splashRadius: 20,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   color: p.card,
                   onSelected: (val) {
