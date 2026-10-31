@@ -15,10 +15,12 @@ class PrayerTasbihView extends StatelessWidget {
   const PrayerTasbihView({super.key});
 
   void _showLocationPicker(BuildContext context, PrayerTasbihController c, AppPalette p) {
-    Get.bottomSheet(
-      _LocationPickerSheet(controller: c, palette: p),
+    showModalBottomSheet<void>(
+      context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
+      builder: (_) => _LocationPickerSheet(controller: c, palette: p),
     );
   }
 
@@ -1582,6 +1584,9 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
     final isBn = Get.locale?.languageCode == 'bn';
     final query = _searchCtrl.text.trim().toLowerCase();
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    final totalHeight = MediaQuery.sizeOf(context).height;
+    final topPadding = MediaQuery.paddingOf(context).top;
+    final availableHeight = (totalHeight - bottomInset - topPadding - 16).clamp(240.0, totalHeight * 0.78);
 
     final filteredDivisions = BangladeshLocation.divisions.where((loc) {
       if (query.isEmpty) return true;
@@ -1607,16 +1612,14 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
         color: p.card,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
         clipBehavior: Clip.antiAlias,
-        child: SafeArea(
-          top: false,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.sizeOf(context).height * 0.78,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: availableHeight,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
                 // Primary Color Header Bar with Close Button (Frozen)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
@@ -1806,7 +1809,6 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 }
