@@ -24,6 +24,9 @@ import 'package:personal_expense/app/core/widgets/app_update_dialog.dart';
 import 'package:personal_expense/app/data/models/app_update_model.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:personal_expense/app/features/prayer_tasbih/views/prayer_tracker_view.dart';
+import 'package:personal_expense/app/features/prayer_tasbih/views/prayer_tasbih_view.dart';
+import 'package:personal_expense/app/features/prayer_tasbih/controllers/prayer_tasbih_controller.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -582,6 +585,81 @@ void main() {
     settingsCtrl.dismissBudgetAlert(nextMonth);
     expect(settingsCtrl.isBudgetAlertDismissed, isTrue);
 
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Samsung Galaxy A15 PrayerTrackerView renders cleanly without overflow', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2340);
+    tester.view.devicePixelRatio = 2.625;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    SharedPreferences.setMockInitialValues({});
+    if (Get.isRegistered<PrayerTasbihController>()) {
+      Get.delete<PrayerTasbihController>();
+    }
+    final prayerCtrl = Get.put(PrayerTasbihController());
+    prayerCtrl.onInit();
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        translations: AppTranslations(),
+        locale: const Locale('bn'),
+        theme: AppTheme.light,
+        home: const Scaffold(
+          body: PrayerTrackerView(),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull, reason: 'PrayerTrackerView should render without overflow on Samsung A15');
+    expect(find.byType(PrayerTrackerView), findsOneWidget);
+    expect(find.text('সালাত ট্র্যাকার'), findsOneWidget);
+    expect(find.text('মাসিক সালাত পরিসংখ্যান'), findsOneWidget);
+  });
+
+  testWidgets('Samsung Galaxy A15 PrayerTasbihView with 3 tabs & Today Tracker renders cleanly', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2340);
+    tester.view.devicePixelRatio = 2.625;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    SharedPreferences.setMockInitialValues({});
+    if (Get.isRegistered<PrayerTasbihController>()) {
+      Get.delete<PrayerTasbihController>();
+    }
+    final prayerCtrl = Get.put(PrayerTasbihController());
+    prayerCtrl.onInit();
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        translations: AppTranslations(),
+        locale: const Locale('bn'),
+        theme: AppTheme.light,
+        home: const Scaffold(
+          body: PrayerTasbihView(),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull, reason: 'PrayerTasbihView should render cleanly');
+    expect(find.text('আজকের সালাত ট্র্যাকার'), findsOneWidget);
+
+    // Switch to Prayer Tracker tab (tab 1)
+    await tester.tap(find.text('সালাত ট্র্যাকার'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.byType(PrayerTrackerView), findsOneWidget);
+
+    // Switch to Digital Tasbih tab (tab 2)
+    await tester.tap(find.text('ডিজিটাল তাসবীহ'));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });

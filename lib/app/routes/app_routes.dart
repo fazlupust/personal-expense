@@ -9,6 +9,7 @@ abstract class AppRoutes {
   static const String register = '/register';
   static const String registeredUsers = '/registered-users';
   static const String prayerAndTasbih = '/prayer-and-tasbih';
+  static const String prayerTracker = '/prayer-tracker';
   static const String tasbihCounter = '/tasbih-counter';
   static const String tasbihHistory = '/tasbih-history';
 }

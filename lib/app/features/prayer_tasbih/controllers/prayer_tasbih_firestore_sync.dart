@@ -143,6 +143,30 @@ extension PrayerTasbihFirestoreSync on PrayerTasbihController {
         }
       }
 
+      // 4. Prayer Tracker sync
+      if (_prayerTrackerRecords.isNotEmpty) {
+        for (final trackerEntry in _prayerTrackerRecords.entries) {
+          final tDate = trackerEntry.key;
+          final tPrayers = trackerEntry.value;
+          final trackerDoc = db
+              .collection('users')
+              .doc(uid)
+              .collection('prayer_tracker')
+              .doc(tDate);
+          batch.set(
+            trackerDoc,
+            {
+              'user_id': uid,
+              'date': tDate,
+              'prayers': Map<String, dynamic>.from(tPrayers),
+              'completed_count': tPrayers.values.where((v) => v).length,
+              'updated_at': FieldValue.serverTimestamp(),
+            },
+            SetOptions(merge: true),
+          );
+        }
+      }
+
       await batch.commit();
       debugPrint('[TasbihFirestore] Synced to Firestore for user: $uid (date: $todayKey, counts: $dayCounts)');
     } catch (e) {
@@ -259,6 +283,32 @@ extension PrayerTasbihFirestoreSync on PrayerTasbihController {
         }
       }
 
+      // 4. Fetch prayer tracker entries
+      try {
+        final trackerSnap = await db
+            .collection('users')
+            .doc(uid)
+            .collection('prayer_tracker')
+            .orderBy('date', descending: true)
+            .limit(365)
+            .get();
+        if (trackerSnap.docs.isNotEmpty) {
+          for (final doc in trackerSnap.docs) {
+            final data = doc.data();
+            final dateKey = data['date'] as String? ?? doc.id;
+            final prayersRaw = data['prayers'];
+            if (prayersRaw is Map) {
+              final dayPrayers = _prayerTrackerRecords.putIfAbsent(dateKey, () => <String, bool>{});
+              prayersRaw.forEach((k, v) {
+                if (v == true) dayPrayers[k.toString()] = true;
+              });
+            }
+          }
+        }
+      } catch (err) {
+        debugPrint('[PrayerTrackerFirestore] Sync error: $err');
+      }
+
       _rebuildHistoryEntriesLocal();
       await _persistTasbihData(uid);
       update();
@@ -334,6 +384,7 @@ extension PrayerTasbihFirestoreSync on PrayerTasbihController {
     _lifetimeTotal = 0;
     _zikirLifetimeCounts.clear();
     _zikirDailyCounts.clear();
+    _prayerTrackerRecords.clear();
 
     final locationId = prefs.getString(_userKey('prayer_location_id', uid)) ?? 'dhaka';
     _selectedLocation = BangladeshLocation.findById(locationId);
@@ -422,6 +473,24 @@ extension PrayerTasbihFirestoreSync on PrayerTasbihController {
       _zikirDailyCounts.clear();
     }
 
+    // Load prayer tracker records
+    final trackerStr = prefs.getString(_userKey('prayer_tracker_records', uid));
+    if (trackerStr != null) {
+      try {
+        final decoded = jsonDecode(trackerStr) as Map<String, dynamic>;
+        _prayerTrackerRecords.clear();
+        decoded.forEach((dateKey, map) {
+          if (map is Map) {
+            final inner = <String, bool>{};
+            map.forEach((k, v) => inner[k.toString()] = v == true);
+            _prayerTrackerRecords[dateKey] = inner;
+          }
+        });
+      } catch (_) {}
+    } else {
+      _prayerTrackerRecords.clear();
+    }
+
     // Check if today's count is for today
     final todayKey = DateFormat('yyyy-MM-dd').format(DateTime.now());
     final savedDate = prefs.getString(_userKey('tasbih_last_date', uid)) ?? '';
@@ -443,6 +512,7 @@ extension PrayerTasbihFirestoreSync on PrayerTasbihController {
     final snapLife = _lifetimeTotal;
     final snapLifetimeZikirs = jsonEncode(_zikirLifetimeCounts);
     final snapDailyZikirs = jsonEncode(_zikirDailyCounts);
+    final snapTracker = jsonEncode(_prayerTrackerRecords);
 
     final prefs = _prefs ?? await SharedPreferences.getInstance();
     _prefs = prefs;
@@ -452,6 +522,7 @@ extension PrayerTasbihFirestoreSync on PrayerTasbihController {
     await prefs.setInt(_userKey('tasbih_lifetime_total', uid), snapLife);
     await prefs.setString(_userKey('tasbih_zikir_lifetime_counts', uid), snapLifetimeZikirs);
     await prefs.setString(_userKey('tasbih_zikir_daily_counts', uid), snapDailyZikirs);
+    await prefs.setString(_userKey('prayer_tracker_records', uid), snapTracker);
   }
 
   Future<void> _persistSettings([String? uidOverride]) async {

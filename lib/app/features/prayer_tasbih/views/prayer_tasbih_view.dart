@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -7,6 +8,7 @@ import '../../../core/widgets/custom_app_bar.dart';
 import '../../../data/services/prayer_time_service.dart';
 import '../../../routes/app_routes.dart';
 import '../controllers/prayer_tasbih_controller.dart';
+import 'prayer_tracker_view.dart';
 import 'tasbih_counter_view.dart';
 
 class PrayerTasbihView extends StatelessWidget {
@@ -759,7 +761,7 @@ class PrayerTasbihView extends StatelessWidget {
 
                 // Button to open Digital Tasbih
                 FilledButton.icon(
-                  onPressed: () => c.setActiveTab(1),
+                  onPressed: () => c.setActiveTab(2),
                   icon: const Icon(Icons.fingerprint_rounded, size: 22),
                   label: Text(
                     'Open Digital Tasbih Counter'.tr,
@@ -966,6 +968,9 @@ class PrayerTasbihView extends StatelessWidget {
 
           const SizedBox(height: 16),
 
+          // Today's Prayer Tracker Card
+          _buildTodayPrayerTrackerCard(context, c, p, isBn),
+
           // All 5 Waqt Prayer Times List (Excludes Sunrise / Sunset)
           Text(
             'Daily Prayer Times'.tr,
@@ -981,6 +986,9 @@ class PrayerTasbihView extends StatelessWidget {
             final isCurrent = item.prayer == currentWaqt.prayer && item.isWaqt;
             final isNext = item.prayer == nextPrayer.prayer && schedule.isNextPrayerSoon(now, thresholdMinutes: 40);
             final timeFormatted = DateFormat('h:mm a').format(item.time);
+            final isWaqt = item.isWaqt;
+            final prayerKey = item.prayer.name;
+            final isPrayedToday = isWaqt && c.isPrayerCompleted(c.todayDateKey, prayerKey);
 
             return Container(
               margin: const EdgeInsets.only(bottom: 8),
@@ -1090,14 +1098,64 @@ class PrayerTasbihView extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  Text(
-                    timeFormatted,
-                    style: TextStyle(
-                      fontSize: 18.5,
-                      fontWeight: FontWeight.w900,
-                      color: isCurrent ? p.income : p.ink,
-                    ),
+                  const SizedBox(width: 8),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        timeFormatted,
+                        style: TextStyle(
+                          fontSize: 17.5,
+                          fontWeight: FontWeight.w900,
+                          color: isCurrent ? p.income : p.ink,
+                        ),
+                      ),
+                      if (isWaqt) ...[
+                        const SizedBox(height: 4),
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(8),
+                            onTap: () {
+                              HapticFeedback.lightImpact();
+                              c.togglePrayer(c.todayDateKey, prayerKey);
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 180),
+                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: isPrayedToday ? p.income : p.bg,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: isPrayedToday ? p.income : p.line,
+                                  width: 1.0,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    isPrayedToday ? Icons.check_rounded : Icons.add_rounded,
+                                    size: 12,
+                                    color: isPrayedToday ? Colors.white : p.mute,
+                                  ),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    isPrayedToday ? 'Prayed'.tr : 'Pray'.tr,
+                                    style: TextStyle(
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: isPrayedToday ? Colors.white : p.ink,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ],
               ),
@@ -1363,6 +1421,268 @@ class PrayerTasbihView extends StatelessWidget {
     );
   }
 
+  Widget _buildTodayPrayerTrackerCard(
+    BuildContext context,
+    PrayerTasbihController c,
+    AppPalette p,
+    bool isBn,
+  ) {
+    final todayKey = c.todayDateKey;
+    final completedCount = c.getCompletedCountForDate(todayKey);
+    final isFull = completedCount == kTrackerPrayers.length;
+    final missing = c.getMissingPrayerItemsForDate(todayKey);
+
+    String formatNum(int n) => isBn ? NumberFormat('', 'bn').format(n) : n.toString();
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            p.income.withOpacity(0.12),
+            p.card,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: p.income.withOpacity(0.35), width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.025),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: p.income.withOpacity(0.18),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.fact_check_rounded, color: p.income, size: 18),
+                    ),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        'Today\'s Prayer Tracker'.tr,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.w800,
+                          color: p.ink,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3.5),
+                decoration: BoxDecoration(
+                  color: isFull
+                      ? p.income
+                      : (completedCount > 0
+                          ? const Color(0xFFF39C12)
+                          : const Color(0xFFC2492F)),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  '${formatNum(completedCount)}/৫ ${'Completed'.tr}',
+                  style: const TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          if (isFull)
+            Text(
+              'MashaAllah! All 5 prayers completed today!'.tr,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: p.income,
+              ),
+            )
+          else
+            Text(
+              '${'Missing:'.tr} ${missing.map((m) => isBn ? m.nameBn : m.nameEn).join(', ')}',
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFFC2492F),
+              ),
+            ),
+          const SizedBox(height: 10),
+          Row(
+            children: kTrackerPrayers.map((prayer) {
+              final isDone = c.isPrayerCompleted(todayKey, prayer.key);
+              return Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2.5),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(10),
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        c.togglePrayer(todayKey, prayer.key);
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 180),
+                        padding: const EdgeInsets.symmetric(vertical: 7),
+                        decoration: BoxDecoration(
+                          color: isDone ? p.income : p.card,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: isDone ? p.income : p.line,
+                            width: isDone ? 1.2 : 1.0,
+                          ),
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              isDone ? Icons.check_rounded : prayer.icon,
+                              size: 15,
+                              color: isDone ? Colors.white : p.mute,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              isBn ? prayer.nameBn : prayer.nameEn,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w700,
+                                color: isDone ? Colors.white : p.ink,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 10),
+          InkWell(
+            borderRadius: BorderRadius.circular(10),
+            onTap: () => c.setActiveTab(1),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+              decoration: BoxDecoration(
+                color: p.income.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: p.income.withOpacity(0.25)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Flexible(
+                    child: Text(
+                      'View Monthly Tracker & Detailed History'.tr,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: p.income,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 5),
+                  Icon(Icons.arrow_forward_rounded, size: 15, color: p.income),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSegmentTab(
+    PrayerTasbihController c,
+    int tabIndex,
+    IconData icon,
+    String label,
+    AppPalette p,
+  ) {
+    final isSelected = c.activeTab == tabIndex;
+    return Expanded(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(10),
+        onTap: () => c.setActiveTab(tabIndex),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
+          decoration: BoxDecoration(
+            gradient: isSelected
+                ? const LinearGradient(
+                    colors: [Color(0xFF0D9488), Color(0xFF10B981)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
+                : null,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: const Color(0xFF10B981).withOpacity(0.30),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 14,
+                color: isSelected ? Colors.white : p.mute,
+              ),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w700,
+                    color: isSelected ? Colors.white : p.mute,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = context.pal;
@@ -1381,7 +1701,7 @@ class PrayerTasbihView extends StatelessWidget {
             showThemeToggle: false,
             showLogout: false,
             actions: [
-              if (c.activeTab == 1) ...[
+              if (c.activeTab == 2) ...[
                 IconButton(
                   icon: Icon(
                     c.isCountHidden ? Icons.visibility_off_rounded : Icons.visibility_rounded,
@@ -1396,32 +1716,30 @@ class PrayerTasbihView extends StatelessWidget {
                   tooltip: 'Tasbih History & Filter'.tr,
                   onPressed: () => Get.toNamed(AppRoutes.tasbihHistory),
                 ),
+              ] else if (c.activeTab == 1) ...[
+                IconButton(
+                  icon: Icon(Icons.calendar_month_rounded, color: p.income, size: 21),
+                  tooltip: 'Prayer Tracker'.tr,
+                  onPressed: () => Get.toNamed(AppRoutes.prayerTracker),
+                ),
               ] else ...[
                 IconButton(
                   icon: Icon(Icons.location_on_rounded, color: p.income, size: 20),
                   tooltip: 'Select Division / Location'.tr,
                   onPressed: () => _showLocationPicker(context, c, p),
                 ),
-              ],
-              // Shortcut to toggle between Tasbih and Prayer Times
-              if (c.activeTab == 0)
                 IconButton(
-                  icon: Icon(Icons.fingerprint_rounded, color: p.income, size: 22),
-                  tooltip: 'Digital Tasbih'.tr,
+                  icon: Icon(Icons.fact_check_rounded, color: p.income, size: 21),
+                  tooltip: 'Prayer Tracker'.tr,
                   onPressed: () => c.setActiveTab(1),
-                )
-              else
-                IconButton(
-                  icon: Icon(Icons.access_time_filled_rounded, color: p.income, size: 21),
-                  tooltip: 'Prayer Times'.tr,
-                  onPressed: () => c.setActiveTab(0),
                 ),
+              ],
             ],
           ),
           body: SafeArea(
             child: Column(
               children: [
-                // Top Segment Bar to switch between Prayer Times & Digital Tasbih
+                // Top Segment Bar with 3 tabs: Prayer Times, Prayer Tracker, Digital Tasbih
                 Container(
                   color: p.card,
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -1433,110 +1751,9 @@ class PrayerTasbihView extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
-                        Expanded(
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(10),
-                            onTap: () => c.setActiveTab(0),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              padding: const EdgeInsets.symmetric(vertical: 9),
-                              decoration: BoxDecoration(
-                                gradient: c.activeTab == 0
-                                    ? const LinearGradient(
-                                        colors: [Color(0xFF0D9488), Color(0xFF10B981)],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                      )
-                                    : null,
-                                borderRadius: BorderRadius.circular(10),
-                                boxShadow: c.activeTab == 0
-                                    ? [
-                                        BoxShadow(
-                                          color: const Color(0xFF10B981).withOpacity(0.30),
-                                          blurRadius: 8,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ]
-                                    : null,
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.access_time_filled_rounded,
-                                    size: 15,
-                                    color: c.activeTab == 0 ? Colors.white : p.mute,
-                                  ),
-                                  const SizedBox(width: 5),
-                                  Flexible(
-                                    child: Text(
-                                      'Prayer Times'.tr,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: 12.5,
-                                        fontWeight: FontWeight.w700,
-                                        color: c.activeTab == 0 ? Colors.white : p.mute,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(10),
-                            onTap: () => c.setActiveTab(1),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              padding: const EdgeInsets.symmetric(vertical: 9),
-                              decoration: BoxDecoration(
-                                gradient: c.activeTab == 1
-                                    ? const LinearGradient(
-                                        colors: [Color(0xFF0D9488), Color(0xFF10B981)],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                      )
-                                    : null,
-                                borderRadius: BorderRadius.circular(10),
-                                boxShadow: c.activeTab == 1
-                                    ? [
-                                        BoxShadow(
-                                          color: const Color(0xFF10B981).withOpacity(0.30),
-                                          blurRadius: 8,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ]
-                                    : null,
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.fingerprint_rounded,
-                                    size: 15,
-                                    color: c.activeTab == 1 ? Colors.white : p.mute,
-                                  ),
-                                  const SizedBox(width: 5),
-                                  Flexible(
-                                    child: Text(
-                                      'Digital Tasbih'.tr,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: 12.5,
-                                        fontWeight: FontWeight.w700,
-                                        color: c.activeTab == 1 ? Colors.white : p.mute,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
+                        _buildSegmentTab(c, 0, Icons.access_time_filled_rounded, 'Prayer Times'.tr, p),
+                        _buildSegmentTab(c, 1, Icons.fact_check_rounded, 'Prayer Tracker'.tr, p),
+                        _buildSegmentTab(c, 2, Icons.fingerprint_rounded, 'Digital Tasbih'.tr, p),
                       ],
                     ),
                   ),
@@ -1546,7 +1763,9 @@ class PrayerTasbihView extends StatelessWidget {
                 Expanded(
                   child: c.activeTab == 0
                       ? _buildPrayerTimesTab(context, c, p)
-                      : const TasbihCounterView(isEmbedded: true),
+                      : (c.activeTab == 1
+                          ? const PrayerTrackerView(isEmbedded: true)
+                          : const TasbihCounterView(isEmbedded: true)),
                 ),
               ],
             ),

@@ -11,6 +11,7 @@ import '../features/notes/bindings/notes_binding.dart';
 import '../features/notes/views/notes_view.dart';
 import '../features/prayer_tasbih/bindings/prayer_tasbih_binding.dart';
 import '../features/prayer_tasbih/views/prayer_tasbih_view.dart';
+import '../features/prayer_tasbih/views/prayer_tracker_view.dart';
 import '../features/prayer_tasbih/views/tasbih_counter_view.dart';
 import '../features/prayer_tasbih/views/tasbih_history_view.dart';
 import '../features/reports/views/generate_report_view.dart';
@@ -33,6 +34,11 @@ class AppPages {
     GetPage(
       name: AppRoutes.prayerAndTasbih,
       page: () => const PrayerTasbihView(),
+      binding: PrayerTasbihBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.prayerTracker,
+      page: () => const PrayerTrackerView(),
       binding: PrayerTasbihBinding(),
     ),
     GetPage(

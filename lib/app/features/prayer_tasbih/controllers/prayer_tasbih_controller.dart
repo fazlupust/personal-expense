@@ -18,6 +18,7 @@ part 'prayer_tasbih_presets.dart';
 part 'prayer_tasbih_prayer_times.dart';
 part 'prayer_tasbih_analytics.dart';
 part 'prayer_tasbih_firestore_sync.dart';
+part 'prayer_tasbih_tracker.dart';
 
 enum ZikirCategory {
   all,
@@ -106,13 +107,16 @@ class PrayerTasbihController extends GetxController {
           : '');
 
   SharedPreferences? _prefs;
+  Future<void>? _loadDataFuture;
+  Future<void>? get loadDataFuture => _loadDataFuture;
 
   Future<void> loadForUserForTesting(String uid) async {
     if (_currentUid.isNotEmpty && _todayTotal > 0) {
       await _persistTasbihData(_currentUid);
     }
     _overrideUid = uid;
-    await _loadTasbihData(uid);
+    _loadDataFuture = _loadTasbihData(uid);
+    await _loadDataFuture;
   }
 
   String _userKey(String base, [String? uidOverride]) {
@@ -258,6 +262,42 @@ class PrayerTasbihController extends GetxController {
   bool _isSyncingHistory = false;
   bool get isSyncingHistory => _isSyncingHistory;
 
+  // --- Prayer Tracker State ---
+  final Map<String, Map<String, bool>> _prayerTrackerRecords = <String, Map<String, bool>>{};
+  Map<String, Map<String, bool>> get prayerTrackerRecords => Map.unmodifiable(_prayerTrackerRecords);
+
+  final Rx<DateTime> _selectedTrackerMonth =
+      Rx<DateTime>(DateTime(DateTime.now().year, DateTime.now().month));
+  DateTime get selectedTrackerMonth => _selectedTrackerMonth.value;
+
+  void setTrackerMonth(DateTime month) {
+    _selectedTrackerMonth.value = DateTime(month.year, month.month);
+    update();
+  }
+
+  void previousTrackerMonth() {
+    final current = _selectedTrackerMonth.value;
+    _selectedTrackerMonth.value = DateTime(current.year, current.month - 1);
+    update();
+  }
+
+  void nextTrackerMonth() {
+    final current = _selectedTrackerMonth.value;
+    final next = DateTime(current.year, current.month + 1);
+    final now = DateTime.now();
+    if (!next.isAfter(DateTime(now.year, now.month))) {
+      _selectedTrackerMonth.value = next;
+      update();
+    }
+  }
+
+  TrackerFilter _selectedTrackerFilter = TrackerFilter.all;
+  TrackerFilter get selectedTrackerFilter => _selectedTrackerFilter;
+  void setTrackerFilter(TrackerFilter filter) {
+    _selectedTrackerFilter = filter;
+    update();
+  }
+
   Timer? _firestoreDebounceTimer;
 
   Map<String, List<TasbihEntryModel>> get groupedHistoryEntries {
@@ -317,7 +357,7 @@ class PrayerTasbihController extends GetxController {
     _targetCount = _selectedZikir.defaultTarget;
 
     _recalculatePrayerTimes();
-    _loadTasbihData();
+    _loadDataFuture = _loadTasbihData();
     _bindAuth();
 
     final isTesting = Get.testMode || (!kIsWeb && Platform.environment.containsKey('FLUTTER_TEST'));
@@ -360,6 +400,7 @@ class PrayerTasbihController extends GetxController {
     _completedCycles = 0;
     _zikirLifetimeCounts.clear();
     _zikirDailyCounts.clear();
+    _prayerTrackerRecords.clear();
     _isCountHidden = false;
     _isZikirCardHidden = true;
     update();

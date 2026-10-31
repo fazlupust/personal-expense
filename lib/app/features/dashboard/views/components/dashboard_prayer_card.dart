@@ -202,7 +202,7 @@ class DashboardPrayerCard extends StatelessWidget {
                       final c = Get.isRegistered<PrayerTasbihController>()
                           ? Get.find<PrayerTasbihController>()
                           : Get.put(PrayerTasbihController());
-                      c.setActiveTab(1);
+                      c.setActiveTab(2);
                       Get.toNamed(AppRoutes.prayerAndTasbih);
                     },
                     borderRadius: BorderRadius.circular(22),

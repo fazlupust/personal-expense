@@ -98,10 +98,10 @@ class _TasbihHistoryViewState extends State<TasbihHistoryView> {
                 onPressed: () {
                   if (Get.previousRoute == AppRoutes.tasbihCounter ||
                       Get.previousRoute == AppRoutes.prayerAndTasbih) {
-                    c.setActiveTab(1);
+                    c.setActiveTab(2);
                     Get.back();
                   } else {
-                    c.setActiveTab(1);
+                    c.setActiveTab(2);
                     Get.toNamed(AppRoutes.prayerAndTasbih);
                   }
                 },
@@ -601,10 +601,10 @@ class _TasbihHistoryViewState extends State<TasbihHistoryView> {
                           c.selectZikir(item);
                           if (Get.previousRoute == AppRoutes.tasbihCounter ||
                               Get.previousRoute == AppRoutes.prayerAndTasbih) {
-                            c.setActiveTab(1);
+                            c.setActiveTab(2);
                             Get.back();
                           } else {
-                            c.setActiveTab(1);
+                            c.setActiveTab(2);
                             Get.toNamed(AppRoutes.prayerAndTasbih);
                           }
                         },

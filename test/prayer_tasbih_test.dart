@@ -9,6 +9,7 @@ import 'package:personal_expense/app/features/prayer_tasbih/views/tasbih_counter
 import 'package:personal_expense/app/features/prayer_tasbih/views/tasbih_history_view.dart';
 import 'package:personal_expense/app/features/dashboard/views/components/dashboard_prayer_card.dart';
 import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:personal_expense/app/data/models/tasbih_entry_model.dart';
 import 'package:personal_expense/app/data/services/prayer_time_service.dart';
 import 'package:personal_expense/app/routes/app_pages.dart';
@@ -16,6 +17,12 @@ import 'package:personal_expense/app/routes/app_routes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  setUpAll(() async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    await initializeDateFormatting('bn', null);
+    await initializeDateFormatting('en', null);
+  });
+
   setUp(() {
     SharedPreferences.setMockInitialValues({});
     Get.testMode = true;
@@ -244,6 +251,83 @@ void main() {
       await c.loadForUserForTesting('other_privacy_user');
       expect(c.isCountHidden, isFalse);
     });
+
+    test('Prayer Tracker marks, toggles, and tracks missing prayers accurately', () async {
+      final c = Get.put(PrayerTasbihController());
+      await c.loadForUserForTesting('tracker_test_user');
+      const testDate = '2026-10-31';
+
+      expect(c.isPrayerCompleted(testDate, 'fajr'), isFalse);
+      expect(c.getCompletedCountForDate(testDate), equals(0));
+      expect(c.getMissingPrayersForDate(testDate).length, equals(5));
+
+      // Toggle Fajr to completed
+      await c.togglePrayer(testDate, 'fajr');
+      expect(c.isPrayerCompleted(testDate, 'fajr'), isTrue);
+      expect(c.getCompletedCountForDate(testDate), equals(1));
+      expect(c.getMissingPrayersForDate(testDate), equals(['dhuhr', 'asr', 'maghrib', 'isha']));
+
+      // Toggle Dhuhr and Maghrib
+      await c.togglePrayer(testDate, 'dhuhr');
+      await c.togglePrayer(testDate, 'maghrib');
+      expect(c.getCompletedCountForDate(testDate), equals(3));
+      expect(c.isDayFullSalat(testDate), isFalse);
+      expect(c.getMissingPrayersForDate(testDate), equals(['asr', 'isha']));
+
+      // Toggle Asr and Isha to complete all 5
+      await c.togglePrayer(testDate, 'asr');
+      await c.togglePrayer(testDate, 'isha');
+      expect(c.getCompletedCountForDate(testDate), equals(5));
+      expect(c.isDayFullSalat(testDate), isTrue);
+      expect(c.getMissingPrayersForDate(testDate), isEmpty);
+
+      // Toggle Fajr back to incomplete
+      await c.togglePrayer(testDate, 'fajr');
+      expect(c.isPrayerCompleted(testDate, 'fajr'), isFalse);
+      expect(c.getCompletedCountForDate(testDate), equals(4));
+      expect(c.getMissingPrayersForDate(testDate), equals(['fajr']));
+
+      // setDayAllPrayers
+      await c.setDayAllPrayers(testDate, true);
+      expect(c.isDayFullSalat(testDate), isTrue);
+      await c.setDayAllPrayers(testDate, false);
+      expect(c.getCompletedCountForDate(testDate), equals(0));
+    });
+
+    test('Prayer Tracker monthly statistics and persistence per user', () async {
+      final c = Get.put(PrayerTasbihController());
+      await c.loadForUserForTesting('salat_user_a');
+
+      final month = DateTime(2026, 10);
+      await c.togglePrayer('2026-10-01', 'fajr');
+      await c.togglePrayer('2026-10-01', 'dhuhr');
+      await c.togglePrayer('2026-10-01', 'asr');
+      await c.togglePrayer('2026-10-01', 'maghrib');
+      await c.togglePrayer('2026-10-01', 'isha'); // 5/5
+
+      await c.togglePrayer('2026-10-02', 'fajr');
+      await c.togglePrayer('2026-10-02', 'dhuhr'); // 2/5 (3 missed)
+
+      expect(c.getMonthlyCompletedPrayersCount(month), equals(7));
+      expect(c.getMonthlyFullSalatDaysCount(month), equals(1));
+
+      final waqtCounts = c.getMonthlyWaqtCompletionCounts(month);
+      expect(waqtCounts['fajr'], equals(2));
+      expect(waqtCounts['dhuhr'], equals(2));
+      expect(waqtCounts['asr'], equals(1));
+      expect(waqtCounts['maghrib'], equals(1));
+      expect(waqtCounts['isha'], equals(1));
+
+      // Reload same user: data persists
+      await c.loadForUserForTesting('salat_user_a');
+      expect(c.getMonthlyCompletedPrayersCount(month), equals(7));
+      expect(c.isPrayerCompleted('2026-10-01', 'fajr'), isTrue);
+
+      // Other user: completely isolated empty data
+      await c.loadForUserForTesting('salat_user_b');
+      expect(c.getMonthlyCompletedPrayersCount(month), equals(0));
+      expect(c.isPrayerCompleted('2026-10-01', 'fajr'), isFalse);
+    });
   });
 
   group('Prayer & Tasbih Samsung A15 UI Tests', () {
@@ -285,12 +369,13 @@ void main() {
       expect(find.byType(TasbihCounterView), findsOneWidget);
       // Zikir details card is hidden by default to keep recitation private
       expect(find.text('Show zikir details'), findsOneWidget);
-      expect(find.text('سُبْحَانَ اللَّهِ'), findsNothing);
+      expect(find.text('Hide'), findsNothing);
 
       // Tap to reveal zikir details card
       await tester.tap(find.text('Show zikir details'));
       await tester.pumpAndSettle();
-      expect(find.text('سُبْحَانَ اللَّهِ'), findsOneWidget);
+      expect(find.text('Hide'), findsOneWidget);
+      expect(find.text('Show zikir details'), findsNothing);
 
       // Tap to count button
       await tester.tap(find.text('+1 Count'));
@@ -319,12 +404,13 @@ void main() {
       expect(find.byType(TasbihCounterView), findsOneWidget);
       // In Bengali locale, verify zikir details card is hidden by default
       expect(find.text('জিকির বিস্তারিত দেখান'), findsOneWidget);
-      expect(find.text('لَا إِلٰهَ إِلَّا اللَّهُ'), findsNothing);
+      expect(find.text('سُبْحَانَ اللَّهِ'), findsNothing);
 
       // Tap to reveal in Bengali
       await tester.tap(find.text('জিকির বিস্তারিত দেখান'));
       await tester.pumpAndSettle();
-      expect(find.text('لَا إِلٰهَ إِلَّا اللَّهُ'), findsOneWidget);
+      expect(find.text('سُبْحَانَ اللَّهِ'), findsOneWidget);
+      expect(find.text('লুকান'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
