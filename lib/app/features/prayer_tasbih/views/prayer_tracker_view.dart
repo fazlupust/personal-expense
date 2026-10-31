@@ -18,116 +18,242 @@ class PrayerTrackerView extends StatefulWidget {
 class _PrayerTrackerViewState extends State<PrayerTrackerView> {
   void _showMonthPicker(BuildContext context, PrayerTasbihController c, AppPalette p) {
     final now = DateTime.now();
-    final months = <DateTime>[];
-    for (int i = 0; i < 12; i++) {
-      months.add(DateTime(now.year, now.month - i));
-    }
+    int tempYear = c.selectedTrackerMonth.year;
+    int tempMonth = c.selectedTrackerMonth.month;
 
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) {
-        final isBn = Get.locale?.languageCode == 'bn';
-        return Material(
-          color: p.card,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
-          clipBehavior: Clip.antiAlias,
-          child: SafeArea(
-            top: false,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                  decoration: BoxDecoration(color: p.income),
-                  child: Row(
+    // Available years: from 3 years ago to current year (e.g., 2023, 2024, 2025, 2026)
+    final years = List.generate(4, (i) => now.year - 3 + i).reversed.toList();
+
+    const monthNamesEn = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    const monthNamesBn = [
+      'জানু', 'ফেব্রু', 'মার্চ', 'এপ্রিল', 'মে', 'জুন',
+      'জুলাই', 'আগস্ট', 'সেপ্টে', 'অক্টো', 'নভে', 'ডিসে'
+    ];
+
+    Get.bottomSheet(
+      StatefulBuilder(
+        builder: (ctx, setState) {
+          final isBn = Get.locale?.languageCode == 'bn';
+          final isCurrentMonth = tempYear == now.year && tempMonth == now.month;
+
+          return Container(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+            decoration: BoxDecoration(
+              color: p.card,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+              border: Border.all(color: p.line),
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Drag Handle
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: p.line,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+
+                  // Header title with close button
+                  Row(
                     children: [
-                      const Icon(Icons.calendar_month_rounded, color: Colors.white, size: 22),
-                      const SizedBox(width: 10),
+                      Icon(Icons.calendar_month_rounded, color: p.income, size: 21),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Select Month'.tr,
-                          style: const TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
+                          'Select Month & Year'.tr,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 17.5,
+                            fontWeight: FontWeight.w800,
+                            color: p.ink,
                           ),
                         ),
                       ),
-                      InkWell(
-                        onTap: () => Navigator.of(ctx).pop(),
-                        borderRadius: BorderRadius.circular(20),
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.close_rounded, color: Colors.white, size: 18),
-                        ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        onPressed: () => Get.back(),
+                        icon: const Icon(Icons.close_rounded, size: 22),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
                       ),
                     ],
                   ),
-                ),
-                Flexible(
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    itemCount: months.length,
-                    separatorBuilder: (_, __) => Divider(height: 1, color: p.line.withOpacity(0.5)),
-                    itemBuilder: (context, index) {
-                      final m = months[index];
-                      final isSelected = c.selectedTrackerMonth.year == m.year &&
-                          c.selectedTrackerMonth.month == m.month;
-                      final label = isBn
-                          ? DateFormat('MMMM yyyy', 'bn').format(m)
-                          : DateFormat('MMMM yyyy').format(m);
+                  const SizedBox(height: 14),
 
-                      return ListTile(
-                        leading: Icon(
-                          isSelected ? Icons.check_circle_rounded : Icons.calendar_today_rounded,
-                          color: isSelected ? p.income : p.mute,
-                          size: 20,
-                        ),
-                        title: Text(
-                          label,
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                            color: isSelected ? p.income : p.ink,
+                  // Quick "This Month" shortcut button
+                  InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () {
+                      c.setTrackerMonth(DateTime(now.year, now.month));
+                      Get.back();
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 14),
+                      decoration: BoxDecoration(
+                        color: isCurrentMonth ? p.income : p.bg,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: isCurrentMonth ? p.income : p.line),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.today_rounded,
+                            size: 18,
+                            color: isCurrentMonth ? Colors.white : p.income,
+                          ),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              '${'This Month'.tr} (${isBn ? DateFormat('MMMM yyyy', 'bn').format(now) : DateFormat('MMMM yyyy').format(now)})',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: isCurrentMonth ? Colors.white : p.ink,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Year selector row
+                  Text(
+                    'Select Year'.tr,
+                    style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: p.mute),
+                  ),
+                  const SizedBox(height: 8),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: years.map((y) {
+                        final isSel = y == tempYear;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(10),
+                            onTap: () {
+                              setState(() {
+                                tempYear = y;
+                                if (tempYear == now.year && tempMonth > now.month) {
+                                  tempMonth = now.month;
+                                }
+                              });
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 150),
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                              decoration: BoxDecoration(
+                                color: isSel ? p.income : p.bg,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: isSel ? p.income : p.line),
+                              ),
+                              child: Text(
+                                isBn ? NumberFormat('', 'bn').format(y) : '$y',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: isSel ? FontWeight.w700 : FontWeight.w600,
+                                  color: isSel ? Colors.white : p.ink,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Month selector Grid (12 Months)
+                  Text(
+                    'Select Month'.tr,
+                    style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: p.mute),
+                  ),
+                  const SizedBox(height: 8),
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 4,
+                      mainAxisSpacing: 8,
+                      crossAxisSpacing: 8,
+                      childAspectRatio: 2.1,
+                    ),
+                    itemCount: 12,
+                    itemBuilder: (ctx, i) {
+                      final monthIndex = i + 1;
+                      final isFuture = tempYear == now.year && monthIndex > now.month;
+                      final isSel = tempYear == c.selectedTrackerMonth.year &&
+                          monthIndex == c.selectedTrackerMonth.month;
+                      final name = isBn ? monthNamesBn[i] : monthNamesEn[i];
+
+                      return InkWell(
+                        borderRadius: BorderRadius.circular(10),
+                        onTap: isFuture
+                            ? null
+                            : () {
+                                c.setTrackerMonth(DateTime(tempYear, monthIndex));
+                                Get.back();
+                              },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 150),
+                          decoration: BoxDecoration(
+                            color: isSel
+                                ? p.income
+                                : isFuture
+                                    ? p.bg.withOpacity(0.4)
+                                    : p.bg,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: isSel
+                                  ? p.income
+                                  : isFuture
+                                      ? p.line.withOpacity(0.4)
+                                      : p.line,
+                            ),
+                          ),
+                          child: Center(
+                            child: Text(
+                              name,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: isSel ? FontWeight.w800 : FontWeight.w600,
+                                color: isSel
+                                    ? Colors.white
+                                    : isFuture
+                                        ? p.mute.withOpacity(0.4)
+                                        : p.ink,
+                              ),
+                            ),
                           ),
                         ),
-                        trailing: isSelected
-                            ? Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                decoration: BoxDecoration(
-                                  color: p.income.withOpacity(0.12),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  'Active'.tr,
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                    color: p.income,
-                                  ),
-                                ),
-                              )
-                            : null,
-                        onTap: () {
-                          Navigator.of(ctx).pop();
-                          c.setTrackerMonth(m);
-                        },
                       );
                     },
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
+      isScrollControlled: true,
     );
   }
 

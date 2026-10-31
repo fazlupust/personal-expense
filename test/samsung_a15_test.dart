@@ -620,6 +620,21 @@ void main() {
     expect(find.byType(PrayerTrackerView), findsOneWidget);
     expect(find.text('সালাত ট্র্যাকার'), findsOneWidget);
     expect(find.text('মাসিক সালাত পরিসংখ্যান'), findsOneWidget);
+
+    // Tap month selector to open the new Year & Month picker grid
+    await tester.tap(find.byIcon(Icons.keyboard_arrow_down_rounded).first);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.text('মাস ও বছর নির্বাচন করুন'), findsOneWidget);
+    expect(find.text('বছর নির্বাচন করুন'), findsOneWidget);
+    expect(find.text('মাস নির্বাচন করুন'), findsOneWidget);
+    expect(find.text('জানু'), findsOneWidget);
+
+    // Select January in grid
+    await tester.tap(find.text('জানু'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(prayerCtrl.selectedTrackerMonth.month, equals(1));
   });
 
   testWidgets('Samsung Galaxy A15 PrayerTasbihView with 3 tabs & Today Tracker renders cleanly', (tester) async {
