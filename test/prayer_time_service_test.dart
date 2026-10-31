@@ -86,6 +86,20 @@ void main() {
       expect(sylhet.nameEn, equals('Sylhet'));
       expect(sylhet.nameBn, equals('সিলেট'));
 
+      final narsingdi = BangladeshLocation.findById('narsingdi');
+      expect(narsingdi.nameEn, equals('Narsingdi'));
+      expect(narsingdi.nameBn, equals('নরসিংদী'));
+      expect(narsingdi.latitude, closeTo(23.9, 0.1));
+
+      final manikganj = BangladeshLocation.findById('manikganj');
+      expect(manikganj.nameEn, equals('Manikganj'));
+      expect(manikganj.nameBn, equals('মানিকগঞ্জ'));
+      expect(manikganj.latitude, closeTo(23.8, 0.1));
+
+      final munshiganj = BangladeshLocation.findById('munshiganj');
+      expect(munshiganj.nameEn, equals('Munshiganj'));
+      expect(munshiganj.nameBn, equals('মুন্সিগঞ্জ'));
+
       // Accurate prayer times can be calculated for Pabna
       final now = DateTime(2026, 10, 27);
       final pabnaSchedule = PrayerTimeCalculator.calculate(date: now, location: pabna);

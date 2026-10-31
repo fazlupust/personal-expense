@@ -663,4 +663,61 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('Samsung Galaxy A15 LocationPicker bottom sheet renders cleanly with search, Narsingdi & Manikganj, and no keyboard space overflow', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2340);
+    tester.view.devicePixelRatio = 2.625;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+      tester.view.resetViewInsets();
+    });
+
+    SharedPreferences.setMockInitialValues({});
+    if (Get.isRegistered<PrayerTasbihController>()) {
+      Get.delete<PrayerTasbihController>();
+    }
+    final prayerCtrl = Get.put(PrayerTasbihController());
+    prayerCtrl.onInit();
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        translations: AppTranslations(),
+        locale: const Locale('bn'),
+        theme: AppTheme.light,
+        home: const Scaffold(
+          body: PrayerTasbihView(),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+
+    // Tap location icon button in AppBar to open Location Picker
+    await tester.tap(find.byIcon(Icons.location_on_rounded).first);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+
+    expect(find.text('বিভাগ বা অবস্থান নির্বাচন করুন'), findsOneWidget);
+    expect(find.text('নরসিংদী'), findsOneWidget);
+    expect(find.text('মানিকগঞ্জ'), findsOneWidget);
+
+    // Enter search query
+    await tester.enterText(find.byType(TextField), 'নরসিংদী');
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(InkWell, 'নরসিংদী'), findsOneWidget);
+    expect(find.widgetWithText(InkWell, 'মানিকগঞ্জ'), findsNothing);
+
+    // Simulate keyboard open
+    tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull, reason: 'Location picker should render cleanly above keyboard without overflow');
+
+    // Tap location chip to select
+    await tester.tap(find.widgetWithText(InkWell, 'নরসিংদী'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(prayerCtrl.selectedLocation.id, equals('narsingdi'));
+  });
 }

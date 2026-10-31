@@ -203,6 +203,27 @@ class BangladeshLocation {
       longitude: 90.5000,
     ),
     BangladeshLocation(
+      id: 'narsingdi',
+      nameEn: 'Narsingdi',
+      nameBn: 'নরসিংদী',
+      latitude: 23.9193,
+      longitude: 90.7202,
+    ),
+    BangladeshLocation(
+      id: 'manikganj',
+      nameEn: 'Manikganj',
+      nameBn: 'মানিকগঞ্জ',
+      latitude: 23.8617,
+      longitude: 90.0003,
+    ),
+    BangladeshLocation(
+      id: 'munshiganj',
+      nameEn: 'Munshiganj',
+      nameBn: 'মুন্সিগঞ্জ',
+      latitude: 23.5422,
+      longitude: 90.5305,
+    ),
+    BangladeshLocation(
       id: 'tangail',
       nameEn: 'Tangail',
       nameBn: 'টাঙ্গাইল',

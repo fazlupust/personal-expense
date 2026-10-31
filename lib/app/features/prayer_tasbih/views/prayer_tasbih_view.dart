@@ -15,283 +15,10 @@ class PrayerTasbihView extends StatelessWidget {
   const PrayerTasbihView({super.key});
 
   void _showLocationPicker(BuildContext context, PrayerTasbihController c, AppPalette p) {
-    String searchQuery = '';
-
     Get.bottomSheet(
+      _LocationPickerSheet(controller: c, palette: p),
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      StatefulBuilder(
-        builder: (context, setState) {
-          final isBn = Get.locale?.languageCode == 'bn';
-          final query = searchQuery.trim().toLowerCase();
-
-          final filteredDivisions = BangladeshLocation.divisions.where((loc) {
-            if (query.isEmpty) return true;
-            return loc.nameEn.toLowerCase().contains(query) ||
-                loc.nameBn.toLowerCase().contains(query);
-          }).toList();
-
-          final filteredAreas = BangladeshLocation.dhakaAreas.where((loc) {
-            if (query.isEmpty) return true;
-            return loc.nameEn.toLowerCase().contains(query) ||
-                loc.nameBn.toLowerCase().contains(query);
-          }).toList();
-
-          final filteredDistricts = BangladeshLocation.districts.where((loc) {
-            if (query.isEmpty) return true;
-            return loc.nameEn.toLowerCase().contains(query) ||
-                loc.nameBn.toLowerCase().contains(query);
-          }).toList();
-
-          return Material(
-            color: p.card,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
-            clipBehavior: Clip.antiAlias,
-            child: Container(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.85,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Primary Color Header Bar with Close Button (Frozen)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-                    decoration: BoxDecoration(color: p.income),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(7),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.location_on_rounded, color: Colors.white, size: 20),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Select Division / Location'.tr,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 17.5,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'Prayer times are calculated accurately based on geographic coordinates.'.tr,
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.9),
-                                  fontSize: 12,
-                                  height: 1.25,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        InkWell(
-                          borderRadius: BorderRadius.circular(20),
-                          onTap: () => Navigator.of(context).pop(),
-                          child: Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Icons.close_rounded, color: Colors.white, size: 18),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Content Body
-                  Flexible(
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(
-                        18,
-                        14,
-                        18,
-                        MediaQuery.of(context).viewInsets.bottom + 18,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          // Search box
-                          Container(
-                            height: 44,
-                            decoration: BoxDecoration(
-                              color: p.bg,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: p.line),
-                            ),
-                            child: TextField(
-                              onChanged: (val) => setState(() => searchQuery = val),
-                              style: TextStyle(fontSize: 14.5, color: p.ink),
-                              decoration: InputDecoration(
-                                hintText: 'Search location...'.tr,
-                                hintStyle: TextStyle(fontSize: 13.5, color: p.mute),
-                                prefixIcon: Icon(Icons.search_rounded, size: 20, color: p.mute),
-                                border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(vertical: 11),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-
-                          Flexible(
-                            child: SingleChildScrollView(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  if (filteredAreas.isNotEmpty) ...[
-                                    Row(
-                                      children: [
-                                        Icon(Icons.location_on_rounded, size: 16, color: p.income),
-                                        const SizedBox(width: 6),
-                                        Text(
-                                          'Dhaka & Areas'.tr,
-                                          style: TextStyle(
-                                            fontSize: 14.5,
-                                            fontWeight: FontWeight.w800,
-                                            color: p.income,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Wrap(
-                                      spacing: 8,
-                                      runSpacing: 8,
-                                      children: filteredAreas.map((loc) {
-                                        return _buildLocationChip(loc, c, p, isBn);
-                                      }).toList(),
-                                    ),
-                                    const SizedBox(height: 16),
-                                  ],
-                                  if (filteredDivisions.isNotEmpty) ...[
-                                    Row(
-                                      children: [
-                                        Icon(Icons.map_rounded, size: 16, color: p.income),
-                                        const SizedBox(width: 6),
-                                        Text(
-                                          'Divisions'.tr,
-                                          style: TextStyle(
-                                            fontSize: 14.5,
-                                            fontWeight: FontWeight.w800,
-                                            color: p.income,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Wrap(
-                                      spacing: 8,
-                                      runSpacing: 8,
-                                      children: filteredDivisions.map((loc) {
-                                        return _buildLocationChip(loc, c, p, isBn);
-                                      }).toList(),
-                                    ),
-                                    const SizedBox(height: 16),
-                                  ],
-                                  if (filteredDistricts.isNotEmpty) ...[
-                                    Row(
-                                      children: [
-                                        Icon(Icons.location_city_rounded, size: 16, color: p.income),
-                                        const SizedBox(width: 6),
-                                        Text(
-                                          'Districts'.tr,
-                                          style: TextStyle(
-                                            fontSize: 14.5,
-                                            fontWeight: FontWeight.w800,
-                                            color: p.income,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Wrap(
-                                      spacing: 8,
-                                      runSpacing: 8,
-                                      children: filteredDistricts.map((loc) {
-                                        return _buildLocationChip(loc, c, p, isBn);
-                                      }).toList(),
-                                    ),
-                                  ],
-                                  if (filteredDivisions.isEmpty && filteredAreas.isEmpty && filteredDistricts.isEmpty)
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 24),
-                                      child: Text(
-                                        'No location found'.tr,
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(fontSize: 14, color: p.mute),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildLocationChip(
-    BangladeshLocation loc,
-    PrayerTasbihController c,
-    AppPalette p,
-    bool isBn,
-  ) {
-    final isSelected = c.selectedLocation.id == loc.id;
-    final name = isBn ? loc.nameBn : loc.nameEn;
-
-    return InkWell(
-      borderRadius: BorderRadius.circular(10),
-      onTap: () {
-        Get.back();
-        c.setLocation(loc);
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8.5),
-        decoration: BoxDecoration(
-          color: isSelected ? p.income : p.bg,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: isSelected ? p.income : p.line),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.location_on_rounded,
-              size: 15,
-              color: isSelected ? Colors.white : p.income,
-            ),
-            const SizedBox(width: 5),
-            Text(
-              name,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: isSelected ? Colors.white : p.ink,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -1772,6 +1499,314 @@ class PrayerTasbihView extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _LocationPickerSheet extends StatefulWidget {
+  final PrayerTasbihController controller;
+  final AppPalette palette;
+
+  const _LocationPickerSheet({
+    required this.controller,
+    required this.palette,
+  });
+
+  @override
+  State<_LocationPickerSheet> createState() => _LocationPickerSheetState();
+}
+
+class _LocationPickerSheetState extends State<_LocationPickerSheet> {
+  late final TextEditingController _searchCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchCtrl = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  Widget _buildLocationChip(
+    BangladeshLocation loc,
+    bool isBn,
+  ) {
+    final c = widget.controller;
+    final p = widget.palette;
+    final isSelected = c.selectedLocation.id == loc.id;
+    final name = isBn ? loc.nameBn : loc.nameEn;
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(10),
+      onTap: () {
+        Get.back();
+        c.setLocation(loc);
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8.5),
+        decoration: BoxDecoration(
+          color: isSelected ? p.income : p.bg,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: isSelected ? p.income : p.line),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.location_on_rounded,
+              size: 15,
+              color: isSelected ? Colors.white : p.income,
+            ),
+            const SizedBox(width: 5),
+            Text(
+              name,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: isSelected ? Colors.white : p.ink,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = widget.palette;
+    final isBn = Get.locale?.languageCode == 'bn';
+    final query = _searchCtrl.text.trim().toLowerCase();
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+
+    final filteredDivisions = BangladeshLocation.divisions.where((loc) {
+      if (query.isEmpty) return true;
+      return loc.nameEn.toLowerCase().contains(query) ||
+          loc.nameBn.toLowerCase().contains(query);
+    }).toList();
+
+    final filteredDistricts = BangladeshLocation.districts.where((loc) {
+      if (query.isEmpty) return true;
+      return loc.nameEn.toLowerCase().contains(query) ||
+          loc.nameBn.toLowerCase().contains(query);
+    }).toList();
+
+    final filteredAreas = BangladeshLocation.dhakaAreas.where((loc) {
+      if (query.isEmpty) return true;
+      return loc.nameEn.toLowerCase().contains(query) ||
+          loc.nameBn.toLowerCase().contains(query);
+    }).toList();
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: bottomInset),
+      child: Material(
+        color: p.card,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+        clipBehavior: Clip.antiAlias,
+        child: SafeArea(
+          top: false,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.sizeOf(context).height * 0.78,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Primary Color Header Bar with Close Button (Frozen)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                  decoration: BoxDecoration(color: p.income),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(7),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.location_on_rounded, color: Colors.white, size: 20),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Select Division / Location'.tr,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 17.5,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Prayer times are calculated accurately based on geographic coordinates.'.tr,
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.9),
+                                fontSize: 12,
+                                height: 1.25,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      InkWell(
+                        borderRadius: BorderRadius.circular(20),
+                        onTap: () => Navigator.of(context).pop(),
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.close_rounded, color: Colors.white, size: 18),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Pinned Search Box
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                  child: Container(
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: p.bg,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: p.line),
+                    ),
+                    child: TextField(
+                      controller: _searchCtrl,
+                      onChanged: (_) => setState(() {}),
+                      style: TextStyle(fontSize: 14.5, color: p.ink),
+                      decoration: InputDecoration(
+                        hintText: 'Search location...'.tr,
+                        hintStyle: TextStyle(fontSize: 13.5, color: p.mute),
+                        prefixIcon: Icon(Icons.search_rounded, size: 20, color: p.mute),
+                        suffixIcon: _searchCtrl.text.isNotEmpty
+                            ? GestureDetector(
+                                onTap: () {
+                                  _searchCtrl.clear();
+                                  setState(() {});
+                                },
+                                child: Icon(Icons.close_rounded, size: 18, color: p.mute),
+                              )
+                            : null,
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(vertical: 11),
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Scrollable Locations List
+                Flexible(
+                  child: SingleChildScrollView(
+                    keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (filteredDivisions.isNotEmpty) ...[
+                          Row(
+                            children: [
+                              Icon(Icons.map_rounded, size: 16, color: p.income),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Divisions'.tr,
+                                style: TextStyle(
+                                  fontSize: 14.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: p.income,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: filteredDivisions.map((loc) {
+                              return _buildLocationChip(loc, isBn);
+                            }).toList(),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                        if (filteredDistricts.isNotEmpty) ...[
+                          Row(
+                            children: [
+                              Icon(Icons.location_city_rounded, size: 16, color: p.income),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Districts'.tr,
+                                style: TextStyle(
+                                  fontSize: 14.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: p.income,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: filteredDistricts.map((loc) {
+                              return _buildLocationChip(loc, isBn);
+                            }).toList(),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                        if (filteredAreas.isNotEmpty) ...[
+                          Row(
+                            children: [
+                              Icon(Icons.location_on_rounded, size: 16, color: p.income),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Dhaka & Areas'.tr,
+                                style: TextStyle(
+                                  fontSize: 14.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: p.income,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: filteredAreas.map((loc) {
+                              return _buildLocationChip(loc, isBn);
+                            }).toList(),
+                          ),
+                        ],
+                        if (filteredDivisions.isEmpty && filteredAreas.isEmpty && filteredDistricts.isEmpty)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 24),
+                            child: Text(
+                              'No location found'.tr,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 14, color: p.mute),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
