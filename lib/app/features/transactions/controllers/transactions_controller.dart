@@ -107,6 +107,9 @@ class TransactionsController extends GetxController {
       debugPrint('[TransactionsController] fetchUserTransactions error: $err');
       isLoading = false;
       update();
+    }).whenComplete(() {
+      isLoading = false;
+      update();
     });
 
     // 2. Realtime stream for live updates
@@ -132,7 +135,9 @@ class TransactionsController extends GetxController {
     if (uid == null || uid.isEmpty) return;
     try {
       final list = await Get.find<TransactionService>().fetchUserTransactions(uid);
-      entries = list;
+      if (list.isNotEmpty || entries.isEmpty) {
+        entries = list;
+      }
     } catch (e) {
       debugPrint('[TransactionsController] refreshTransactions error: $e');
     } finally {

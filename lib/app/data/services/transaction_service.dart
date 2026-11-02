@@ -36,7 +36,8 @@ class TransactionService extends GetxService {
     try {
       final snapshot = await _collection
           .where('user_id', isEqualTo: userId)
-          .get();
+          .get()
+          .timeout(const Duration(seconds: 5));
       final list = snapshot.docs
           .map((doc) => TransactionModel.fromFirestore(doc))
           .where((tx) => !tx.isDeleted)
@@ -45,7 +46,12 @@ class TransactionService extends GetxService {
       // Fallback 1: Check subcollection users/{userId}/transactions if root query returned 0
       if (list.isEmpty) {
         try {
-          final subSnap = await _db.collection('users').doc(userId).collection('transactions').get();
+          final subSnap = await _db
+              .collection('users')
+              .doc(userId)
+              .collection('transactions')
+              .get()
+              .timeout(const Duration(seconds: 4));
           if (subSnap.docs.isNotEmpty) {
             final subList = subSnap.docs
                 .map((doc) => TransactionModel.fromFirestore(doc))
@@ -59,7 +65,10 @@ class TransactionService extends GetxService {
       // Fallback 2: If developer and still empty, check top-level transactions
       if (list.isEmpty && _auth.isDeveloper) {
         try {
-          final allSnap = await _collection.limit(100).get();
+          final allSnap = await _collection
+              .limit(100)
+              .get()
+              .timeout(const Duration(seconds: 4));
           if (allSnap.docs.isNotEmpty) {
             final allList = allSnap.docs
                 .map((doc) => TransactionModel.fromFirestore(doc))
