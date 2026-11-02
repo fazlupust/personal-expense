@@ -31,6 +31,8 @@ class BudgetManagementSheet extends StatefulWidget {
 class _BudgetManagementSheetState extends State<BudgetManagementSheet> {
   final _totalBudgetCtrl = TextEditingController();
   final Map<String, TextEditingController> _catControllers = {};
+  List<dynamic> _categories = [];
+  bool _sortByBudget = true;
 
   @override
   void initState() {
@@ -39,14 +41,54 @@ class _BudgetManagementSheetState extends State<BudgetManagementSheet> {
     _totalBudgetCtrl.text = s.budget > 0 ? _plain(s.budget) : '';
     _totalBudgetCtrl.addListener(() => setState(() {}));
 
-    final categories = Get.isRegistered<CategoriesController>()
+    final rawCategories = Get.isRegistered<CategoriesController>()
         ? Get.find<CategoriesController>().byType(EntryType.expense)
         : AppConstants.defaultCategories.where((c) => c.type == EntryType.expense).toList();
 
-    for (final cat in categories) {
+    for (final cat in rawCategories) {
       final b = s.getCategoryBudget(cat.name);
       _catControllers[cat.name] = TextEditingController(text: b > 0 ? _plain(b) : '');
     }
+
+    _categories = List.from(rawCategories);
+    _sortCategories();
+  }
+
+  void _sortCategories() {
+    if (_sortByBudget) {
+      final s = SettingsController.to;
+      final isBn = Get.locale?.languageCode == 'bn';
+      _categories.sort((a, b) {
+        final ctrlA = _catControllers[a.name];
+        final ctrlB = _catControllers[b.name];
+        final budgetA = ctrlA != null
+            ? (double.tryParse(ctrlA.text.trim()) ?? 0.0)
+            : s.getCategoryBudget(a.name);
+        final budgetB = ctrlB != null
+            ? (double.tryParse(ctrlB.text.trim()) ?? 0.0)
+            : s.getCategoryBudget(b.name);
+
+        // 1. Higher budget first (descending)
+        if (budgetB != budgetA) {
+          return budgetB.compareTo(budgetA);
+        }
+        // 2. Alphabetical fallback
+        final nameA = (a.displayName(isBn) as String).toLowerCase();
+        final nameB = (b.displayName(isBn) as String).toLowerCase();
+        return nameA.compareTo(nameB);
+      });
+    } else {
+      final rawCategories = Get.isRegistered<CategoriesController>()
+          ? Get.find<CategoriesController>().byType(EntryType.expense)
+          : AppConstants.defaultCategories.where((c) => c.type == EntryType.expense).toList();
+      _categories = List.from(rawCategories);
+    }
+  }
+
+  void _toggleSort() {
+    _sortByBudget = !_sortByBudget;
+    _sortCategories();
+    setState(() {});
   }
 
   @override
@@ -104,6 +146,11 @@ class _BudgetManagementSheetState extends State<BudgetManagementSheet> {
     final categories = Get.isRegistered<CategoriesController>()
         ? Get.find<CategoriesController>().byType(EntryType.expense)
         : AppConstants.defaultCategories.where((c) => c.type == EntryType.expense).toList();
+
+    if (_categories.isEmpty || _categories.length != categories.length) {
+      _categories = List.from(categories);
+      _sortCategories();
+    }
 
     final tc = Get.isRegistered<TransactionsController>() ? Get.find<TransactionsController>() : null;
     final currentRows = tc?.currentMonthRows ?? [];
@@ -558,6 +605,41 @@ class _BudgetManagementSheetState extends State<BudgetManagementSheet> {
                                 ),
                               ),
                             ],
+                            const SizedBox(width: 6),
+                            // Sort Toggle Chip
+                            InkWell(
+                              borderRadius: BorderRadius.circular(6),
+                              onTap: _toggleSort,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2.5),
+                                decoration: BoxDecoration(
+                                  color: _sortByBudget ? p.income.withOpacity(0.12) : p.bg,
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(
+                                    color: _sortByBudget ? p.income.withOpacity(0.3) : p.line,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.swap_vert_rounded,
+                                      size: 13,
+                                      color: _sortByBudget ? p.income : p.mute,
+                                    ),
+                                    const SizedBox(width: 2),
+                                    Text(
+                                      _sortByBudget ? 'By Budget'.tr : 'Default Order'.tr,
+                                      style: TextStyle(
+                                        fontSize: 10.5,
+                                        fontWeight: FontWeight.w700,
+                                        color: _sortByBudget ? p.income : p.mute,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -595,8 +677,8 @@ class _BudgetManagementSheetState extends State<BudgetManagementSheet> {
                   ),
                   const SizedBox(height: 10),
 
-                  // Category Budget List
-                  for (final cat in categories)
+                  // Category Budget List (Sorted budget-wise)
+                  for (final cat in _categories)
                     _buildCategoryRow(
                       cat: cat,
                       isBn: isBn,

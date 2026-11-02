@@ -176,6 +176,38 @@ void main() {
     expect(find.text('Save Budgets'.tr), findsOneWidget);
   });
 
+  testWidgets('BudgetManagementSheet sorts categories budget-wise and toggles sort', (tester) async {
+    final s = SettingsController.to;
+    s.setCategoryBudget('Groceries', 5000);
+    s.setCategoryBudget('Rent', 15000);
+    s.setCategoryBudget('Transport', 2000);
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        translations: AppTranslations(),
+        locale: const Locale('en'),
+        theme: AppTheme.light,
+        home: const Scaffold(
+          body: BudgetManagementSheet(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Save Budgets'), findsOneWidget);
+    expect(find.text('By Budget'), findsOneWidget);
+
+    // Tap toggle
+    await tester.tap(find.text('By Budget'));
+    await tester.pumpAndSettle();
+    expect(find.text('Default Order'), findsOneWidget);
+
+    // Tap toggle back
+    await tester.tap(find.text('Default Order'));
+    await tester.pumpAndSettle();
+    expect(find.text('By Budget'), findsOneWidget);
+  });
+
   testWidgets('Samsung Galaxy A15 EditProfileSheet renders cleanly with Update Profile button', (tester) async {
     tester.view.physicalSize = const Size(1080, 2340);
     tester.view.devicePixelRatio = 2.625;
