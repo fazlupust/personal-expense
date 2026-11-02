@@ -525,25 +525,70 @@ class _BudgetManagementSheetState extends State<BudgetManagementSheet> {
                   ),
                   const SizedBox(height: 18),
 
-                  // Category Budgets Header
+                  // Category Budgets Header with Live Total on the right
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Flexible(
-                        child: Text(
-                          'Category Budgets'.tr,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: p.ink),
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                'Category Budgets'.tr,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: p.ink),
+                              ),
+                            ),
+                            if (activeCatBudgetCount > 0) ...[
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: p.income.withOpacity(0.12),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  '$activeCatBudgetCount',
+                                  style: TextStyle(
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: p.income,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Flexible(
-                        child: Text(
-                          'Set budget per category'.tr,
+                      // Prominent Category Total Pill
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: p.income.withOpacity(0.10),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: p.income.withOpacity(0.25)),
+                        ),
+                        child: Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: '${'Total:'.tr} ',
+                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: p.mute),
+                              ),
+                              TextSpan(
+                                text: Fmt.money(categoryBudgetsSum),
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: p.income,
+                                ),
+                              ),
+                            ],
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(fontSize: 12, color: p.mute),
                         ),
                       ),
                     ],
@@ -558,18 +603,194 @@ class _BudgetManagementSheetState extends State<BudgetManagementSheet> {
                       p: p,
                       spent: catSpending[cat.name] ?? 0.0,
                     ),
+
+                  // Dedicated Total Card right below the category list
+                  Container(
+                    margin: const EdgeInsets.only(top: 6, bottom: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: p.card,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: p.income.withOpacity(0.35),
+                        width: 1.5,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.03),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                color: p.income.withOpacity(0.12),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(Icons.calculate_rounded, color: p.income, size: 20),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Total Category Budget'.tr,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 13.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: p.ink,
+                                    ),
+                                  ),
+                                  Text(
+                                    activeCatBudgetCount > 0
+                                        ? '$activeCatBudgetCount ${'categories configured'.tr}'
+                                        : 'Set budget per category'.tr,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(fontSize: 11, color: p.mute),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              Fmt.money(categoryBudgetsSum),
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w900,
+                                color: p.income,
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (categoryBudgetsSum > 0 &&
+                            (totalBudgetVal <= 0 || (categoryBudgetsSum - totalBudgetVal).abs() >= 0.01)) ...[
+                          const SizedBox(height: 10),
+                          InkWell(
+                            onTap: () {
+                              _totalBudgetCtrl.text = _plain(categoryBudgetsSum);
+                              setState(() {});
+                            },
+                            borderRadius: BorderRadius.circular(8),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                              decoration: BoxDecoration(
+                                color: p.income.withOpacity(0.09),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: p.income.withOpacity(0.25)),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.arrow_upward_rounded, size: 14, color: p.income),
+                                  const SizedBox(width: 6),
+                                  Flexible(
+                                    child: Text(
+                                      '${'Use this total as monthly budget'.tr} (${Fmt.money(categoryBudgetsSum)})',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 11.5,
+                                        fontWeight: FontWeight.w700,
+                                        color: p.income,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
                 ],
               ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-                  child: AppButton(
-                    'Save Budgets',
-                    height: 48,
-                    fontSize: 15,
-                    margin: EdgeInsets.zero,
-                    onPressed: _save,
+                Container(
+                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 16),
+                  decoration: BoxDecoration(
+                    color: p.card,
+                    border: Border(top: BorderSide(color: p.line)),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Sticky Summary Pill Bar
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text.rich(
+                                TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: '${'Category Total:'.tr} ',
+                                      style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: p.mute),
+                                    ),
+                                    TextSpan(
+                                      text: Fmt.money(categoryBudgetsSum),
+                                      style: TextStyle(
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.w800,
+                                        color: p.income,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text.rich(
+                                TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: '${'Monthly Budget:'.tr} ',
+                                      style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: p.mute),
+                                    ),
+                                    TextSpan(
+                                      text: totalBudgetVal > 0 ? Fmt.money(totalBudgetVal) : 'Not set'.tr,
+                                      style: TextStyle(
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.w800,
+                                        color: totalBudgetVal > 0 ? p.ink : p.mute,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                textAlign: TextAlign.end,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      AppButton(
+                        'Save Budgets',
+                        height: 48,
+                        fontSize: 15,
+                        margin: EdgeInsets.zero,
+                        onPressed: _save,
+                      ),
+                    ],
                   ),
                 ),
               ],
