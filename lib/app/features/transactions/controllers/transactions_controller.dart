@@ -83,7 +83,12 @@ class TransactionsController extends GetxController {
     }
   }
 
+  String? _boundUid;
+
   void _bindTransactions(String uid) {
+    if (_boundUid == uid && entries.isNotEmpty) return;
+    _boundUid = uid;
+
     if (entries.isEmpty) {
       isLoading = true;
       update();
@@ -92,12 +97,16 @@ class TransactionsController extends GetxController {
     // 1. One-shot direct fetch for instant UI load
     final txService = Get.find<TransactionService>();
     txService.fetchUserTransactions(uid).then((list) {
-      if (list.isNotEmpty && entries.isEmpty) {
+      if (list.isNotEmpty || entries.isEmpty) {
         entries = list;
-        isLoading = false;
-        update();
       }
-    }).catchError((_) {});
+      isLoading = false;
+      update();
+    }).catchError((err) {
+      debugPrint('[TransactionsController] fetchUserTransactions error: $err');
+      isLoading = false;
+      update();
+    });
 
     // 2. Realtime stream for live updates
     _sub?.cancel();
@@ -153,6 +162,12 @@ class TransactionsController extends GetxController {
         .where((e) => e.date.year == now.year && e.date.month == now.month)
         .toList()
       ..sort(_newestFirst);
+  }
+
+  DateTime? get latestActiveMonth {
+    if (entries.isEmpty) return null;
+    final sorted = entries.toList()..sort(_newestFirst);
+    return DateTime(sorted.first.date.year, sorted.first.date.month);
   }
 
   static int _newestFirst(TransactionModel a, TransactionModel b) {

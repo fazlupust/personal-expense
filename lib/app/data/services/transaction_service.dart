@@ -28,9 +28,6 @@ class TransactionService extends GetxService {
       // Sort client-side by date descending
       list.sort((a, b) => b.date.compareTo(a.date));
       return list;
-    }).handleError((err) {
-      debugPrint('[TransactionService] streamUserTransactions error: $err');
-      return <TransactionModel>[];
     });
   }
 
@@ -44,6 +41,35 @@ class TransactionService extends GetxService {
           .map((doc) => TransactionModel.fromFirestore(doc))
           .where((tx) => !tx.isDeleted)
           .toList();
+
+      // Fallback 1: Check subcollection users/{userId}/transactions if root query returned 0
+      if (list.isEmpty) {
+        try {
+          final subSnap = await _db.collection('users').doc(userId).collection('transactions').get();
+          if (subSnap.docs.isNotEmpty) {
+            final subList = subSnap.docs
+                .map((doc) => TransactionModel.fromFirestore(doc))
+                .where((tx) => !tx.isDeleted)
+                .toList();
+            list.addAll(subList);
+          }
+        } catch (_) {}
+      }
+
+      // Fallback 2: If developer and still empty, check top-level transactions
+      if (list.isEmpty && _auth.isDeveloper) {
+        try {
+          final allSnap = await _collection.limit(100).get();
+          if (allSnap.docs.isNotEmpty) {
+            final allList = allSnap.docs
+                .map((doc) => TransactionModel.fromFirestore(doc))
+                .where((tx) => !tx.isDeleted)
+                .toList();
+            list.addAll(allList);
+          }
+        } catch (_) {}
+      }
+
       list.sort((a, b) => b.date.compareTo(a.date));
       return list;
     } catch (e) {

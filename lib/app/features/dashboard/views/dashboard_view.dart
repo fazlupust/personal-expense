@@ -596,9 +596,66 @@ class DashboardView extends StatelessWidget {
                   ),
                 if (s.showWeatherCard) const DashboardWeatherCard(),
                 if (s.showPrayerCard) const DashboardPrayerCard(),
+                if (rows.isEmpty && tc.entries.isNotEmpty && tc.latestActiveMonth != null) ...[
+                  Builder(builder: (context) {
+                    final isBn = Get.locale?.languageCode == 'bn';
+                    final lastMonthName = Fmt.date(tc.latestActiveMonth!, 'MMMM yyyy');
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                      decoration: BoxDecoration(
+                        color: p.income.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: p.income.withOpacity(0.3)),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.calendar_month_outlined, color: p.income, size: 20),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              isBn
+                                  ? 'চলতি মাসে কোনো লেনদেন নেই। পূর্ববর্তী ($lastMonthName) মাসের হিসাব দেখতে ট্যাপ করুন।'
+                                  : 'No entries in current month. Tap to view previous month ($lastMonthName).',
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w600,
+                                color: p.ink,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          InkWell(
+                            onTap: () {
+                              tc.setYearAndMonth(tc.latestActiveMonth!.year, tc.latestActiveMonth!.month);
+                              Get.find<NavigationController>().select(1);
+                            },
+                            borderRadius: BorderRadius.circular(8),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: p.income,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                isBn ? 'দেখুন' : 'View',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                ],
                 AdaptiveColumns(
                   left: [
                     BalanceCard(
+                      monthLabel: '${'Balance this month'.tr} (${Fmt.date(DateTime.now(), 'MMM yyyy')})',
                       income: income,
                       expense: expense,
                       budget: s.budget,

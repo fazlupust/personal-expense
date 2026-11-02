@@ -17,6 +17,7 @@ class BalanceCard extends StatelessWidget {
     this.onToggleIncomeVisibility,
     this.isExpenseHidden = false,
     this.onToggleExpenseVisibility,
+    this.monthLabel,
   });
 
   final double income;
@@ -28,6 +29,7 @@ class BalanceCard extends StatelessWidget {
   final VoidCallback? onToggleIncomeVisibility;
   final bool isExpenseHidden;
   final VoidCallback? onToggleExpenseVisibility;
+  final String? monthLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -138,7 +140,7 @@ class BalanceCard extends StatelessWidget {
                             const SizedBox(width: 6),
                             Flexible(
                               child: Text(
-                                'Balance this month'.tr,
+                                monthLabel ?? 'Balance this month'.tr,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
