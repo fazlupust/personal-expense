@@ -396,6 +396,7 @@ extension PrayerTasbihFirestoreSync on PrayerTasbihController {
     _isSoundEnabled = prefs.getBool(_userKey('tasbih_sound', uid)) ?? true;
     _isCountHidden = prefs.getBool(_userKey('tasbih_hide_count', uid)) ?? false;
     _isZikirCardHidden = prefs.getBool(_userKey('tasbih_hide_zikir_card', uid)) ?? true;
+    _zikirTextScale = prefs.getDouble(_userKey('tasbih_zikir_text_scale', uid)) ?? 1.0;
     _isProhibitedAlertOn = prefs.getBool(_userKey('prohibited_alert_on', uid)) ?? true;
     _prohibitedBufferMinutes = prefs.getInt(_userKey('prohibited_buffer_minutes', uid)) ?? 15;
 
@@ -533,5 +534,6 @@ extension PrayerTasbihFirestoreSync on PrayerTasbihController {
     await prefs.setBool(_userKey('tasbih_sound', uid), _isSoundEnabled);
     await prefs.setBool(_userKey('tasbih_hide_count', uid), _isCountHidden);
     await prefs.setBool(_userKey('tasbih_hide_zikir_card', uid), _isZikirCardHidden);
+    await prefs.setDouble(_userKey('tasbih_zikir_text_scale', uid), _zikirTextScale);
   }
 }

@@ -211,6 +211,9 @@ class PrayerTasbihController extends GetxController {
   bool _isZikirCardHidden = true;
   bool get isZikirCardHidden => _isZikirCardHidden;
 
+  double _zikirTextScale = 1.0;
+  double get zikirTextScale => _zikirTextScale;
+
   bool _isProhibitedAlertOn = true;
   bool get isProhibitedAlertOn => _isProhibitedAlertOn;
 
@@ -403,6 +406,7 @@ class PrayerTasbihController extends GetxController {
     _prayerTrackerRecords.clear();
     _isCountHidden = false;
     _isZikirCardHidden = true;
+    _zikirTextScale = 1.0;
     update();
   }
 
@@ -554,6 +558,30 @@ class PrayerTasbihController extends GetxController {
 
   Future<void> setZikirCardHidden(bool val) async {
     _isZikirCardHidden = val;
+    update();
+    await _persistSettings();
+  }
+
+  Future<void> zoomInZikirText() async {
+    _zikirTextScale = (_zikirTextScale + 0.15).clamp(0.75, 2.2);
+    update();
+    await _persistSettings();
+  }
+
+  Future<void> zoomOutZikirText() async {
+    _zikirTextScale = (_zikirTextScale - 0.15).clamp(0.75, 2.2);
+    update();
+    await _persistSettings();
+  }
+
+  Future<void> setZikirTextScale(double scale) async {
+    _zikirTextScale = scale.clamp(0.75, 2.2);
+    update();
+    await _persistSettings();
+  }
+
+  Future<void> resetZikirTextScale() async {
+    _zikirTextScale = 1.0;
     update();
     await _persistSettings();
   }

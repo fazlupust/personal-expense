@@ -11,6 +11,8 @@ class TasbihCounterView extends StatelessWidget {
   final bool isEmbedded;
   const TasbihCounterView({super.key, this.isEmbedded = false});
 
+  static double _baseScale = 1.0;
+
   void showAnalyticsSheet(BuildContext context, PrayerTasbihController c, AppPalette p) {
     Get.toNamed(AppRoutes.tasbihHistory);
   }
@@ -708,10 +710,78 @@ class TasbihCounterView extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // Header Row: Hide card button
+                      // Header Row: Zoom Controls (A- / % / A+) + Hide card button
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
+                          // Zoom controls
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: p.bg,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: p.line),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                InkWell(
+                                  borderRadius: BorderRadius.circular(4),
+                                  onTap: c.zoomOutZikirText,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.remove_rounded, size: 12, color: p.ink),
+                                        Text('A', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: p.ink)),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 2),
+                                InkWell(
+                                  borderRadius: BorderRadius.circular(4),
+                                  onTap: c.resetZikirTextScale,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: (c.zikirTextScale - 1.0).abs() > 0.05
+                                          ? p.income.withOpacity(0.12)
+                                          : Colors.transparent,
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      '${(c.zikirTextScale * 100).toInt()}%',
+                                      style: TextStyle(
+                                        fontSize: 10.5,
+                                        fontWeight: FontWeight.w700,
+                                        color: (c.zikirTextScale - 1.0).abs() > 0.05
+                                            ? p.income
+                                            : p.mute,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 2),
+                                InkWell(
+                                  borderRadius: BorderRadius.circular(4),
+                                  onTap: c.zoomInZikirText,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.add_rounded, size: 12, color: p.ink),
+                                        Text('A', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: p.ink)),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Hide card button
                           InkWell(
                             borderRadius: BorderRadius.circular(6),
                             onTap: c.toggleZikirCardVisibility,
@@ -736,18 +806,29 @@ class TasbihCounterView extends StatelessWidget {
                           ),
                         ],
                       ),
-                      // Arabic
-                      Text(
-                        zikir.arabic,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: zikir.arabic.length > 80
-                              ? 20
-                              : (zikir.arabic.length > 40 ? 24 : 29),
-                          fontWeight: FontWeight.w700,
-                          color: p.income,
-                          height: zikir.arabic.length > 80 ? 1.45 : 1.38,
-                          letterSpacing: 0.3,
+                      // Arabic with pinch to zoom
+                      GestureDetector(
+                        onScaleStart: (_) {
+                          _baseScale = c.zikirTextScale;
+                        },
+                        onScaleUpdate: (details) {
+                          if (details.scale != 1.0) {
+                            c.setZikirTextScale((_baseScale * details.scale).clamp(0.75, 2.2));
+                          }
+                        },
+                        child: Text(
+                          zikir.arabic,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: (zikir.arabic.length > 80
+                                    ? 20.0
+                                    : (zikir.arabic.length > 40 ? 24.0 : 29.0)) *
+                                c.zikirTextScale,
+                            fontWeight: FontWeight.w700,
+                            color: p.income,
+                            height: zikir.arabic.length > 80 ? 1.45 : 1.38,
+                            letterSpacing: 0.3,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 5),
@@ -762,7 +843,7 @@ class TasbihCounterView extends StatelessWidget {
                             isBn ? zikir.titleBn : zikir.titleEn,
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontSize: 14,
+                              fontSize: 14.0 * (1.0 + (c.zikirTextScale - 1.0) * 0.25),
                               fontWeight: FontWeight.w700,
                               color: p.ink,
                             ),
@@ -771,10 +852,10 @@ class TasbihCounterView extends StatelessWidget {
                           Text(
                             isBn ? zikir.meaningBn : zikir.meaningEn,
                             textAlign: TextAlign.center,
-                            maxLines: 2,
+                            maxLines: c.zikirTextScale > 1.3 ? 4 : 2,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 12.0 * (1.0 + (c.zikirTextScale - 1.0) * 0.25),
                               fontWeight: FontWeight.w500,
                               color: p.mute,
                             ),

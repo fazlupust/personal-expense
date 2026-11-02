@@ -252,6 +252,32 @@ void main() {
       expect(c.isCountHidden, isFalse);
     });
 
+    test('Zikir text zoom in, zoom out, reset and persistence work accurately', () async {
+      final c = Get.put(PrayerTasbihController());
+      await c.loadForUserForTesting('zoom_user');
+
+      expect(c.zikirTextScale, equals(1.0));
+
+      await c.zoomInZikirText();
+      expect(c.zikirTextScale, closeTo(1.15, 0.01));
+
+      await c.zoomInZikirText();
+      expect(c.zikirTextScale, closeTo(1.30, 0.01));
+
+      await c.zoomOutZikirText();
+      expect(c.zikirTextScale, closeTo(1.15, 0.01));
+
+      await c.resetZikirTextScale();
+      expect(c.zikirTextScale, equals(1.0));
+
+      // Set custom scale and test persistence across reload
+      await c.setZikirTextScale(1.45);
+      expect(c.zikirTextScale, closeTo(1.45, 0.01));
+
+      await c.loadForUserForTesting('zoom_user');
+      expect(c.zikirTextScale, closeTo(1.45, 0.01));
+    });
+
     test('Prayer Tracker marks, toggles, and tracks missing prayers accurately', () async {
       final c = Get.put(PrayerTasbihController());
       await c.loadForUserForTesting('tracker_test_user');
