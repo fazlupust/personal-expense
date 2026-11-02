@@ -100,5 +100,13 @@ service cloud.firestore {
       // Users can only read and write their own zikir summary
       allow read, write: if isOwner(userId);
     }
+    match /users/{userId}/prayer_tracker/{dateKey} {
+      // Users can only read and write their own daily prayer tracker records
+      allow read, write: if isOwner(userId);
+    }
+    match /users/{userId}/{allSubcollections=**} {
+      // Fallback for all user-owned subcollections
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
   }
 }
