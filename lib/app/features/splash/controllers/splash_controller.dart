@@ -46,8 +46,17 @@ class SplashController extends GetxController {
       return;
     }
 
-    // Normal navigation
-    final user = FirebaseAuth.instance.currentUser;
+    // Normal navigation: ensure Firebase Auth has restored user from disk
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      try {
+        user = await FirebaseAuth.instance
+            .authStateChanges()
+            .first
+            .timeout(const Duration(milliseconds: 500));
+      } catch (_) {}
+    }
+
     if (user != null) {
       Get.offAllNamed(AppRoutes.navigation);
     } else {

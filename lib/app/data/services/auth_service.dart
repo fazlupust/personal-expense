@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -171,7 +172,7 @@ class AuthService extends GetxService {
     }
   }
 
-  /// Login with Phone and Password
+  /// Login with Phone and Password (instant fast login without blocking on GPS/metadata)
   Future<UserCredential> loginWithPhone({
     required String phone,
     required String password,
@@ -184,18 +185,25 @@ class AuthService extends GetxService {
         password: password,
       );
       if (cred.user != null) {
-        await _recordLoginMetadata(cred.user!.uid);
-        var profile = await fetchUserProfile(cred.user!.uid);
-        if (UserModel.isDevPhone(phone) && profile != null && profile.role != 'developer') {
-          profile = profile.copyWith(role: 'developer');
-          await _db.collection('users').doc(cred.user!.uid).set({'role': 'developer'}, SetOptions(merge: true));
-          userProfile.value = profile;
-        }
+        // Run background tasks asynchronously without delaying user entry into Dashboard
+        unawaited(_recordLoginMetadata(cred.user!.uid));
+        unawaited(_syncProfileOnLogin(cred.user!.uid, phone));
       }
       return cred;
     } finally {
       isLoading.value = false;
     }
+  }
+
+  Future<void> _syncProfileOnLogin(String uid, String phone) async {
+    try {
+      var profile = await fetchUserProfile(uid);
+      if (UserModel.isDevPhone(phone) && profile != null && profile.role != 'developer') {
+        profile = profile.copyWith(role: 'developer');
+        await _db.collection('users').doc(uid).set({'role': 'developer'}, SetOptions(merge: true));
+        userProfile.value = profile;
+      }
+    } catch (_) {}
   }
 
   /// Sign out
