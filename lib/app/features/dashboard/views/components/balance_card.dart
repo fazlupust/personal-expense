@@ -18,11 +18,13 @@ class BalanceCard extends StatelessWidget {
     this.isExpenseHidden = false,
     this.onToggleExpenseVisibility,
     this.monthLabel,
+    this.isCategoryBudget = false,
   });
 
   final double income;
   final double expense;
   final double budget;
+  final bool isCategoryBudget;
   final bool isHidden;
   final VoidCallback? onToggleVisibility;
   final bool isIncomeHidden;
@@ -346,7 +348,9 @@ class BalanceCard extends StatelessWidget {
                           children: [
                             Flexible(
                               child: Text(
-                                'Monthly budget (0 = none)'.tr,
+                                isCategoryBudget
+                                    ? '${'Monthly budget (0 = none)'.tr} (${'Category sum'.tr})'
+                                    : 'Monthly budget (0 = none)'.tr,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(

@@ -37,6 +37,7 @@ class _BudgetManagementSheetState extends State<BudgetManagementSheet> {
     super.initState();
     final s = SettingsController.to;
     _totalBudgetCtrl.text = s.budget > 0 ? _plain(s.budget) : '';
+    _totalBudgetCtrl.addListener(() => setState(() {}));
 
     final categories = Get.isRegistered<CategoriesController>()
         ? Get.find<CategoriesController>().byType(EntryType.expense)
@@ -108,6 +109,17 @@ class _BudgetManagementSheetState extends State<BudgetManagementSheet> {
     final currentRows = tc?.currentMonthRows ?? [];
     final catSpending = tc != null ? tc.group(currentRows, EntryType.expense) : <String, double>{};
     final totalExpense = tc != null ? tc.sum(currentRows, EntryType.expense) : 0.0;
+
+    final totalBudgetVal = double.tryParse(_totalBudgetCtrl.text.trim()) ?? 0.0;
+    double categoryBudgetsSum = 0.0;
+    int activeCatBudgetCount = 0;
+    for (final ctrl in _catControllers.values) {
+      final val = double.tryParse(ctrl.text.trim()) ?? 0.0;
+      if (val > 0) {
+        categoryBudgetsSum += val;
+        activeCatBudgetCount++;
+      }
+    }
 
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
@@ -283,6 +295,229 @@ class _BudgetManagementSheetState extends State<BudgetManagementSheet> {
                               borderRadius: BorderRadius.circular(10),
                               borderSide: BorderSide(color: p.income, width: 1.5),
                             ),
+                          ),
+                        ),
+                        // Live Category Budgets Summary & Comparison
+                        Container(
+                          margin: const EdgeInsets.only(top: 12),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: p.card,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: p.line),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(Icons.pie_chart_rounded, size: 17, color: p.income),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Row(
+                                      children: [
+                                        Flexible(
+                                          child: Text(
+                                            'Total of Category Budgets'.tr,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w700,
+                                              color: p.ink,
+                                            ),
+                                          ),
+                                        ),
+                                        if (activeCatBudgetCount > 0) ...[
+                                          const SizedBox(width: 6),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: p.income.withOpacity(0.12),
+                                              borderRadius: BorderRadius.circular(10),
+                                            ),
+                                            child: Text(
+                                              '$activeCatBudgetCount',
+                                              style: TextStyle(
+                                                fontSize: 10.5,
+                                                fontWeight: FontWeight.w700,
+                                                color: p.income,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    Fmt.money(categoryBudgetsSum),
+                                    style: TextStyle(
+                                      fontSize: 14.5,
+                                      fontWeight: FontWeight.w800,
+                                      color: p.income,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              if (categoryBudgetsSum > 0) ...[
+                                const SizedBox(height: 8),
+                                if (totalBudgetVal > 0) ...[
+                                  if ((categoryBudgetsSum - totalBudgetVal).abs() < 0.01) ...[
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF1F8A5B).withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          const Icon(Icons.check_circle_rounded, size: 15, color: Color(0xFF1F8A5B)),
+                                          const SizedBox(width: 6),
+                                          Expanded(
+                                            child: Text(
+                                              'Category budgets match total budget (100% allocated)'.tr,
+                                              style: const TextStyle(
+                                                fontSize: 11.5,
+                                                fontWeight: FontWeight.w600,
+                                                color: Color(0xFF1F8A5B),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ] else if (totalBudgetVal > categoryBudgetsSum) ...[
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: Colors.amber.withOpacity(0.12),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          const Icon(Icons.info_outline_rounded, size: 15, color: Colors.amber),
+                                          const SizedBox(width: 6),
+                                          Expanded(
+                                            child: Text(
+                                              '${'Unallocated budget:'.tr} ${Fmt.money(totalBudgetVal - categoryBudgetsSum)}',
+                                              style: TextStyle(
+                                                fontSize: 11.5,
+                                                fontWeight: FontWeight.w600,
+                                                color: p.ink,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 6),
+                                          InkWell(
+                                            onTap: () {
+                                              _totalBudgetCtrl.text = _plain(categoryBudgetsSum);
+                                              setState(() {});
+                                            },
+                                            borderRadius: BorderRadius.circular(6),
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                              decoration: BoxDecoration(
+                                                color: p.income,
+                                                borderRadius: BorderRadius.circular(6),
+                                              ),
+                                              child: Text(
+                                                'Set as Total'.tr,
+                                                style: const TextStyle(
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ] else ...[
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFE74C3C).withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          const Icon(Icons.warning_amber_rounded, size: 15, color: Color(0xFFE74C3C)),
+                                          const SizedBox(width: 6),
+                                          Expanded(
+                                            child: Text(
+                                              '${'Category budgets exceed total by:'.tr} ${Fmt.money(categoryBudgetsSum - totalBudgetVal)}',
+                                              style: const TextStyle(
+                                                fontSize: 11.5,
+                                                fontWeight: FontWeight.w600,
+                                                color: Color(0xFFE74C3C),
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 6),
+                                          InkWell(
+                                            onTap: () {
+                                              _totalBudgetCtrl.text = _plain(categoryBudgetsSum);
+                                              setState(() {});
+                                            },
+                                            borderRadius: BorderRadius.circular(6),
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFFE74C3C),
+                                                borderRadius: BorderRadius.circular(6),
+                                              ),
+                                              child: Text(
+                                                'Update Total'.tr,
+                                                style: const TextStyle(
+                                                  fontSize: 10.5,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ] else ...[
+                                  InkWell(
+                                    onTap: () {
+                                      _totalBudgetCtrl.text = _plain(categoryBudgetsSum);
+                                      setState(() {});
+                                    },
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                                      decoration: BoxDecoration(
+                                        color: p.income.withOpacity(0.08),
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(color: p.income.withOpacity(0.2)),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.arrow_upward_rounded, size: 15, color: p.income),
+                                          const SizedBox(width: 6),
+                                          Expanded(
+                                            child: Text(
+                                              '${'Use category sum as total monthly budget:'.tr} ${Fmt.money(categoryBudgetsSum)}',
+                                              style: TextStyle(
+                                                fontSize: 11.5,
+                                                fontWeight: FontWeight.w600,
+                                                color: p.income,
+                                              ),
+                                            ),
+                                          ),
+                                          Icon(Icons.touch_app_rounded, size: 16, color: p.income),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ],
                           ),
                         ),
                       ],

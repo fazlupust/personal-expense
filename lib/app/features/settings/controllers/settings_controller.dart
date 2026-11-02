@@ -285,6 +285,12 @@ class SettingsController extends GetxController {
 
   double getCategoryBudget(String category) => categoryBudgets[category] ?? 0.0;
 
+  double get totalCategoryBudget =>
+      categoryBudgets.values.fold(0.0, (acc, val) => acc + val);
+
+  int get activeCategoryBudgetsCount =>
+      categoryBudgets.values.where((v) => v > 0).length;
+
   void setTotalBudget(double val) {
     budget = val >= 0 ? val : 0;
     budgetCtrl.text = budget > 0 ? _plain(budget) : '';
