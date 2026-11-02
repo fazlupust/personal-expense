@@ -14,20 +14,42 @@ class TransactionService extends GetxService {
   CollectionReference<Map<String, dynamic>> get _collection =>
       _db.collection('transactions');
 
-  /// Stream of active (non-deleted) transactions for the current logged-in user
+  /// Stream of active (non-deleted) transactions for the current logged-in user.
+  /// Queries strictly by user_id to match security rules and avoid composite index requirements.
   Stream<List<TransactionModel>> streamUserTransactions(String userId) {
     return _collection
         .where('user_id', isEqualTo: userId)
-        .where('is_deleted', isEqualTo: false)
         .snapshots()
         .map((snapshot) {
       final list = snapshot.docs
           .map((doc) => TransactionModel.fromFirestore(doc))
+          .where((tx) => !tx.isDeleted)
           .toList();
       // Sort client-side by date descending
       list.sort((a, b) => b.date.compareTo(a.date));
       return list;
+    }).handleError((err) {
+      debugPrint('[TransactionService] streamUserTransactions error: $err');
+      return <TransactionModel>[];
     });
+  }
+
+  /// One-shot fetch of transactions for the current user (used on app open & pull-to-refresh)
+  Future<List<TransactionModel>> fetchUserTransactions(String userId) async {
+    try {
+      final snapshot = await _collection
+          .where('user_id', isEqualTo: userId)
+          .get();
+      final list = snapshot.docs
+          .map((doc) => TransactionModel.fromFirestore(doc))
+          .where((tx) => !tx.isDeleted)
+          .toList();
+      list.sort((a, b) => b.date.compareTo(a.date));
+      return list;
+    } catch (e) {
+      debugPrint('[TransactionService] fetchUserTransactions error: $e');
+      return [];
+    }
   }
 
   /// Add a new transaction with category snapshot, safe location and device info
@@ -49,10 +71,11 @@ class TransactionService extends GetxService {
     if (uid == null) throw Exception('User not logged in');
 
     // If location is not explicitly passed, attempt to fetch safely (null if off or denied)
+    // Never pop blocking permission dialogs during transaction creation
     double? lat = latitude;
     double? lng = longitude;
     if (lat == null && lng == null) {
-      final loc = await DeviceLocationService.getCurrentLocation();
+      final loc = await DeviceLocationService.getCurrentLocation(requestIfNotGranted: false);
       lat = loc.latitude;
       lng = loc.longitude;
     }
@@ -84,7 +107,10 @@ class TransactionService extends GetxService {
       updatedAt: DateTime.now(),
     );
 
-    await docRef.set(newTx.toMap());
+    await docRef.set(newTx.toMap()).timeout(
+      const Duration(seconds: 10),
+      onTimeout: () => throw Exception('Transaction save timed out. Please check your network connection.'),
+    );
     try {
       await _db.collection('users').doc(uid).set({
         'transaction_count': FieldValue.increment(1),

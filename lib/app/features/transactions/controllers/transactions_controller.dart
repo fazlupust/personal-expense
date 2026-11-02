@@ -13,6 +13,7 @@ class TransactionsController extends GetxController {
 
   final searchCtrl = TextEditingController();
   List<TransactionModel> entries = [];
+  bool isLoading = false;
   DateTime month = DateTime(DateTime.now().year, DateTime.now().month);
   TxFilter filter = TxFilter.all;
   bool tableMode = false;
@@ -64,27 +65,69 @@ class TransactionsController extends GetxController {
   void _initTransactions() {
     if (Get.isRegistered<TransactionService>() && Get.isRegistered<AuthService>()) {
       final auth = Get.find<AuthService>();
-      final txService = Get.find<TransactionService>();
 
       ever(auth.firebaseUser, (user) {
         _sub?.cancel();
         if (user != null) {
-          _sub = txService.streamUserTransactions(user.uid).listen((list) {
-            entries = list;
-            update();
-          });
+          _bindTransactions(user.uid);
         } else {
           entries = [];
+          isLoading = false;
           update();
         }
       });
 
       if (auth.currentUid != null) {
-        _sub = txService.streamUserTransactions(auth.currentUid!).listen((list) {
-          entries = list;
-          update();
-        });
+        _bindTransactions(auth.currentUid!);
       }
+    }
+  }
+
+  void _bindTransactions(String uid) {
+    if (entries.isEmpty) {
+      isLoading = true;
+      update();
+    }
+
+    // 1. One-shot direct fetch for instant UI load
+    final txService = Get.find<TransactionService>();
+    txService.fetchUserTransactions(uid).then((list) {
+      if (list.isNotEmpty && entries.isEmpty) {
+        entries = list;
+        isLoading = false;
+        update();
+      }
+    }).catchError((_) {});
+
+    // 2. Realtime stream for live updates
+    _sub?.cancel();
+    _sub = txService.streamUserTransactions(uid).listen(
+      (list) {
+        entries = list;
+        isLoading = false;
+        update();
+      },
+      onError: (err) {
+        debugPrint('[TransactionsController] Stream error: $err');
+        isLoading = false;
+        update();
+      },
+    );
+  }
+
+  /// Pull-to-refresh handler for transactions
+  Future<void> refreshTransactions() async {
+    if (!Get.isRegistered<TransactionService>() || !Get.isRegistered<AuthService>()) return;
+    final uid = Get.find<AuthService>().currentUid;
+    if (uid == null || uid.isEmpty) return;
+    try {
+      final list = await Get.find<TransactionService>().fetchUserTransactions(uid);
+      entries = list;
+    } catch (e) {
+      debugPrint('[TransactionsController] refreshTransactions error: $e');
+    } finally {
+      isLoading = false;
+      update();
     }
   }
 

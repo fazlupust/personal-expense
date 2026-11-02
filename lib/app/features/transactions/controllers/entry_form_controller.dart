@@ -290,6 +290,22 @@ class EntryFormController extends GetxController {
         );
       }
       return true;
+    } catch (e) {
+      debugPrint('[EntryFormController] save error: $e');
+      if (Get.context != null) {
+        Get.snackbar(
+          'Error'.tr,
+          'Could not save transaction. Please check your internet connection.'.tr,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color(0xFFDC2626),
+          colorText: Colors.white,
+          icon: const Icon(Icons.error_outline_rounded, color: Colors.white, size: 24),
+          duration: const Duration(seconds: 4),
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          borderRadius: 12,
+        );
+      }
+      return false;
     } finally {
       isSaving = false;
       update();

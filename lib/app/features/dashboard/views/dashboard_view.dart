@@ -574,66 +574,86 @@ class DashboardView extends StatelessWidget {
         }
         final hasBudgetAlert = (totalBudgetExceeded || exceededCategories.isNotEmpty) && !s.isBudgetAlertDismissed;
 
-        return ContentWrap(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildGreetingBar(context, s),
-              const SizedBox(height: 6),
-              if (hasBudgetAlert)
-                _buildBudgetAlertBanner(
-                  context,
-                  p: p,
-                  s: s,
-                  totalExceeded: totalBudgetExceeded,
-                  totalOver: expense - s.budget,
-                  exceededCategories: exceededCategories,
-                  isExpenseHidden: s.isExpenseHidden,
-                ),
-              if (s.showWeatherCard) const DashboardWeatherCard(),
-              if (s.showPrayerCard) const DashboardPrayerCard(),
-              AdaptiveColumns(
-                left: [
-                  BalanceCard(
-                    income: income,
-                    expense: expense,
-                    budget: s.budget,
-                    isHidden: s.isIncomeHidden || s.isExpenseHidden,
-                    onToggleVisibility: s.toggleBalanceVisibility,
-                    isIncomeHidden: s.isIncomeHidden,
-                    onToggleIncomeVisibility: s.toggleIncomeVisibility,
-                    isExpenseHidden: s.isExpenseHidden,
-                    onToggleExpenseVisibility: s.toggleExpenseVisibility,
-                  ),
-                  DashboardStatsCard(
-                    controller: tc,
-                    income: income,
-                    expense: expense,
-                    byCategory: byCat,
-                    entryCount: rows.length,
-                    daily: tc.dailyExpense(rows),
-                    isHidden: s.isIncomeHidden,
+        return RefreshIndicator(
+          onRefresh: tc.refreshTransactions,
+          color: p.income,
+          child: ContentWrap(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildGreetingBar(context, s),
+                const SizedBox(height: 6),
+                if (hasBudgetAlert)
+                  _buildBudgetAlertBanner(
+                    context,
+                    p: p,
+                    s: s,
+                    totalExceeded: totalBudgetExceeded,
+                    totalOver: expense - s.budget,
+                    exceededCategories: exceededCategories,
                     isExpenseHidden: s.isExpenseHidden,
                   ),
-                ],
-                right: [
-                  AppCard(
-                    title: 'Recent transactions',
-                    action: 'See all',
-                    onAction: () => Get.find<NavigationController>().select(1),
-                    flush: true,
-                    child: recent.isEmpty
-                        ? Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                            child: Center(
-                              child: Text(
-                                'No transactions yet. Tap “+ Add”.'.tr,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(color: p.mute),
+                if (s.showWeatherCard) const DashboardWeatherCard(),
+                if (s.showPrayerCard) const DashboardPrayerCard(),
+                AdaptiveColumns(
+                  left: [
+                    BalanceCard(
+                      income: income,
+                      expense: expense,
+                      budget: s.budget,
+                      isHidden: s.isIncomeHidden || s.isExpenseHidden,
+                      onToggleVisibility: s.toggleBalanceVisibility,
+                      isIncomeHidden: s.isIncomeHidden,
+                      onToggleIncomeVisibility: s.toggleIncomeVisibility,
+                      isExpenseHidden: s.isExpenseHidden,
+                      onToggleExpenseVisibility: s.toggleExpenseVisibility,
+                    ),
+                    DashboardStatsCard(
+                      controller: tc,
+                      income: income,
+                      expense: expense,
+                      byCategory: byCat,
+                      entryCount: rows.length,
+                      daily: tc.dailyExpense(rows),
+                      isHidden: s.isIncomeHidden,
+                      isExpenseHidden: s.isExpenseHidden,
+                    ),
+                  ],
+                  right: [
+                    AppCard(
+                      title: 'Recent transactions',
+                      action: 'See all',
+                      onAction: () => Get.find<NavigationController>().select(1),
+                      flush: true,
+                      child: recent.isEmpty
+                          ? Padding(
+                              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                              child: Center(
+                                child: tc.isLoading
+                                    ? Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          SizedBox(
+                                            width: 16,
+                                            height: 16,
+                                            child: CircularProgressIndicator(strokeWidth: 2, color: p.income),
+                                          ),
+                                          const SizedBox(width: 10),
+                                          Text(
+                                            'Loading transactions...'.tr,
+                                            style: TextStyle(color: p.mute, fontSize: 13),
+                                          ),
+                                        ],
+                                      )
+                                    : Text(
+                                        'No transactions yet. Tap “+ Add”.'.tr,
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(color: p.mute),
+                                      ),
                               ),
-                            ),
-                          )
-                        : Column(
+                            )
+                          : Column(
                             children: [
                               for (var i = 0; i < recent.length; i++)
                                 TransactionTile(
@@ -666,8 +686,8 @@ class DashboardView extends StatelessWidget {
               ),
             ],
           ),
-        );
-      }),
-    );
+        ),
+      );
+    }));
   }
 }

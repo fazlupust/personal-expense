@@ -668,6 +668,8 @@ class AppTranslations extends Translations {
     'Sunnah / Nafl': 'সুন্নাত / নফল',
     'Ishraq / Chasht': 'ইশরাক ও চাশত',
     'Current Waqt:': 'বর্তমান ওয়াক্ত:',
+    'Loading transactions...': 'লেনদেন লোড হচ্ছে...',
+    'Could not save transaction. Please check your internet connection.': 'লেনদেন সংরক্ষণ করা যায়নি। ইন্টারনেট সংযোগ চেক করুন।',
   };
 }
 

@@ -21,45 +21,72 @@ class TransactionsView extends StatelessWidget {
     final p = context.pal;
     return GetBuilder<TransactionsController>(builder: (tc) {
       final rows = tc.visibleRows;
-      return ContentWrap(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const MonthSwitcher(),
-            TextField(
-              controller: tc.searchCtrl,
-              onChanged: tc.setQuery,
-              decoration: InputDecoration(
-                hintText: 'Search notes, categories, accounts'.tr,
-                prefixIcon: const Icon(Icons.search),
-              ),
-            ),
-            const SizedBox(height: 10),
-            SegmentBar<TxFilter>(
-              options: {
-                TxFilter.all: 'All'.tr,
-                TxFilter.income: 'Income'.tr,
-                TxFilter.expense: 'Expenses'.tr,
-              },
-              value: tc.filter,
-              onChanged: tc.setFilter,
-            ),
-            SegmentBar<bool>(
-              options: {false: 'List view'.tr, true: 'Table view'.tr},
-              value: tc.tableMode,
-              onChanged: tc.setTableMode,
-            ),
-            if (rows.isEmpty)
-              AppCard(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: Text(
-                    'Nothing here. Tap “+ Add” to record income or an expense.'.tr,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: p.mute),
-                  ),
+      return RefreshIndicator(
+        onRefresh: tc.refreshTransactions,
+        color: p.income,
+        child: ContentWrap(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const MonthSwitcher(),
+              TextField(
+                controller: tc.searchCtrl,
+                onChanged: tc.setQuery,
+                decoration: InputDecoration(
+                  hintText: 'Search notes, categories, accounts'.tr,
+                  prefixIcon: const Icon(Icons.search),
                 ),
-              )
+              ),
+              const SizedBox(height: 10),
+              SegmentBar<TxFilter>(
+                options: {
+                  TxFilter.all: 'All'.tr,
+                  TxFilter.income: 'Income'.tr,
+                  TxFilter.expense: 'Expenses'.tr,
+                },
+                value: tc.filter,
+                onChanged: tc.setFilter,
+              ),
+              SegmentBar<bool>(
+                options: {false: 'List view'.tr, true: 'Table view'.tr},
+                value: tc.tableMode,
+                onChanged: tc.setTableMode,
+              ),
+              if (tc.isLoading && rows.isEmpty)
+                AppCard(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    child: Center(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: p.income),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Loading transactions...'.tr,
+                            style: TextStyle(color: p.mute, fontSize: 13.5),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+              else if (rows.isEmpty)
+                AppCard(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Text(
+                      'Nothing here. Tap “+ Add” to record income or an expense.'.tr,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: p.mute),
+                    ),
+                  ),
+                )
             else if (tc.tableMode)
               TransactionTable(rows: rows)
             else
@@ -115,9 +142,10 @@ class TransactionsView extends StatelessWidget {
             ],
           ],
         ),
-      );
-    });
-  }
+      ),
+    );
+  });
+}
 
   List<Widget> _groupedList(BuildContext context, TransactionsController tc, List<TransactionModel> rows) {
     final p = context.pal;

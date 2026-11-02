@@ -22,18 +22,31 @@ class DeviceLocationService {
 
   static final DeviceInfoPlugin _deviceInfo = DeviceInfoPlugin();
 
+  static String? _cachedSummary;
+
   /// Safely fetches the current device location.
-  /// If location service is disabled, or permission is denied, it safely returns null
-  /// without throwing exceptions or blocking the user flow.
-  static Future<LocationResult> getCurrentLocation() async {
+  /// If location service is disabled, or permission is not granted, it safely returns null
+  /// without popping blocking system dialogs or blocking the user flow.
+  static Future<LocationResult> getCurrentLocation({bool requestIfNotGranted = false}) async {
     try {
-      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled().timeout(
+        const Duration(milliseconds: 600),
+        onTimeout: () => false,
+      );
       if (!serviceEnabled) {
         return const LocationResult();
       }
 
-      var permission = await Geolocator.checkPermission();
+      var permission = await Geolocator.checkPermission().timeout(
+        const Duration(milliseconds: 600),
+        onTimeout: () => LocationPermission.denied,
+      );
+
       if (permission == LocationPermission.denied) {
+        if (!requestIfNotGranted) {
+          // Do not pop permission dialog or block user transaction creation
+          return const LocationResult();
+        }
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied ||
             permission == LocationPermission.deniedForever) {
@@ -45,12 +58,29 @@ class DeviceLocationService {
         return const LocationResult();
       }
 
-      // Fetch location with a sensible timeout (max 4 seconds) so it never hangs
+      // Fast path: Try last known position first (instant from OS cache)
+      try {
+        final lastKnown = await Geolocator.getLastKnownPosition().timeout(
+          const Duration(milliseconds: 500),
+          onTimeout: () => null,
+        );
+        if (lastKnown != null) {
+          return LocationResult(
+            latitude: lastKnown.latitude,
+            longitude: lastKnown.longitude,
+          );
+        }
+      } catch (_) {}
+
+      // Fallback: Fetch location with a tight 1.5-second timeout so saving never hangs
       final position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.medium,
-          timeLimit: Duration(seconds: 4),
+          accuracy: LocationAccuracy.low,
+          timeLimit: Duration(milliseconds: 1500),
         ),
+      ).timeout(
+        const Duration(milliseconds: 1500),
+        onTimeout: () => throw TimeoutException('Location timeout'),
       );
 
       return LocationResult(
@@ -131,8 +161,14 @@ class DeviceLocationService {
 
   /// Returns a clean one-line device description e.g. "Google Pixel 9 (Android 15)" or "Chrome (macOS)"
   static Future<String> getDeviceSummary() async {
-    final info = await getDeviceInfo();
-    final name = info['device_name'] ?? info['model'] ?? info['platform'] ?? 'Unknown device';
-    return name.toString();
+    if (_cachedSummary != null) return _cachedSummary!;
+    try {
+      final info = await getDeviceInfo();
+      final name = info['device_name'] ?? info['model'] ?? info['platform'] ?? 'Unknown device';
+      _cachedSummary = name.toString();
+      return _cachedSummary!;
+    } catch (_) {
+      return 'Unknown Device';
+    }
   }
 }

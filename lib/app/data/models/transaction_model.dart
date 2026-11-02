@@ -113,43 +113,69 @@ class TransactionModel {
 
   factory TransactionModel.fromMap(Map<String, dynamic> map, String docId) {
     DateTime parseDate(dynamic val) {
+      if (val == null) return DateTime.now();
       if (val is Timestamp) return val.toDate();
+      if (val is DateTime) return val;
+      if (val is int) return DateTime.fromMillisecondsSinceEpoch(val);
       if (val is String) return DateTime.tryParse(val) ?? DateTime.now();
       return DateTime.now();
     }
 
+    double parseAmount(dynamic val) {
+      if (val == null) return 0.0;
+      if (val is num) return val.toDouble();
+      if (val is String) return double.tryParse(val) ?? 0.0;
+      return 0.0;
+    }
+
     double? parseDouble(dynamic val) {
+      if (val == null) return null;
       if (val is num) return val.toDouble();
       if (val is String) return double.tryParse(val);
       return null;
     }
 
-    final typeStr = (map['type'] as String?) ?? 'expense';
+    bool parseBool(dynamic val) {
+      if (val == null) return false;
+      if (val is bool) return val;
+      if (val is num) return val != 0;
+      if (val is String) {
+        final lower = val.trim().toLowerCase();
+        return lower == 'true' || lower == '1';
+      }
+      return false;
+    }
+
+    final typeStr = (map['type']?.toString().toLowerCase()) ?? 'expense';
     final entryType = typeStr == 'income' ? EntryType.income : EntryType.expense;
 
     return TransactionModel(
-      id: (map['id'] as String?) ?? docId,
-      userId: (map['user_id'] as String?) ?? '',
-      categoryId: (map['category_id'] as String?) ?? '',
-      categoryNameBn: (map['category_name_bn'] as String?) ?? '',
-      categoryNameEn: (map['category_name_en'] as String?) ?? '',
+      id: (map['id']?.toString()) ?? docId,
+      userId: (map['user_id']?.toString()) ?? '',
+      categoryId: (map['category_id']?.toString()) ?? '',
+      categoryNameBn: (map['category_name_bn']?.toString()) ?? '',
+      categoryNameEn: (map['category_name_en']?.toString()) ?? '',
       type: entryType,
-      amount: ((map['amount'] as num?) ?? 0).toDouble(),
-      noteBn: map['note_bn'] as String?,
-      noteEn: map['note_en'] as String?,
+      amount: parseAmount(map['amount']),
+      noteBn: map['note_bn']?.toString(),
+      noteEn: map['note_en']?.toString(),
       date: parseDate(map['transaction_date'] ?? map['date']),
-      isDeleted: (map['is_deleted'] as bool?) ?? false,
-      account: (map['account'] as String?) ?? 'Cash',
+      isDeleted: parseBool(map['is_deleted']),
+      account: (map['account']?.toString()) ?? 'Cash',
       latitude: parseDouble(map['latitude']),
       longitude: parseDouble(map['longitude']),
-      deviceInfo: map['device_info'] as String?,
+      deviceInfo: map['device_info']?.toString(),
       createdAt: map['created_at'] != null ? parseDate(map['created_at']) : null,
       updatedAt: map['updated_at'] != null ? parseDate(map['updated_at']) : null,
     );
   }
 
   factory TransactionModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
-    return TransactionModel.fromMap(doc.data() ?? {}, doc.id);
+    try {
+      return TransactionModel.fromMap(doc.data() ?? {}, doc.id);
+    } catch (_) {
+      return TransactionModel.fromMap({}, doc.id);
+    }
   }
 
   TransactionModel copyWith({
