@@ -46,9 +46,9 @@ class AuthService extends GetxService {
     }
   }
 
-  /// Converts a phone number (e.g. 01712345678) into a Firebase Auth compatible email
+  /// Converts a phone number (e.g. 01712345678, +88017..., ০১৭...) into a Firebase Auth compatible email
   String _phoneToEmail(String phone) {
-    final cleaned = phone.replaceAll(RegExp(r'\D'), '');
+    final cleaned = UserModel.normalizePhone(phone);
     return '$cleaned@personalexpense.app';
   }
 
@@ -148,7 +148,7 @@ class AuthService extends GetxService {
         nameEn: nameEn,
         designationBn: designationBn,
         designationEn: designationEn,
-        phone: phone,
+        phone: UserModel.normalizePhone(phone),
         email: email,
         addressBn: addressBn,
         addressEn: addressEn,

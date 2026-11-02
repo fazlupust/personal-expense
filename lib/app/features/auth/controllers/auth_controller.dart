@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -91,8 +92,16 @@ class AuthController extends GetxController {
         addressEn: addressEnCtrl.text.trim(),
       );
       Get.offAllNamed(AppRoutes.navigation);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'email-already-in-use') {
+        errorMessage.value = 'This phone number is already registered. Please log in.'.tr;
+      } else if (e.code == 'weak-password') {
+        errorMessage.value = 'Password should be at least 6 characters.'.tr;
+      } else {
+        errorMessage.value = 'Registration failed. Please try again.'.tr;
+      }
     } catch (e) {
-      errorMessage.value = 'Registration failed. $e';
+      errorMessage.value = 'Registration failed. Please try again.'.tr;
     }
   }
 }

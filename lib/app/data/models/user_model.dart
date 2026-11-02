@@ -43,10 +43,27 @@ class UserModel {
   final String? lastLoginDevice;
   final DateTime? lastLoginAt;
 
+  static String normalizePhone(String input) {
+    const bnDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+    var result = input.trim();
+    for (int i = 0; i < bnDigits.length; i++) {
+      result = result.replaceAll(bnDigits[i], '$i');
+    }
+    var digitsOnly = result.replaceAll(RegExp(r'\D'), '');
+    if (digitsOnly.startsWith('880') && digitsOnly.length == 13) {
+      digitsOnly = digitsOnly.substring(2);
+    } else if (digitsOnly.startsWith('00880') && digitsOnly.length == 15) {
+      digitsOnly = digitsOnly.substring(4);
+    } else if (digitsOnly.startsWith('1') && digitsOnly.length == 10) {
+      digitsOnly = '0$digitsOnly';
+    }
+    return digitsOnly;
+  }
+
   static bool isDevPhone(String? p) {
     if (p == null) return false;
-    final cleaned = p.replaceAll(RegExp(r'\D'), '');
-    return cleaned == '01744309649' || cleaned == '8801744309649';
+    final cleaned = normalizePhone(p);
+    return cleaned == '01744309649';
   }
 
   bool get isAdmin => role == 'admin';

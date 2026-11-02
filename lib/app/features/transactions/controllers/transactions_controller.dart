@@ -71,6 +71,7 @@ class TransactionsController extends GetxController {
         if (user != null) {
           _bindTransactions(user.uid);
         } else {
+          _boundUid = null;
           entries = [];
           isLoading = false;
           update();

@@ -30,6 +30,20 @@ void main() {
     expect(AppUpdateService.isVersionHigher('v1.2.0', '1.1.0'), isTrue);
   });
 
+  test('UserModel.normalizePhone handles all BD prefixes, spaces, and Bangla digits', () {
+    expect(UserModel.normalizePhone('01744309649'), '01744309649');
+    expect(UserModel.normalizePhone('+8801744309649'), '01744309649');
+    expect(UserModel.normalizePhone('8801744309649'), '01744309649');
+    expect(UserModel.normalizePhone('008801744309649'), '01744309649');
+    expect(UserModel.normalizePhone(' 01744 309 649 '), '01744309649');
+    expect(UserModel.normalizePhone('০১৭৪৪৩০৯৬৪৯'), '01744309649');
+    expect(UserModel.normalizePhone('+৮৮০১৭৪৪৩০৯৬৪৯'), '01744309649');
+    expect(UserModel.normalizePhone('1744309649'), '01744309649');
+    expect(UserModel.isDevPhone('01744309649'), isTrue);
+    expect(UserModel.isDevPhone('+8801744309649'), isTrue);
+    expect(UserModel.isDevPhone('০১৭৪৪৩০৯৬৪৯'), isTrue);
+  });
+
   group('Categories duplicate check tests', () {
     late CategoriesController controller;
 

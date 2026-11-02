@@ -178,6 +178,13 @@ class AppTranslations extends Translations {
     // Authentication
     'Welcome Back': 'স্বাগতম',
     'Sign in with your phone & password': 'আপনার ফোন নম্বর ও পাসওয়ার্ড দিয়ে লগইন করুন',
+    'Please enter phone number and password': 'ফোন নম্বর এবং পাসওয়ার্ড লিখুন',
+    'Login failed. Please check phone & password.': 'লগইন ব্যর্থ হয়েছে। ফোন নম্বর ও পাসওয়ার্ড সঠিক কিনা দেখুন।',
+    'Phone and password are required': 'ফোন নম্বর ও পাসওয়ার্ড আবশ্যক',
+    'Please provide a name': 'দয়া করে নাম লিখুন',
+    'This phone number is already registered. Please log in.': 'এই ফোন নম্বরটি ইতিমধ্যে নিবন্ধিত। অনুগ্রহ করে লগইন করুন।',
+    'Password should be at least 6 characters.': 'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।',
+    'Registration failed. Please try again.': 'রেজিস্ট্রেশন ব্যর্থ হয়েছে। আবার চেষ্টা করুন।',
     'Phone Number': 'মোবাইল নম্বর',
     'Phone Number *': 'মোবাইল নম্বর *',
     'Password': 'পাসওয়ার্ড',
