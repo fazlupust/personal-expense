@@ -30,6 +30,70 @@ class TransactionsView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const MonthSwitcher(),
+              if (tc.entries.length > rows.length &&
+                  tc.latestActiveMonth != null &&
+                  (tc.latestActiveMonth!.month != tc.month.month ||
+                      tc.latestActiveMonth!.year != tc.month.year)) ...[
+                Builder(builder: (context) {
+                  final isBn = Get.locale?.languageCode == 'bn';
+                  final lastMonthName = Fmt.date(tc.latestActiveMonth!, 'MMMM yyyy');
+                  final prevCount = tc.entries
+                      .where((e) =>
+                          e.date.year == tc.latestActiveMonth!.year &&
+                          e.date.month == tc.latestActiveMonth!.month)
+                      .length;
+
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: p.income.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: p.income.withOpacity(0.25)),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.history_rounded, color: p.income, size: 18),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            isBn
+                                ? '$lastMonthName-এ আপনার $prevCountটি লেনদেন রয়েছে।'
+                                : 'You have $prevCount entries in $lastMonthName.',
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w600,
+                              color: p.ink,
+                            ),
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () {
+                            tc.setYearAndMonth(
+                                tc.latestActiveMonth!.year, tc.latestActiveMonth!.month);
+                          },
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: p.income,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              isBn ? 'দেখুন' : 'View',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+              ],
               TextField(
                 controller: tc.searchCtrl,
                 onChanged: tc.setQuery,
