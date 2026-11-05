@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../data/models/entry_type.dart';
 import '../../../data/models/transaction_model.dart';
 import '../../../data/services/auth_service.dart';
@@ -20,6 +22,49 @@ class TransactionsController extends GetxController {
   String query = '';
 
   StreamSubscription<List<TransactionModel>>? _sub;
+
+  SharedPreferences? get _prefs =>
+      Get.isRegistered<SharedPreferences>() ? Get.find<SharedPreferences>() : null;
+  static const _txCacheKeyPrefix = 'personal_expense_tx_cache_';
+
+  String _cacheKey([String? uidOverride]) {
+    final uid = uidOverride ?? (Get.isRegistered<AuthService>() ? Get.find<AuthService>().currentUid : null);
+    return '$_txCacheKeyPrefix${uid ?? 'guest'}';
+  }
+
+  void _loadCachedTransactions([String? uidOverride]) {
+    try {
+      final p = _prefs;
+      if (p == null) return;
+      final key = _cacheKey(uidOverride);
+      final raw = p.getString(key);
+      if (raw != null && raw.isNotEmpty && raw != '[]') {
+        final decoded = jsonDecode(raw) as List<dynamic>;
+        final list = decoded
+            .map((e) => TransactionModel.fromMap(Map<String, dynamic>.from(e as Map), (e['id'] ?? '').toString()))
+            .toList();
+        list.sort(_newestFirst);
+        if (list.isNotEmpty) {
+          entries = list;
+          isLoading = false;
+        }
+      }
+    } catch (e) {
+      debugPrint('[TransactionsController] Error loading cached transactions: $e');
+    }
+  }
+
+  void _saveCachedTransactions(List<TransactionModel> list, [String? uidOverride]) {
+    try {
+      final p = _prefs;
+      if (p == null) return;
+      final key = _cacheKey(uidOverride);
+      final encoded = jsonEncode(list.map((m) => m.toJson()).toList());
+      p.setString(key, encoded);
+    } catch (e) {
+      debugPrint('[TransactionsController] Error saving cached transactions: $e');
+    }
+  }
 
   bool get isCurrentMonth {
     final now = DateTime.now();
@@ -52,6 +97,7 @@ class TransactionsController extends GetxController {
   void onInit() {
     super.onInit();
     resetToCurrentMonth();
+    _loadCachedTransactions();
     _initTransactions();
   }
 
@@ -67,10 +113,14 @@ class TransactionsController extends GetxController {
       final auth = Get.find<AuthService>();
 
       ever(auth.firebaseUser, (user) {
-        _sub?.cancel();
         if (user != null) {
-          _bindTransactions(user.uid);
+          if (_boundUid != user.uid) {
+            _sub?.cancel();
+            _boundUid = null;
+            _bindTransactions(user.uid);
+          }
         } else {
+          _sub?.cancel();
           _boundUid = null;
           entries = [];
           isLoading = false;
@@ -85,30 +135,51 @@ class TransactionsController extends GetxController {
   }
 
   String? _boundUid;
+  bool _isBinding = false;
 
   void _bindTransactions(String uid) {
     if (_boundUid == uid && entries.isNotEmpty) return;
+    if (_boundUid == uid && _isBinding) return;
     _boundUid = uid;
+    _isBinding = true;
+
+    _loadCachedTransactions(uid);
 
     if (entries.isEmpty) {
       isLoading = true;
       update();
+    } else {
+      isLoading = false;
+      update();
     }
+
+    // Safety fallback: ensure loading spinner never hangs indefinitely
+    Timer(const Duration(seconds: 3), () {
+      if (isLoading) {
+        isLoading = false;
+        _isBinding = false;
+        update();
+      }
+    });
 
     // 1. One-shot direct fetch for instant UI load
     final txService = Get.find<TransactionService>();
     txService.fetchUserTransactions(uid).then((list) {
-      if (list.isNotEmpty || entries.isEmpty) {
+      if (list.isNotEmpty) {
         entries = list;
+        _saveCachedTransactions(list, uid);
       }
       isLoading = false;
+      _isBinding = false;
       update();
     }).catchError((err) {
       debugPrint('[TransactionsController] fetchUserTransactions error: $err');
       isLoading = false;
+      _isBinding = false;
       update();
     }).whenComplete(() {
       isLoading = false;
+      _isBinding = false;
       update();
     });
 
@@ -116,13 +187,18 @@ class TransactionsController extends GetxController {
     _sub?.cancel();
     _sub = txService.streamUserTransactions(uid).listen(
       (list) {
-        entries = list;
+        if (list.isNotEmpty || entries.isEmpty) {
+          entries = list;
+          _saveCachedTransactions(list, uid);
+        }
         isLoading = false;
+        _isBinding = false;
         update();
       },
       onError: (err) {
         debugPrint('[TransactionsController] Stream error: $err');
         isLoading = false;
+        _isBinding = false;
         update();
       },
     );
@@ -137,11 +213,13 @@ class TransactionsController extends GetxController {
       final list = await Get.find<TransactionService>().fetchUserTransactions(uid);
       if (list.isNotEmpty || entries.isEmpty) {
         entries = list;
+        _saveCachedTransactions(list, uid);
       }
     } catch (e) {
       debugPrint('[TransactionsController] refreshTransactions error: $e');
     } finally {
       isLoading = false;
+      _isBinding = false;
       update();
     }
   }
@@ -270,36 +348,53 @@ class TransactionsController extends GetxController {
   }
 
   Future<void> save(TransactionModel m) async {
+    // 1. Optimistically update local list and cache immediately for zero-lag UI response
+    final i = entries.indexWhere((e) => e.id == m.id);
+    if (i >= 0) {
+      entries[i] = m;
+    } else {
+      entries.add(m);
+    }
+    entries.sort(_newestFirst);
+    month = DateTime(m.date.year, m.date.month);
+    _saveCachedTransactions(entries);
+    update();
+
+    // 2. Sync with cloud in background
     if (Get.isRegistered<TransactionService>()) {
       final txService = Get.find<TransactionService>();
-      final exists = entries.any((e) => e.id == m.id);
-      if (exists) {
-        await txService.updateTransaction(m);
-      } else {
-        await txService.addTransaction(
-          categoryId: m.categoryId,
-          categoryNameBn: m.categoryNameBn,
-          categoryNameEn: m.categoryNameEn,
-          type: m.type,
-          amount: m.amount,
-          noteBn: m.noteBn,
-          noteEn: m.noteEn,
-          date: m.date,
-          account: m.account,
-          latitude: m.latitude,
-          longitude: m.longitude,
-          deviceInfo: m.deviceInfo,
-        );
+      final exists = i >= 0;
+      try {
+        if (exists) {
+          await txService.updateTransaction(m);
+        } else {
+          final realId = await txService.addTransaction(
+            categoryId: m.categoryId,
+            categoryNameBn: m.categoryNameBn,
+            categoryNameEn: m.categoryNameEn,
+            type: m.type,
+            amount: m.amount,
+            noteBn: m.noteBn,
+            noteEn: m.noteEn,
+            date: m.date,
+            account: m.account,
+            latitude: m.latitude,
+            longitude: m.longitude,
+            deviceInfo: m.deviceInfo,
+          );
+          if (realId.isNotEmpty && realId != m.id) {
+            final idx = entries.indexWhere((e) => e.id == m.id);
+            if (idx >= 0) {
+              entries[idx] = m.copyWith(id: realId);
+              _saveCachedTransactions(entries);
+              update();
+            }
+          }
+        }
+      } catch (e) {
+        debugPrint('[TransactionsController] Background cloud sync error: $e');
+        // Do not crash or rollback the local optimistic entry; it remains persisted in SharedPreferences & Firestore queue.
       }
-    } else {
-      final i = entries.indexWhere((e) => e.id == m.id);
-      if (i >= 0) {
-        entries[i] = m;
-      } else {
-        entries.add(m);
-      }
-      month = DateTime(m.date.year, m.date.month);
-      update();
     }
   }
 
@@ -357,6 +452,7 @@ class TransactionsController extends GetxController {
 
     // 1. Immediately remove from local list for instant UI response
     entries.removeWhere((e) => e.id == id);
+    _saveCachedTransactions(entries);
     update();
 
     // 2. Perform reliable cloud delete with minimal delay for smooth UX

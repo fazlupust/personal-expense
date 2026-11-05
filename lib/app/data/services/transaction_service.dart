@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -28,16 +29,35 @@ class TransactionService extends GetxService {
       // Sort client-side by date descending
       list.sort((a, b) => b.date.compareTo(a.date));
       return list;
+    }).handleError((err) {
+      debugPrint('[TransactionService] streamUserTransactions error: $err');
+      return <TransactionModel>[];
     });
   }
 
   /// One-shot fetch of transactions for the current user (used on app open & pull-to-refresh)
   Future<List<TransactionModel>> fetchUserTransactions(String userId) async {
+    // 1. Fast path: Check local Firestore cache first for instant (< 50ms) load
+    try {
+      final cacheSnap = await _collection
+          .where('user_id', isEqualTo: userId)
+          .get(const GetOptions(source: Source.cache));
+      final cacheList = cacheSnap.docs
+          .map((doc) => TransactionModel.fromFirestore(doc))
+          .where((tx) => !tx.isDeleted)
+          .toList();
+      if (cacheList.isNotEmpty) {
+        cacheList.sort((a, b) => b.date.compareTo(a.date));
+        return cacheList;
+      }
+    } catch (_) {}
+
+    // 2. Server path: Fetch fresh data from Firestore
     try {
       final snapshot = await _collection
           .where('user_id', isEqualTo: userId)
-          .get()
-          .timeout(const Duration(seconds: 5));
+          .get(const GetOptions(source: Source.serverAndCache))
+          .timeout(const Duration(seconds: 8));
       final list = snapshot.docs
           .map((doc) => TransactionModel.fromFirestore(doc))
           .where((tx) => !tx.isDeleted)
@@ -142,14 +162,21 @@ class TransactionService extends GetxService {
       updatedAt: DateTime.now(),
     );
 
-    await docRef.set(newTx.toMap()).timeout(
-      const Duration(seconds: 10),
-      onTimeout: () => throw Exception('Transaction save timed out. Please check your network connection.'),
-    );
+    // Write to Firestore. Offline persistence writes locally first and queues for server.
+    // If the server acknowledgment takes longer than 6 seconds, do not fail the save.
+    try {
+      await docRef.set(newTx.toMap()).timeout(const Duration(seconds: 6));
+    } on TimeoutException {
+      debugPrint('[TransactionService] docRef.set server ack timed out; write is queued in Firestore local cache.');
+    } catch (e) {
+      debugPrint('[TransactionService] docRef.set error: $e');
+      rethrow;
+    }
+
     try {
       await _db.collection('users').doc(uid).set({
         'transaction_count': FieldValue.increment(1),
-      }, SetOptions(merge: true));
+      }, SetOptions(merge: true)).timeout(const Duration(seconds: 4));
     } catch (_) {}
     return docRef.id;
   }
@@ -172,7 +199,14 @@ class TransactionService extends GetxService {
     if (tx.longitude != null) updateData['longitude'] = tx.longitude;
     if (tx.deviceInfo != null) updateData['device_info'] = tx.deviceInfo;
 
-    await _collection.doc(tx.id).update(updateData);
+    try {
+      await _collection.doc(tx.id).update(updateData).timeout(const Duration(seconds: 6));
+    } on TimeoutException {
+      debugPrint('[TransactionService] updateTransaction server ack timed out; update is queued in local cache.');
+    } catch (e) {
+      debugPrint('[TransactionService] updateTransaction error: $e');
+      rethrow;
+    }
   }
 
   /// Permanently delete transaction from Firestore with reliable soft-delete fallback

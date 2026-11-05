@@ -221,6 +221,8 @@ class EntryFormSheet extends StatelessWidget {
                                 initialDate: f.date,
                                 firstDate: DateTime(2000),
                                 lastDate: DateTime(2100),
+                                confirmText: isBn ? 'ঠিক আছে' : 'OK',
+                                cancelText: isBn ? 'বাতিল' : 'Cancel',
                               );
                               if (d != null) f.setDate(d);
                             },

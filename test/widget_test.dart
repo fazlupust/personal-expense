@@ -826,6 +826,45 @@ void main() {
       Get.delete<TransactionsController>();
       Get.delete<NotesController>();
     });
+
+    test('TransactionsController saves backdate entry optimistically and updates cache', () async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+      Get.put<SharedPreferences>(prefs, permanent: true);
+
+      final tc = Get.put(TransactionsController());
+      expect(tc.isLoading, isFalse);
+
+      final backDate = DateTime(2026, 11, 3, 10, 30);
+      final tx = TransactionModel(
+        id: 'test_backdate_1',
+        userId: 'test_user',
+        categoryId: 'food',
+        categoryNameBn: 'খাবার',
+        categoryNameEn: 'Food',
+        type: EntryType.expense,
+        amount: 250.0,
+        date: backDate,
+      );
+
+      await tc.save(tx);
+
+      expect(tc.entries.length, 1);
+      expect(tc.entries.first.date.day, 3);
+      expect(tc.entries.first.amount, 250.0);
+      expect(tc.month.year, 2026);
+      expect(tc.month.month, 11);
+
+      // Verify cached in SharedPreferences
+      final key = 'personal_expense_tx_cache_guest';
+      final cachedRaw = prefs.getString(key);
+      expect(cachedRaw, isNotNull);
+      expect(cachedRaw!.contains('test_backdate_1'), isTrue);
+
+      tc.dispose();
+      Get.delete<TransactionsController>();
+      Get.delete<SharedPreferences>();
+    });
   });
 }
 
