@@ -22,6 +22,8 @@ import 'package:personal_expense/app/features/reports/views/generate_report_view
 import 'package:personal_expense/app/features/settings/views/components/data_export_sheet.dart';
 import 'package:personal_expense/app/core/widgets/app_update_dialog.dart';
 import 'package:personal_expense/app/data/models/app_update_model.dart';
+import 'package:personal_expense/app/data/models/entry_type.dart';
+import 'package:personal_expense/app/data/models/transaction_model.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:personal_expense/app/features/prayer_tasbih/views/prayer_tracker_view.dart';
@@ -145,6 +147,57 @@ void main() {
 
     // Verify Submit & Cancel buttons are present and visible
     expect(find.text('Submit'.tr), findsOneWidget);
+    expect(find.text('Cancel'.tr), findsOneWidget);
+
+    // Close sheet
+    Get.back();
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('Samsung Galaxy A15 EntryFormSheet renders Update button in edit mode', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2340);
+    tester.view.devicePixelRatio = 2.625;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final existingTx = TransactionModel(
+      id: 'tx_edit_test',
+      userId: 'test_user',
+      categoryId: 'food',
+      categoryNameBn: 'খাবার',
+      categoryNameEn: 'Food',
+      type: EntryType.expense,
+      amount: 150.0,
+      date: DateTime(2026, 11, 4),
+    );
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        translations: AppTranslations(),
+        locale: const Locale('bn'),
+        theme: AppTheme.light,
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: Center(
+              child: ElevatedButton(
+                onPressed: () => showEntrySheet(context, entry: existingTx),
+                child: const Text('Edit Sheet'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Tap to open EntryFormSheet in edit mode
+    await tester.tap(find.text('Edit Sheet'));
+    await tester.pumpAndSettle();
+
+    // Verify Update & Cancel buttons are present in edit mode instead of Submit
+    expect(find.text('Update'.tr), findsOneWidget);
+    expect(find.text('Submit'.tr), findsNothing);
     expect(find.text('Cancel'.tr), findsOneWidget);
 
     // Close sheet

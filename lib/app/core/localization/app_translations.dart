@@ -55,6 +55,7 @@ class AppTranslations extends Translations {
     'Note (e.g. lunch, salary)': 'নোট (যেমন: দুপুরের খাবার, বেতন)',
     'Save entry': 'এন্ট্রি সংরক্ষণ',
     'Submit': 'সাবমিট',
+    'Update': 'আপডেট',
     'Delete entry': 'এন্ট্রি মুছুন',
     'Delete entry?': 'এন্ট্রিটি মুছবেন?',
     'Delete Transaction?': 'লেনদেনটি মুছবেন?',

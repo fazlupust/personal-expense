@@ -414,7 +414,7 @@ class EntryFormSheet extends StatelessWidget {
                                 child: AppButton(
                                   f.isSaving
                                       ? (f.isEdit ? 'Updating...'.tr : 'Saving...'.tr)
-                                      : 'Submit',
+                                      : (f.isEdit ? 'Update' : 'Submit'),
                                   isLoading: f.isSaving,
                                   onPressed: (f.isSaving || f.isDeleting)
                                       ? null
