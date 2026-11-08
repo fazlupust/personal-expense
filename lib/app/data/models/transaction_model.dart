@@ -15,6 +15,8 @@ class TransactionModel {
     this.noteEn,
     required this.date,
     this.isDeleted = false,
+    this.isSynced = true,
+    this.syncError,
     this.createdAt,
     this.updatedAt,
     this.account = 'Cash',
@@ -34,6 +36,8 @@ class TransactionModel {
   final String? noteEn;
   final DateTime date; // transaction_date
   final bool isDeleted;
+  final bool isSynced;
+  final String? syncError;
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final String account;
@@ -102,6 +106,8 @@ class TransactionModel {
       'date': date.toIso8601String(),
       'transaction_date': date.toIso8601String(),
       'is_deleted': isDeleted,
+      'is_synced': isSynced,
+      'sync_error': syncError,
       'account': account,
       'latitude': latitude,
       'longitude': longitude,
@@ -161,6 +167,8 @@ class TransactionModel {
       noteEn: map['note_en']?.toString(),
       date: parseDate(map['transaction_date'] ?? map['date']),
       isDeleted: parseBool(map['is_deleted']),
+      isSynced: parseBool(map['is_synced'] ?? true),
+      syncError: map['sync_error']?.toString(),
       account: (map['account']?.toString()) ?? 'Cash',
       latitude: parseDouble(map['latitude']),
       longitude: parseDouble(map['longitude']),
@@ -172,7 +180,10 @@ class TransactionModel {
 
   factory TransactionModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
     try {
-      return TransactionModel.fromMap(doc.data() ?? {}, doc.id);
+      final isPending = doc.metadata.hasPendingWrites;
+      return TransactionModel.fromMap(doc.data() ?? {}, doc.id).copyWith(
+        isSynced: !isPending,
+      );
     } catch (_) {
       return TransactionModel.fromMap({}, doc.id);
     }
@@ -190,6 +201,8 @@ class TransactionModel {
     String? noteEn,
     DateTime? date,
     bool? isDeleted,
+    bool? isSynced,
+    String? syncError,
     DateTime? createdAt,
     DateTime? updatedAt,
     String? account,
@@ -209,6 +222,8 @@ class TransactionModel {
       noteEn: noteEn ?? this.noteEn,
       date: date ?? this.date,
       isDeleted: isDeleted ?? this.isDeleted,
+      isSynced: isSynced ?? this.isSynced,
+      syncError: syncError ?? this.syncError,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       account: account ?? this.account,

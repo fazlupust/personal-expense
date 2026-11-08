@@ -20,7 +20,7 @@ class TransactionService extends GetxService {
   Stream<List<TransactionModel>> streamUserTransactions(String userId) {
     return _collection
         .where('user_id', isEqualTo: userId)
-        .snapshots()
+        .snapshots(includeMetadataChanges: true)
         .map((snapshot) {
       final list = snapshot.docs
           .map((doc) => TransactionModel.fromFirestore(doc))

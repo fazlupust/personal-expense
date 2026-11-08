@@ -7,6 +7,7 @@ import '../../../data/models/category_model.dart';
 import '../../../data/models/entry_type.dart';
 import '../../../data/models/transaction_model.dart';
 import '../../../data/services/auth_service.dart';
+import '../../../data/services/network_service.dart';
 import '../../../data/services/voice_service.dart';
 import '../../categories/controllers/categories_controller.dart';
 import '../../settings/controllers/settings_controller.dart';
@@ -252,13 +253,13 @@ class EntryFormController extends GetxController {
 
       final effectiveUid = (existing != null && existing!.userId.isNotEmpty)
           ? existing!.userId
-          : (Get.isRegistered<AuthService>() ? (Get.find<AuthService>().currentUid ?? '') : '');
+          : (Get.isRegistered<AuthService>() ? (Get.find<AuthService>().currentUid ?? 'guest') : 'guest');
 
       final isEdit = existing != null;
       await txCtrl.save(
         TransactionModel(
           id: existing?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
-          userId: effectiveUid,
+          userId: effectiveUid.isNotEmpty ? effectiveUid : 'guest',
           categoryId: catId,
           categoryNameBn: catNameBn,
           categoryNameEn: catNameEn,
@@ -276,18 +277,44 @@ class EntryFormController extends GetxController {
         ),
       );
 
+      final isOnline = Get.isRegistered<NetworkService>() ? NetworkService.to.isOnline.value : true;
+      final isLoggedIn = Get.isRegistered<AuthService>() ? Get.find<AuthService>().isLoggedIn : false;
+
       if (Get.context != null) {
-        Get.snackbar(
-          'Success'.tr,
-          (isEdit ? 'Transaction updated successfully.' : 'Transaction added successfully.').tr,
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: const Color(0xFF1F8A5B),
-          colorText: Colors.white,
-          icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 24),
-          duration: const Duration(seconds: 3),
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          borderRadius: 12,
-        );
+        final isBn = Get.locale?.languageCode == 'bn';
+        if (!isLoggedIn || !isOnline) {
+          Get.snackbar(
+            !isLoggedIn
+                ? (isBn ? 'লগইন ছাড়া লোকাল সেভ' : 'Saved Locally (Guest)')
+                : (isBn ? 'অফলাইনে সেভ হয়েছে' : 'Saved Offline'),
+            !isLoggedIn
+                ? (isBn
+                    ? 'আপনি লগইন করেননি। লেনদেনটি শুধু ফোনে সেভ হয়েছে, অনলাইনে যাবে না।'
+                    : 'You are not logged in. Transaction saved on device only, not online.')
+                : (isBn
+                    ? 'লেনদেনটি ফোনে সেভ হয়েছে। ইন্টারনেট পেলে স্বয়ংক্রিয়ভাবে ক্লাউডে সিঙ্ক হবে।'
+                    : 'Transaction saved on device. It will automatically sync when online.'),
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: const Color(0xFFD97706),
+            colorText: Colors.white,
+            icon: const Icon(Icons.cloud_off_rounded, color: Colors.white, size: 24),
+            duration: const Duration(seconds: 4),
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            borderRadius: 12,
+          );
+        } else {
+          Get.snackbar(
+            'Success'.tr,
+            (isEdit ? 'Transaction updated successfully.' : 'Transaction added successfully.').tr,
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: const Color(0xFF1F8A5B),
+            colorText: Colors.white,
+            icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 24),
+            duration: const Duration(seconds: 3),
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            borderRadius: 12,
+          );
+        }
       }
       return true;
     } catch (e) {

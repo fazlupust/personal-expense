@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../data/services/auth_service.dart';
 import '../../features/settings/controllers/settings_controller.dart';
+import '../../features/transactions/controllers/transactions_controller.dart';
 import '../../routes/app_routes.dart';
 import '../theme/app_theme.dart';
 
@@ -35,6 +36,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   void _confirmSignOut(BuildContext context) {
     final p = context.pal;
+    final isBn = Get.locale?.languageCode == 'bn';
+    final txCtrl = Get.isRegistered<TransactionsController>() ? Get.find<TransactionsController>() : null;
+    final unsynced = txCtrl?.unsyncedCount ?? 0;
+
     Get.dialog(
       Dialog(
         backgroundColor: Colors.transparent,
@@ -61,29 +66,63 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 width: 52,
                 height: 52,
                 decoration: BoxDecoration(
-                  color: p.expense.withOpacity(0.12),
+                  color: (unsynced > 0 ? const Color(0xFFF97316) : p.expense).withOpacity(0.12),
                   shape: BoxShape.circle,
                 ),
                 child: Center(
-                  child: Icon(Icons.logout_rounded, color: p.expense, size: 26),
+                  child: Icon(
+                    unsynced > 0 ? Icons.warning_amber_rounded : Icons.logout_rounded,
+                    color: unsynced > 0 ? const Color(0xFFEA580C) : p.expense,
+                    size: 26,
+                  ),
                 ),
               ),
               const SizedBox(height: 14),
               Text(
-                'Sign Out'.tr,
+                unsynced > 0
+                    ? (isBn ? 'সতর্কতা: অফলাইন ডাটা রয়েছে!' : 'Warning: Unsynced Data!')
+                    : 'Sign Out'.tr,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: p.ink,
+                  color: unsynced > 0 ? const Color(0xFFEA580C) : p.ink,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                'Are you sure you want to sign out?'.tr,
+                unsynced > 0
+                    ? (isBn
+                        ? 'আপনার $unsyncedটি লেনদেন এখনও ক্লাউড সার্ভারে সিঙ্ক হয়নি! এখন লগআউট করলে এই ডাটা চিরতরে মুছে যাবে।'
+                        : 'You have $unsynced transactions not synced to the cloud! Logging out now will permanently erase this data.')
+                    : 'Are you sure you want to sign out?'.tr,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 13, color: p.mute, height: 1.4),
+                style: TextStyle(
+                  fontSize: 13,
+                  color: unsynced > 0 ? const Color(0xFF9A3412) : p.mute,
+                  height: 1.4,
+                ),
               ),
               const SizedBox(height: 20),
+              if (unsynced > 0) ...[
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    Get.back();
+                    await txCtrl?.syncPendingTransactions();
+                  },
+                  icon: const Icon(Icons.cloud_upload_rounded, color: Colors.white, size: 18),
+                  label: Text(
+                    isBn ? 'এখনই ক্লাউডে সিঙ্ক করুন' : 'Sync to Cloud Now',
+                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF1F8A5B),
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size.fromHeight(42),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                ),
+                const SizedBox(height: 10),
+              ],
               Row(
                 children: [
                   Expanded(
@@ -119,7 +158,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
-                      child: Text('Sign Out'.tr),
+                      child: Text(
+                        unsynced > 0 ? (isBn ? 'মুছে ফেলে লগআউট' : 'Sign Out Anyway') : 'Sign Out'.tr,
+                        style: TextStyle(fontSize: unsynced > 0 ? 11.5 : null),
+                      ),
                     ),
                   ),
                 ],

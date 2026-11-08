@@ -551,6 +551,90 @@ class DashboardView extends StatelessWidget {
     );
   }
 
+  Widget _buildUnsyncedAlertBanner(
+    BuildContext context,
+    TransactionsController tc,
+    AppPalette p,
+  ) {
+    final isBn = Get.locale?.languageCode == 'bn';
+    final lastErr = tc.unsyncedEntries.firstWhereOrNull((e) => e.syncError != null)?.syncError;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF7ED),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFF97316).withOpacity(0.4)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.cloud_off_rounded, color: Color(0xFFEA580C), size: 22),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isBn
+                      ? '${Fmt.count(tc.unsyncedCount)}টি লেনদেন ক্লাউডে সিঙ্ক হয়নি (অফলাইন)'
+                      : '${tc.unsyncedCount} entries not synced to cloud (offline)',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                    color: Color(0xFF9A3412),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  lastErr != null
+                      ? (isBn ? 'কারণ: $lastErr' : 'Reason: $lastErr')
+                      : (isBn
+                          ? 'লগআউট বা ফোন ক্লিন করার আগে সিঙ্ক করে নিন'
+                          : 'Sync before logging out or cleaning phone'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 11.5,
+                    color: Color(0xFFC2410C),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          InkWell(
+            onTap: tc.isSyncingPending ? null : tc.syncPendingTransactions,
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFFEA580C),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: tc.isSyncingPending
+                  ? const SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Text(
+                      isBn ? 'সিঙ্ক করুন' : 'Sync Now',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = context.pal;
@@ -584,6 +668,8 @@ class DashboardView extends StatelessWidget {
               children: [
                 _buildGreetingBar(context, s),
                 const SizedBox(height: 6),
+                if (tc.unsyncedCount > 0)
+                  _buildUnsyncedAlertBanner(context, tc, p),
                 if (hasBudgetAlert)
                   _buildBudgetAlertBanner(
                     context,

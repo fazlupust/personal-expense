@@ -865,6 +865,37 @@ void main() {
       Get.delete<TransactionsController>();
       Get.delete<SharedPreferences>();
     });
+
+    test('TransactionsController tracks isSynced and unsyncedCount properly', () async {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+      Get.put<SharedPreferences>(prefs, permanent: true);
+
+      final tc = Get.put(TransactionsController());
+      expect(tc.unsyncedCount, 0);
+
+      final tx1 = TransactionModel(
+        id: 'tx_local_1',
+        userId: 'test_user',
+        categoryId: 'food',
+        categoryNameBn: 'খাবার',
+        categoryNameEn: 'Food',
+        type: EntryType.expense,
+        amount: 150.0,
+        date: DateTime.now(),
+        isSynced: false,
+      );
+
+      await tc.save(tx1);
+
+      expect(tc.entries.length, 1);
+      expect(tc.unsyncedCount, 1);
+      expect(tc.entries.first.isSynced, isFalse);
+
+      tc.dispose();
+      Get.delete<TransactionsController>();
+      Get.delete<SharedPreferences>();
+    });
   });
 }
 

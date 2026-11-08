@@ -382,6 +382,119 @@ class SettingsView extends StatelessWidget {
                       ),
                     ),
                   ),
+
+                  // Cloud Data Sync Card
+                  AppCard(
+                    flush: true,
+                    child: InkWell(
+                      onTap: () async {
+                        await tc.refreshTransactions();
+                        if (Get.context != null) {
+                          final isBn = Get.locale?.languageCode == 'bn';
+                          if (tc.unsyncedCount == 0) {
+                            Get.snackbar(
+                              isBn ? 'সিঙ্ক সম্পন্ন' : 'Sync Complete',
+                              isBn
+                                  ? 'সব লেনদেন ক্লাউডের সাথে সফলভাবে সিঙ্ক রয়েছে।'
+                                  : 'All transactions are synced with the cloud.',
+                              snackPosition: SnackPosition.BOTTOM,
+                              backgroundColor: const Color(0xFF1F8A5B),
+                              colorText: Colors.white,
+                              icon: const Icon(Icons.cloud_done_rounded, color: Colors.white, size: 24),
+                              duration: const Duration(seconds: 3),
+                            );
+                          }
+                        }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: (tc.unsyncedCount > 0 ? const Color(0xFFF97316) : p.income)
+                                    .withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(
+                                tc.unsyncedCount > 0
+                                    ? Icons.sync_problem_rounded
+                                    : Icons.cloud_sync_rounded,
+                                color: tc.unsyncedCount > 0 ? const Color(0xFFEA580C) : p.income,
+                                size: 20,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          isBn ? 'ক্লাউড ডাটা সিঙ্ক' : 'Sync Data with Cloud',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w600,
+                                              color: p.ink),
+                                        ),
+                                      ),
+                                      if (tc.unsyncedCount > 0) ...[
+                                        const SizedBox(width: 6),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 6, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFFFF7ED),
+                                            borderRadius: BorderRadius.circular(10),
+                                            border: Border.all(
+                                                color: const Color(0xFFF97316), width: 0.8),
+                                          ),
+                                          child: Text(
+                                            isBn
+                                                ? '${Fmt.count(tc.unsyncedCount)}টি অফলাইন'
+                                                : '${tc.unsyncedCount} offline',
+                                            style: const TextStyle(
+                                              fontSize: 10.5,
+                                              fontWeight: FontWeight.w700,
+                                              color: Color(0xFFEA580C),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    tc.unsyncedCount > 0
+                                        ? (isBn
+                                            ? '${Fmt.count(tc.unsyncedCount)}টি অফলাইন · সিঙ্ক করতে ট্যাপ করুন'
+                                            : '${tc.unsyncedCount} offline · Tap to sync')
+                                        : (isBn
+                                            ? 'সব ডাটা সিঙ্কড · রিফ্রেশ করতে ট্যাপ করুন'
+                                            : 'Synced · Tap to refresh'),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: tc.unsyncedCount > 0
+                                          ? const Color(0xFFC2410C)
+                                          : p.mute,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Icon(Icons.chevron_right, color: p.mute),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
                 right: [SettingsFormCard(settings: s)],
               ),
@@ -394,6 +507,10 @@ class SettingsView extends StatelessWidget {
 
   void _confirmSignOut(BuildContext context, AuthService auth) {
     final p = context.pal;
+    final isBn = Get.locale?.languageCode == 'bn';
+    final txCtrl = Get.isRegistered<TransactionsController>() ? Get.find<TransactionsController>() : null;
+    final unsynced = txCtrl?.unsyncedCount ?? 0;
+
     Get.dialog(
       Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
@@ -407,28 +524,62 @@ class SettingsView extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: p.expense.withOpacity(0.12),
+                  color: (unsynced > 0 ? const Color(0xFFF97316) : p.expense).withOpacity(0.12),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.logout_rounded, color: p.expense, size: 28),
+                child: Icon(
+                  unsynced > 0 ? Icons.warning_amber_rounded : Icons.logout_rounded,
+                  color: unsynced > 0 ? const Color(0xFFEA580C) : p.expense,
+                  size: 28,
+                ),
               ),
               const SizedBox(height: 14),
               Text(
-                'Sign Out Confirmation'.tr,
+                unsynced > 0
+                    ? (isBn ? 'সতর্কতা: অফলাইন ডাটা রয়েছে!' : 'Warning: Unsynced Data!')
+                    : 'Sign Out Confirmation'.tr,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
-                  color: p.ink,
+                  color: unsynced > 0 ? const Color(0xFFEA580C) : p.ink,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                'Are you sure you want to sign out?'.tr,
+                unsynced > 0
+                    ? (isBn
+                        ? 'আপনার $unsyncedটি লেনদেন এখনও ক্লাউড সার্ভারে সিঙ্ক হয়নি! এখন লগআউট করলে এই অফলাইন ডাটা চিরতরে মুছে যাবে। দয়া করে প্রথমে সিঙ্ক করে নিন।'
+                        : 'You have $unsynced transactions not synced to the cloud! Logging out now will permanently erase this data. Please sync first.')
+                    : 'Are you sure you want to sign out?'.tr,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 13.5, color: p.mute),
+                style: TextStyle(
+                  fontSize: 13.5,
+                  color: unsynced > 0 ? const Color(0xFF9A3412) : p.mute,
+                  height: 1.4,
+                ),
               ),
-              const SizedBox(height: 22),
+              const SizedBox(height: 20),
+              if (unsynced > 0) ...[
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    Get.back();
+                    await txCtrl?.syncPendingTransactions();
+                  },
+                  icon: const Icon(Icons.cloud_upload_rounded, color: Colors.white, size: 18),
+                  label: Text(
+                    isBn ? 'এখনই ক্লাউডে সিঙ্ক করুন' : 'Sync to Cloud Now',
+                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF1F8A5B),
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size.fromHeight(44),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
               Row(
                 children: [
                   Expanded(
@@ -453,7 +604,7 @@ class SettingsView extends StatelessWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: AppButton(
-                      'Sign Out',
+                      unsynced > 0 ? (isBn ? 'মুছে ফেলে লগআউট' : 'Sign Out Anyway') : 'Sign Out',
                       style: AppButtonStyle.cancel,
                       height: 44,
                       fontSize: 13.5,

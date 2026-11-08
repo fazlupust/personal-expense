@@ -6,11 +6,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../data/models/entry_type.dart';
 import '../../../data/models/transaction_model.dart';
 import '../../../data/services/auth_service.dart';
+import '../../../data/services/network_service.dart';
 import '../../../data/services/transaction_service.dart';
 
 enum TxFilter { all, income, expense }
 
-class TransactionsController extends GetxController {
+class TransactionsController extends GetxController with WidgetsBindingObserver {
   TransactionsController();
 
   final searchCtrl = TextEditingController();
@@ -20,6 +21,10 @@ class TransactionsController extends GetxController {
   TxFilter filter = TxFilter.all;
   bool tableMode = false;
   String query = '';
+  bool isSyncingPending = false;
+
+  int get unsyncedCount => entries.where((e) => !e.isSynced).length;
+  List<TransactionModel> get unsyncedEntries => entries.where((e) => !e.isSynced).toList();
 
   StreamSubscription<List<TransactionModel>>? _sub;
 
@@ -96,16 +101,35 @@ class TransactionsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    WidgetsBinding.instance.addObserver(this);
     resetToCurrentMonth();
     _loadCachedTransactions();
     _initTransactions();
+
+    if (Get.isRegistered<NetworkService>()) {
+      ever(Get.find<NetworkService>().isOnline, (bool isOnline) {
+        if (isOnline && unsyncedCount > 0) {
+          syncPendingTransactions();
+        }
+      });
+    }
   }
 
   @override
   void onClose() {
+    WidgetsBinding.instance.removeObserver(this);
     searchCtrl.dispose();
     _sub?.cancel();
     super.onClose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      if (unsyncedCount > 0) {
+        syncPendingTransactions();
+      }
+    }
   }
 
   void _initTransactions() {
@@ -187,10 +211,18 @@ class TransactionsController extends GetxController {
     _sub?.cancel();
     _sub = txService.streamUserTransactions(uid).listen(
       (list) {
-        if (list.isNotEmpty || entries.isEmpty) {
-          entries = list;
-          _saveCachedTransactions(list, uid);
+        // Retain any locally pending unsynced entries that have not reached the server yet
+        final unsynced = entries.where((e) => !e.isSynced).toList();
+        final serverMap = {for (final tx in list) tx.id: tx};
+        final merged = <TransactionModel>[...list];
+        for (final u in unsynced) {
+          if (!serverMap.containsKey(u.id)) {
+            merged.add(u);
+          }
         }
+        merged.sort(_newestFirst);
+        entries = merged;
+        _saveCachedTransactions(entries, uid);
         isLoading = false;
         _isBinding = false;
         update();
@@ -204,16 +236,32 @@ class TransactionsController extends GetxController {
     );
   }
 
-  /// Pull-to-refresh handler for transactions
+  /// Pull-to-refresh & manual sync handler
   Future<void> refreshTransactions() async {
     if (!Get.isRegistered<TransactionService>() || !Get.isRegistered<AuthService>()) return;
     final uid = Get.find<AuthService>().currentUid;
     if (uid == null || uid.isEmpty) return;
+
+    // 1. If there are any pending offline entries, push them to the cloud first
+    if (unsyncedCount > 0) {
+      await syncPendingTransactions();
+    }
+
+    // 2. Fetch fresh data from Firestore cloud and merge
     try {
       final list = await Get.find<TransactionService>().fetchUserTransactions(uid);
       if (list.isNotEmpty || entries.isEmpty) {
-        entries = list;
-        _saveCachedTransactions(list, uid);
+        final unsynced = entries.where((e) => !e.isSynced).toList();
+        final serverMap = {for (final tx in list) tx.id: tx};
+        final merged = <TransactionModel>[...list];
+        for (final u in unsynced) {
+          if (!serverMap.containsKey(u.id)) {
+            merged.add(u);
+          }
+        }
+        merged.sort(_newestFirst);
+        entries = merged;
+        _saveCachedTransactions(entries, uid);
       }
     } catch (e) {
       debugPrint('[TransactionsController] refreshTransactions error: $e');
@@ -347,13 +395,41 @@ class TransactionsController extends GetxController {
     update();
   }
 
+  static String parseSyncError(dynamic e) {
+    if (e == null) return 'অজানা কারণ (Unknown error)';
+    final s = e.toString();
+    if (s.contains('User not logged in') || s.contains('user-not-found')) {
+      return 'ইউজার লগইন করা নেই (User not logged in)';
+    }
+    if (s.contains('permission-denied')) {
+      return 'ফায়ারবেস অনুমতি সমস্যা (Permission Denied / Auth Mismatch)';
+    }
+    if (s.contains('TimeoutException') || s.contains('timed out')) {
+      return 'সার্ভার টাইমআউট: ইন্টারনেট অত্যন্ত ধীরগতির (Server response timed out)';
+    }
+    if (s.contains('SocketException') || s.contains('Network') || s.contains('network-request-failed')) {
+      return 'ইন্টারনেট সংযোগ নেই বা বিচ্ছিন্ন (No internet / Socket error)';
+    }
+    if (s.contains('unavailable')) {
+      return 'ফায়ারবেস ক্লাউড সার্ভিস সাময়িকভাবে আনরিচেবল (Service unavailable)';
+    }
+    if (s.contains('quota-exceeded')) {
+      return 'ফায়ারবেস কোটা সীমা অতিক্রম করেছে (Quota exceeded)';
+    }
+    return s.replaceAll('Exception:', '').trim();
+  }
+
   Future<void> save(TransactionModel m) async {
     // 1. Optimistically update local list and cache immediately for zero-lag UI response
     final i = entries.indexWhere((e) => e.id == m.id);
-    if (i >= 0) {
-      entries[i] = m;
+    final exists = i >= 0;
+    // Local optimistic entry starts as isSynced: false until confirmed by cloud
+    final localTx = m.copyWith(isSynced: false);
+
+    if (exists) {
+      entries[i] = localTx;
     } else {
-      entries.add(m);
+      entries.add(localTx);
     }
     entries.sort(_newestFirst);
     month = DateTime(m.date.year, m.date.month);
@@ -363,10 +439,15 @@ class TransactionsController extends GetxController {
     // 2. Sync with cloud in background
     if (Get.isRegistered<TransactionService>()) {
       final txService = Get.find<TransactionService>();
-      final exists = i >= 0;
       try {
         if (exists) {
           await txService.updateTransaction(m);
+          final idx = entries.indexWhere((e) => e.id == m.id);
+          if (idx >= 0) {
+            entries[idx] = entries[idx].copyWith(isSynced: true, syncError: null);
+            _saveCachedTransactions(entries);
+            update();
+          }
         } else {
           final realId = await txService.addTransaction(
             categoryId: m.categoryId,
@@ -382,19 +463,125 @@ class TransactionsController extends GetxController {
             longitude: m.longitude,
             deviceInfo: m.deviceInfo,
           );
-          if (realId.isNotEmpty && realId != m.id) {
-            final idx = entries.indexWhere((e) => e.id == m.id);
-            if (idx >= 0) {
-              entries[idx] = m.copyWith(id: realId);
-              _saveCachedTransactions(entries);
-              update();
-            }
+          final idx = entries.indexWhere((e) => e.id == m.id);
+          if (idx >= 0) {
+            entries[idx] = entries[idx].copyWith(
+              id: realId.isNotEmpty ? realId : m.id,
+              isSynced: true,
+              syncError: null,
+            );
+            _saveCachedTransactions(entries);
+            update();
           }
         }
       } catch (e) {
-        debugPrint('[TransactionsController] Background cloud sync error: $e');
-        // Do not crash or rollback the local optimistic entry; it remains persisted in SharedPreferences & Firestore queue.
+        final reason = parseSyncError(e);
+        debugPrint('[TransactionsController] Background cloud sync error: $e ($reason)');
+        final idx = entries.indexWhere((e) => e.id == m.id);
+        if (idx >= 0) {
+          entries[idx] = entries[idx].copyWith(isSynced: false, syncError: reason);
+          _saveCachedTransactions(entries);
+          update();
+        }
       }
+    }
+  }
+
+  /// Retries syncing all unsynced (offline) transactions to Firestore
+  Future<void> syncPendingTransactions() async {
+    if (isSyncingPending) return;
+    if (!Get.isRegistered<TransactionService>() || !Get.isRegistered<AuthService>()) return;
+    final uid = Get.find<AuthService>().currentUid;
+    if (uid == null || uid.isEmpty) return;
+
+    final pending = entries.where((e) => !e.isSynced).toList();
+    if (pending.isEmpty) return;
+
+    isSyncingPending = true;
+    update();
+
+    final txService = Get.find<TransactionService>();
+    int syncedCount = 0;
+    int failedCount = 0;
+    String? lastFailureReason;
+
+    for (final tx in pending) {
+      try {
+        final isTempId = int.tryParse(tx.id) != null && tx.id.length >= 10;
+        if (isTempId) {
+          final realId = await txService.addTransaction(
+            categoryId: tx.categoryId,
+            categoryNameBn: tx.categoryNameBn,
+            categoryNameEn: tx.categoryNameEn,
+            type: tx.type,
+            amount: tx.amount,
+            noteBn: tx.noteBn,
+            noteEn: tx.noteEn,
+            date: tx.date,
+            account: tx.account,
+            latitude: tx.latitude,
+            longitude: tx.longitude,
+            deviceInfo: tx.deviceInfo,
+          );
+          final idx = entries.indexWhere((e) => e.id == tx.id);
+          if (idx >= 0) {
+            entries[idx] = tx.copyWith(
+              id: realId.isNotEmpty ? realId : tx.id,
+              isSynced: true,
+              syncError: null,
+            );
+            syncedCount++;
+          }
+        } else {
+          await txService.updateTransaction(tx);
+          final idx = entries.indexWhere((e) => e.id == tx.id);
+          if (idx >= 0) {
+            entries[idx] = tx.copyWith(isSynced: true, syncError: null);
+            syncedCount++;
+          }
+        }
+      } catch (e) {
+        final reason = parseSyncError(e);
+        lastFailureReason = reason;
+        failedCount++;
+        debugPrint('[TransactionsController] Sync failed for ${tx.id}: $e ($reason)');
+        final idx = entries.indexWhere((e) => e.id == tx.id);
+        if (idx >= 0) {
+          entries[idx] = tx.copyWith(isSynced: false, syncError: reason);
+        }
+      }
+    }
+
+    _saveCachedTransactions(entries, uid);
+    isSyncingPending = false;
+    update();
+
+    if (syncedCount > 0 && Get.context != null) {
+      final isBn = Get.locale?.languageCode == 'bn';
+      Get.snackbar(
+        isBn ? 'সিঙ্ক সম্পন্ন' : 'Sync Complete',
+        isBn
+            ? '$syncedCountটি অফলাইন লেনদেন সফলভাবে ক্লাউডে সিঙ্ক হয়েছে।'
+            : '$syncedCount offline entries synced to cloud successfully.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFF1F8A5B),
+        colorText: Colors.white,
+        icon: const Icon(Icons.cloud_done_rounded, color: Colors.white, size: 24),
+        duration: const Duration(seconds: 3),
+      );
+    } else if (failedCount > 0 && syncedCount == 0 && Get.context != null) {
+      final isBn = Get.locale?.languageCode == 'bn';
+      Get.snackbar(
+        isBn ? 'সিঙ্ক ব্যর্থ হয়েছে' : 'Sync Failed',
+        isBn
+            ? 'আসল কারণ: ${lastFailureReason ?? 'নেটওয়ার্ক বা সার্ভার সমস্যা'}'
+            : 'Exact reason: ${lastFailureReason ?? 'Network or server error'}',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFFDC2626),
+        colorText: Colors.white,
+        icon: const Icon(Icons.sync_problem_rounded, color: Colors.white, size: 24),
+        duration: const Duration(seconds: 5),
+      );
     }
   }
 
