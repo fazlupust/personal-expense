@@ -426,7 +426,7 @@ class TransactionsController extends GetxController with WidgetsBindingObserver 
             c.type == e.type &&
             (c.nameEn.toLowerCase() == e.categoryNameEn.toLowerCase() ||
                 c.nameBn == e.categoryNameBn ||
-                c.name == e.categoryNameEn ||
+                c.name.toLowerCase() == e.categoryNameEn.toLowerCase() ||
                 c.name == e.categoryNameBn),
       );
       if (byName != null) return byName.displayName(isBn);

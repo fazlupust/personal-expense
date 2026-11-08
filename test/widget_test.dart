@@ -78,6 +78,15 @@ void main() {
       expect(controller.isDuplicate('নতুন আয় খাত', EntryType.income), isFalse);
     });
 
+    test('emojiOf returns apple icon for Fruits across case and language', () {
+      expect(controller.emojiOf(EntryType.expense, 'Fruits'), '🍎');
+      expect(controller.emojiOf(EntryType.expense, 'fruits'), '🍎');
+      expect(controller.emojiOf(EntryType.expense, 'ফলমূল'), '🍎');
+      expect(controller.emojiOf(EntryType.expense, 'ফল'), '🍎');
+      expect(controller.emojiOf(EntryType.expense, 'Extra Cost'), '💸');
+      expect(controller.emojiOf(EntryType.expense, 'অতিরিক্ত খরচ'), '💸');
+    });
+
     test('onNameChanged updates nameError accurately', () {
       controller.onNameChanged('Food');
       expect(controller.nameError, isNotNull);

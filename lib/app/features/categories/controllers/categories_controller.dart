@@ -81,7 +81,30 @@ class CategoriesController extends GetxController {
     for (final c in list) {
       final key = '${c.type.name}_${c.nameEn.trim().toLowerCase()}_${c.nameBn.trim().toLowerCase()}';
       if (seen.add(key)) {
-        uniqueList.add(c);
+        // If this category matches a default category (e.g. Fruits) and has generic tag emoji '🏷️' or empty, upgrade its emoji to the default emoji!
+        final defMatch = AppConstants.defaultCategories.firstWhereOrNull((d) =>
+            d.type == c.type &&
+            (d.nameEn.toLowerCase() == c.nameEn.trim().toLowerCase() ||
+                d.nameBn == c.nameBn.trim() ||
+                d.nameEn.toLowerCase() == c.name.trim().toLowerCase()));
+        if (defMatch != null && (c.emoji == '🏷️' || c.emoji.isEmpty || c.emoji == '•')) {
+          uniqueList.add(CategoryModel(
+            id: c.id,
+            nameBn: c.nameBn.isNotEmpty ? c.nameBn : defMatch.nameBn,
+            nameEn: c.nameEn.isNotEmpty ? c.nameEn : defMatch.nameEn,
+            name: c.name,
+            type: c.type,
+            isActive: c.isActive,
+            isDefault: true,
+            createdBy: c.createdBy,
+            updatedBy: c.updatedBy,
+            createdAt: c.createdAt,
+            updatedAt: c.updatedAt,
+            emoji: defMatch.emoji,
+          ));
+        } else {
+          uniqueList.add(c);
+        }
       }
     }
 
@@ -103,13 +126,30 @@ class CategoriesController extends GetxController {
   List<CategoryModel> byType(EntryType t) => categories.where((c) => c.type == t).toList();
 
   String emojiOf(EntryType t, String name) {
+    final clean = name.trim().toLowerCase();
+    if (clean == 'fruits' || clean == 'fruit' || name == 'ফলমূল' || name == 'ফল') return '🍎';
+    if (clean == 'extra cost' || clean == 'extra expense' || name == 'অতিরিক্ত খরচ') return '💸';
+    if (clean == 'deposit' || clean == 'deposit / investment' || name == 'ডিপোজিট' || name == 'ডিপোজিট ও বিনিয়োগ') return '🏦';
+    if (clean == 'investment' || name == 'বিনিয়োগ' || name == 'বিনিয়োগ ও মুনাফা') return '📈';
+
     for (final c in categories) {
-      if (c.type == t && (c.nameEn == name || c.nameBn == name || c.name == name)) return c.emoji;
+      if (c.type == t &&
+          (c.nameEn.toLowerCase() == clean ||
+              c.nameBn == name ||
+              c.name.toLowerCase() == clean)) {
+        if (c.emoji != '🏷️' && c.emoji != '•' && c.emoji.isNotEmpty) {
+          return c.emoji;
+        }
+      }
     }
-    if (name == 'Deposit' || name == 'ডিপোজিট' || name == 'Deposit / Investment' || name == 'ডিপোজিট ও বিনিয়োগ') return '🏦';
-    if (name == 'Investment' || name == 'বিনিয়োগ' || name == 'বিনিয়োগ ও মুনাফা') return '📈';
-    if (name == 'Extra Cost' || name == 'অতিরিক্ত খরচ' || name == 'Extra Expense') return '💸';
-    if (name == 'Fruits' || name == 'ফলমূল' || name == 'ফল') return '🍎';
+    for (final d in AppConstants.defaultCategories) {
+      if (d.type == t &&
+          (d.nameEn.toLowerCase() == clean ||
+              d.nameBn == name ||
+              d.name.toLowerCase() == clean)) {
+        return d.emoji;
+      }
+    }
     return '•';
   }
 
