@@ -76,7 +76,16 @@ class CategoriesController extends GetxController {
   }
 
   List<CategoryModel> _mergeWithDefaults(List<CategoryModel> list) {
-    final result = List<CategoryModel>.from(list);
+    final seen = <String>{};
+    final uniqueList = <CategoryModel>[];
+    for (final c in list) {
+      final key = '${c.type.name}_${c.nameEn.trim().toLowerCase()}_${c.nameBn.trim().toLowerCase()}';
+      if (seen.add(key)) {
+        uniqueList.add(c);
+      }
+    }
+
+    final result = List<CategoryModel>.from(uniqueList);
     for (final def in AppConstants.defaultCategories) {
       final exists = result.any((c) =>
           c.type == def.type &&
@@ -204,12 +213,19 @@ class CategoriesController extends GetxController {
     return rawName.tr;
   }
 
+  bool isCreating = false;
+
   Future<void> create() async {
+    if (isCreating) return;
+    isCreating = true;
+    update();
+
     final name = nameCtrl.text.trim();
     final nameBn = nameBnCtrl.text.trim();
 
     if (name.isEmpty && nameBn.isEmpty) {
       nameError = 'Enter a category name.';
+      isCreating = false;
       update();
       return;
     }
@@ -217,18 +233,21 @@ class CategoriesController extends GetxController {
     if ((name.isNotEmpty && isDuplicate(name, formType)) ||
         (nameBn.isNotEmpty && isDuplicate(nameBn, formType))) {
       nameError = 'That category already exists.';
+      isCreating = false;
       update();
-      Get.snackbar(
-        'Alert'.tr,
-        'That category already exists.'.tr,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFFDC2626),
-        colorText: Colors.white,
-        icon: const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 24),
-        duration: const Duration(seconds: 3),
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        borderRadius: 12,
-      );
+      if (Get.context != null) {
+        Get.snackbar(
+          'Alert'.tr,
+          'That category already exists.'.tr,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color(0xFFDC2626),
+          colorText: Colors.white,
+          icon: const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 24),
+          duration: const Duration(seconds: 3),
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          borderRadius: 12,
+        );
+      }
       return;
     }
 
@@ -256,21 +275,24 @@ class CategoriesController extends GetxController {
       nameCtrl.clear();
       nameBnCtrl.clear();
       nameError = null;
-      update();
 
-      Get.snackbar(
-        'Success'.tr,
-        'Category created successfully'.tr,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFF1F8A5B),
-        colorText: Colors.white,
-        icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 24),
-        duration: const Duration(seconds: 3),
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        borderRadius: 12,
-      );
+      if (Get.context != null) {
+        Get.snackbar(
+          'Success'.tr,
+          'Category created successfully'.tr,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color(0xFF1F8A5B),
+          colorText: Colors.white,
+          icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 24),
+          duration: const Duration(seconds: 3),
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          borderRadius: 12,
+        );
+      }
     } catch (_) {
       nameError = 'That category already exists.';
+    } finally {
+      isCreating = false;
       update();
     }
   }

@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../data/services/auth_service.dart';
+import '../../categories/controllers/categories_controller.dart';
 
 class SettingsController extends GetxController {
   static SettingsController get to => Get.find<SettingsController>();
@@ -283,7 +284,23 @@ class SettingsController extends GetxController {
     }
   }
 
-  double getCategoryBudget(String category) => categoryBudgets[category] ?? 0.0;
+  double getCategoryBudget(String category) {
+    if (categoryBudgets.containsKey(category)) {
+      return categoryBudgets[category] ?? 0.0;
+    }
+    if (Get.isRegistered<CategoriesController>()) {
+      final catsCtrl = Get.find<CategoriesController>();
+      final cat = catsCtrl.categories.firstWhereOrNull(
+        (c) => c.nameEn == category || c.nameBn == category || c.name == category,
+      );
+      if (cat != null) {
+        if (categoryBudgets.containsKey(cat.nameEn)) return categoryBudgets[cat.nameEn] ?? 0.0;
+        if (categoryBudgets.containsKey(cat.nameBn)) return categoryBudgets[cat.nameBn] ?? 0.0;
+        if (categoryBudgets.containsKey(cat.name)) return categoryBudgets[cat.name] ?? 0.0;
+      }
+    }
+    return 0.0;
+  }
 
   double get totalCategoryBudget =>
       categoryBudgets.values.fold(0.0, (acc, val) => acc + val);

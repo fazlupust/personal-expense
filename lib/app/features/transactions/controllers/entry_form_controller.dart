@@ -8,6 +8,7 @@ import '../../../data/models/entry_type.dart';
 import '../../../data/models/transaction_model.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../data/services/network_service.dart';
+import '../../../data/services/transaction_service.dart';
 import '../../../data/services/voice_service.dart';
 import '../../categories/controllers/categories_controller.dart';
 import '../../settings/controllers/settings_controller.dart';
@@ -255,10 +256,15 @@ class EntryFormController extends GetxController {
           ? existing!.userId
           : (Get.isRegistered<AuthService>() ? (Get.find<AuthService>().currentUid ?? 'guest') : 'guest');
 
+      final genId = Get.isRegistered<TransactionService>()
+          ? Get.find<TransactionService>().newTransactionId()
+          : DateTime.now().millisecondsSinceEpoch.toString();
+      final txId = existing?.id ?? genId;
+
       final isEdit = existing != null;
       await txCtrl.save(
         TransactionModel(
-          id: existing?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+          id: txId,
           userId: effectiveUid.isNotEmpty ? effectiveUid : 'guest',
           categoryId: catId,
           categoryNameBn: catNameBn,

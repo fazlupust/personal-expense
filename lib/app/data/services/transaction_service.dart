@@ -107,8 +107,18 @@ class TransactionService extends GetxService {
     }
   }
 
+  /// Generates a new unique Firestore document ID synchronously without network
+  String newTransactionId() {
+    try {
+      return _collection.doc().id;
+    } catch (_) {
+      return DateTime.now().millisecondsSinceEpoch.toString();
+    }
+  }
+
   /// Add a new transaction with category snapshot, safe location and device info
   Future<String> addTransaction({
+    String? id,
     required String categoryId,
     required String categoryNameBn,
     required String categoryNameEn,
@@ -141,7 +151,9 @@ class TransactionService extends GetxService {
       dev = await DeviceLocationService.getDeviceSummary();
     }
 
-    final docRef = _collection.doc();
+    final docRef = (id != null && id.isNotEmpty && int.tryParse(id) == null)
+        ? _collection.doc(id)
+        : _collection.doc();
     final newTx = TransactionModel(
       id: docRef.id,
       userId: uid,

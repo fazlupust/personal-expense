@@ -84,7 +84,11 @@ class CategoryFormCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          AppButton('Create category', onPressed: c.create),
+          AppButton(
+            'Create category',
+            onPressed: c.isCreating ? null : c.create,
+            isLoading: c.isCreating,
+          ),
         ],
       ),
     );

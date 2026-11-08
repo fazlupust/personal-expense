@@ -896,6 +896,80 @@ void main() {
       Get.delete<TransactionsController>();
       Get.delete<SharedPreferences>();
     });
+
+    test('TransactionsController deduplicates entries and prevents double counting', () async {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+      Get.put<SharedPreferences>(prefs, permanent: true);
+
+      final tc = Get.put(TransactionsController());
+
+      // Simulate duplicate IDs or twin entries
+      final now = DateTime.now();
+      final tx1 = TransactionModel(
+        id: 'real_doc_1',
+        userId: 'test_user',
+        categoryId: 'extra_cost',
+        categoryNameBn: 'অতিরিক্ত খরচ',
+        categoryNameEn: 'Extra Cost',
+        type: EntryType.expense,
+        amount: 500.0,
+        date: now,
+        isSynced: true,
+      );
+
+      final txDuplicateTwin = TransactionModel(
+        id: '1762589999999', // temporary ID with identical amount, category, date
+        userId: 'test_user',
+        categoryId: 'extra_cost',
+        categoryNameBn: 'অতিরিক্ত খরচ',
+        categoryNameEn: 'Extra Cost',
+        type: EntryType.expense,
+        amount: 500.0,
+        date: now,
+        isSynced: false,
+      );
+
+      tc.entries = [tx1, txDuplicateTwin, tx1];
+      // Save / deduplicate
+      await tc.save(tx1);
+
+      // Verify twin and duplicate id were removed
+      expect(tc.entries.length, 1);
+      expect(tc.entries.first.id, 'real_doc_1');
+      expect(tc.entries.first.amount, 500.0);
+
+      // Verify category grouping sums to exactly 500, NOT 1000
+      final byCat = tc.group(tc.currentMonthRows, EntryType.expense);
+      expect(byCat.values.first, 500.0);
+
+      tc.dispose();
+      Get.delete<TransactionsController>();
+      Get.delete<SharedPreferences>();
+    });
+
+    test('CategoriesController isCreating flag guards against duplicate taps', () async {
+      final controller = CategoriesController();
+      expect(controller.isCreating, isFalse);
+
+      controller.nameCtrl.text = 'Custom Extra Cost';
+      controller.nameBnCtrl.text = 'কাস্টম অতিরিক্ত খরচ';
+      controller.setType(EntryType.expense);
+
+      // When isCreating is true, calling create() early returns and does not add duplicates
+      controller.isCreating = true;
+      final countBefore = controller.categories.length;
+      await controller.create();
+      expect(controller.categories.length, countBefore);
+
+      // When isCreating is false, create proceeds
+      controller.isCreating = false;
+      await controller.create();
+      expect(controller.categories.length, countBefore + 1);
+      expect(controller.isCreating, isFalse);
+
+      controller.dispose();
+    });
   });
 }
 

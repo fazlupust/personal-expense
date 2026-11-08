@@ -8,6 +8,7 @@ import '../../../data/models/transaction_model.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../data/services/network_service.dart';
 import '../../../data/services/transaction_service.dart';
+import '../../categories/controllers/categories_controller.dart';
 
 enum TxFilter { all, income, expense }
 
@@ -51,12 +52,56 @@ class TransactionsController extends GetxController with WidgetsBindingObserver 
         list.sort(_newestFirst);
         if (list.isNotEmpty) {
           entries = list;
+          _deduplicateEntries();
           isLoading = false;
         }
       }
     } catch (e) {
       debugPrint('[TransactionsController] Error loading cached transactions: $e');
     }
+  }
+
+  void _deduplicateEntries() {
+    final seenIds = <String>{};
+    final unique = <TransactionModel>[];
+    for (final e in entries) {
+      if (e.id.isNotEmpty && !seenIds.add(e.id)) {
+        continue;
+      }
+      unique.add(e);
+    }
+    // Remove temporary ID duplicate twins if a real ID document with identical data exists
+    final finalUnique = <TransactionModel>[];
+    for (final e in unique) {
+      final isTemp = int.tryParse(e.id) != null && e.id.length >= 10;
+      if (isTemp) {
+        final hasRealTwin = unique.any((s) =>
+            s.id != e.id &&
+            (int.tryParse(s.id) == null || s.id.length < 10) &&
+            s.amount == e.amount &&
+            s.type == e.type &&
+            s.account == e.account &&
+            (s.categoryId == e.categoryId || s.category == e.category) &&
+            s.date.difference(e.date).abs().inSeconds <= 3);
+        if (hasRealTwin) {
+          continue; // discard temp duplicate twin
+        }
+      } else if (!e.isSynced) {
+        final hasSyncedTwin = unique.any((s) =>
+            s.id != e.id &&
+            s.isSynced &&
+            s.amount == e.amount &&
+            s.type == e.type &&
+            s.account == e.account &&
+            (s.categoryId == e.categoryId || s.category == e.category) &&
+            s.date.difference(e.date).abs().inSeconds <= 3);
+        if (hasSyncedTwin) {
+          continue;
+        }
+      }
+      finalUnique.add(e);
+    }
+    entries = finalUnique;
   }
 
   void _saveCachedTransactions(List<TransactionModel> list, [String? uidOverride]) {
@@ -217,11 +262,21 @@ class TransactionsController extends GetxController with WidgetsBindingObserver 
         final merged = <TransactionModel>[...list];
         for (final u in unsynced) {
           if (!serverMap.containsKey(u.id)) {
-            merged.add(u);
+            final alreadyInServer = list.any((s) =>
+                s.id == u.id ||
+                (s.amount == u.amount &&
+                    s.type == u.type &&
+                    s.account == u.account &&
+                    (s.categoryId == u.categoryId || s.category == u.category) &&
+                    s.date.difference(u.date).abs().inSeconds <= 3));
+            if (!alreadyInServer) {
+              merged.add(u);
+            }
           }
         }
         merged.sort(_newestFirst);
         entries = merged;
+        _deduplicateEntries();
         _saveCachedTransactions(entries, uid);
         isLoading = false;
         _isBinding = false;
@@ -256,11 +311,21 @@ class TransactionsController extends GetxController with WidgetsBindingObserver 
         final merged = <TransactionModel>[...list];
         for (final u in unsynced) {
           if (!serverMap.containsKey(u.id)) {
-            merged.add(u);
+            final alreadyInServer = list.any((s) =>
+                s.id == u.id ||
+                (s.amount == u.amount &&
+                    s.type == u.type &&
+                    s.account == u.account &&
+                    (s.categoryId == u.categoryId || s.category == u.category) &&
+                    s.date.difference(u.date).abs().inSeconds <= 3));
+            if (!alreadyInServer) {
+              merged.add(u);
+            }
           }
         }
         merged.sort(_newestFirst);
         entries = merged;
+        _deduplicateEntries();
         _saveCachedTransactions(entries, uid);
       }
     } catch (e) {
@@ -329,7 +394,8 @@ class TransactionsController extends GetxController with WidgetsBindingObserver 
         TxFilter.income => e.type == EntryType.income,
         TxFilter.expense => e.type == EntryType.expense,
       };
-      final okQuery = q.isEmpty || '${e.note} ${e.category} ${e.account}'.toLowerCase().contains(q);
+      final okQuery = q.isEmpty ||
+          '${e.note} ${e.category} ${e.categoryNameEn} ${e.categoryNameBn} ${e.account}'.toLowerCase().contains(q);
       return okType && okQuery;
     }).toList();
   }
@@ -346,11 +412,37 @@ class TransactionsController extends GetxController with WidgetsBindingObserver 
   double sum(Iterable<TransactionModel> rows, EntryType t) =>
       rows.where((e) => e.type == t).fold(0.0, (a, e) => a + e.amount);
 
+  String _resolveCategoryKey(TransactionModel e, bool isBn) {
+    if (Get.isRegistered<CategoriesController>()) {
+      final catsCtrl = Get.find<CategoriesController>();
+      if (e.categoryId.isNotEmpty && e.categoryId != 'other') {
+        final cat = catsCtrl.categories.firstWhereOrNull(
+          (c) => c.id == e.categoryId && c.type == e.type,
+        );
+        if (cat != null) return cat.displayName(isBn);
+      }
+      final byName = catsCtrl.categories.firstWhereOrNull(
+        (c) =>
+            c.type == e.type &&
+            (c.nameEn.toLowerCase() == e.categoryNameEn.toLowerCase() ||
+                c.nameBn == e.categoryNameBn ||
+                c.name == e.categoryNameEn ||
+                c.name == e.categoryNameBn),
+      );
+      if (byName != null) return byName.displayName(isBn);
+    }
+    return e.category;
+  }
+
   /// Totals per category, biggest first.
   Map<String, double> group(Iterable<TransactionModel> rows, EntryType t) {
     final m = <String, double>{};
+    final isBn = Get.locale?.languageCode == 'bn';
     for (final e in rows) {
-      if (e.type == t) m[e.category] = (m[e.category] ?? 0) + e.amount;
+      if (e.type == t) {
+        final catKey = _resolveCategoryKey(e, isBn);
+        m[catKey] = (m[catKey] ?? 0) + e.amount;
+      }
     }
     final sorted = m.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
     return Map.fromEntries(sorted);
@@ -424,13 +516,14 @@ class TransactionsController extends GetxController with WidgetsBindingObserver 
     final i = entries.indexWhere((e) => e.id == m.id);
     final exists = i >= 0;
     // Local optimistic entry starts as isSynced: false until confirmed by cloud
-    final localTx = m.copyWith(isSynced: false);
+    final localTx = m.isSynced ? m : m.copyWith(isSynced: false);
 
     if (exists) {
       entries[i] = localTx;
     } else {
       entries.add(localTx);
     }
+    _deduplicateEntries();
     entries.sort(_newestFirst);
     month = DateTime(m.date.year, m.date.month);
     _saveCachedTransactions(entries);
@@ -450,6 +543,7 @@ class TransactionsController extends GetxController with WidgetsBindingObserver 
           }
         } else {
           final realId = await txService.addTransaction(
+            id: m.id,
             categoryId: m.categoryId,
             categoryNameBn: m.categoryNameBn,
             categoryNameEn: m.categoryNameEn,
@@ -463,16 +557,32 @@ class TransactionsController extends GetxController with WidgetsBindingObserver 
             longitude: m.longitude,
             deviceInfo: m.deviceInfo,
           );
-          final idx = entries.indexWhere((e) => e.id == m.id);
-          if (idx >= 0) {
-            entries[idx] = entries[idx].copyWith(
-              id: realId.isNotEmpty ? realId : m.id,
-              isSynced: true,
-              syncError: null,
-            );
-            _saveCachedTransactions(entries);
-            update();
+          if (realId.isNotEmpty && realId != m.id) {
+            if (entries.any((e) => e.id == realId)) {
+              entries.removeWhere((e) => e.id == m.id);
+            } else {
+              final idx = entries.indexWhere((e) => e.id == m.id);
+              if (idx >= 0) {
+                entries[idx] = entries[idx].copyWith(
+                  id: realId,
+                  isSynced: true,
+                  syncError: null,
+                );
+              }
+            }
+          } else {
+            final idx = entries.indexWhere((e) => e.id == m.id);
+            if (idx >= 0) {
+              entries[idx] = entries[idx].copyWith(
+                id: realId.isNotEmpty ? realId : m.id,
+                isSynced: true,
+                syncError: null,
+              );
+            }
           }
+          _deduplicateEntries();
+          _saveCachedTransactions(entries);
+          update();
         }
       } catch (e) {
         final reason = parseSyncError(e);
@@ -523,14 +633,26 @@ class TransactionsController extends GetxController with WidgetsBindingObserver 
             longitude: tx.longitude,
             deviceInfo: tx.deviceInfo,
           );
-          final idx = entries.indexWhere((e) => e.id == tx.id);
-          if (idx >= 0) {
-            entries[idx] = tx.copyWith(
-              id: realId.isNotEmpty ? realId : tx.id,
-              isSynced: true,
-              syncError: null,
-            );
+          if (realId.isNotEmpty && realId != tx.id) {
+            if (entries.any((e) => e.id == realId)) {
+              entries.removeWhere((e) => e.id == tx.id);
+            } else {
+              final idx = entries.indexWhere((e) => e.id == tx.id);
+              if (idx >= 0) {
+                entries[idx] = tx.copyWith(
+                  id: realId,
+                  isSynced: true,
+                  syncError: null,
+                );
+              }
+            }
             syncedCount++;
+          } else {
+            final idx = entries.indexWhere((e) => e.id == tx.id);
+            if (idx >= 0) {
+              entries[idx] = tx.copyWith(isSynced: true, syncError: null);
+              syncedCount++;
+            }
           }
         } else {
           await txService.updateTransaction(tx);
@@ -552,6 +674,7 @@ class TransactionsController extends GetxController with WidgetsBindingObserver 
       }
     }
 
+    _deduplicateEntries();
     _saveCachedTransactions(entries, uid);
     isSyncingPending = false;
     update();
