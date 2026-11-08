@@ -171,6 +171,7 @@ void main() {
       expect(names, contains('Utilities'));
       expect(names, contains('Health & Medicine'));
       expect(names, contains('Fish'));
+      expect(names, contains('Fruits'));
       expect(names, contains('DPS Saving'));
       expect(names, contains('Extra Cost'));
 
@@ -185,6 +186,7 @@ void main() {
       expect(AppConstants.isDefaultCategory('Utilities', 'ইউটিলিটি ও বিল'), isTrue);
       expect(AppConstants.isDefaultCategory('Health & Medicine', 'স্বাস্থ্য ও ওষুধ'), isTrue);
       expect(AppConstants.isDefaultCategory('Fish', 'মাছ ও বাজার'), isTrue);
+      expect(AppConstants.isDefaultCategory('Fruits', 'ফলমূল'), isTrue);
       expect(AppConstants.isDefaultCategory('DPS Saving', 'ডিপিএস ও সঞ্চয়'), isTrue);
       expect(AppConstants.isDefaultCategory('Extra Cost', 'অতিরিক্ত খরচ'), isTrue);
     });

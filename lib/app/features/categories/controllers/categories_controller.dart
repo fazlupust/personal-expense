@@ -109,6 +109,7 @@ class CategoriesController extends GetxController {
     if (name == 'Deposit' || name == 'ডিপোজিট' || name == 'Deposit / Investment' || name == 'ডিপোজিট ও বিনিয়োগ') return '🏦';
     if (name == 'Investment' || name == 'বিনিয়োগ' || name == 'বিনিয়োগ ও মুনাফা') return '📈';
     if (name == 'Extra Cost' || name == 'অতিরিক্ত খরচ' || name == 'Extra Expense') return '💸';
+    if (name == 'Fruits' || name == 'ফলমূল' || name == 'ফল') return '🍎';
     return '•';
   }
 

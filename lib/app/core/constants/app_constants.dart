@@ -25,6 +25,7 @@ class AppConstants {
     CategoryModel(nameEn: 'Utilities', nameBn: 'ইউটিলিটি ও বিল', emoji: '⚡', type: EntryType.expense, isDefault: true),
     CategoryModel(nameEn: 'Health & Medicine', nameBn: 'স্বাস্থ্য ও ওষুধ', emoji: '💊', type: EntryType.expense, isDefault: true),
     CategoryModel(nameEn: 'Fish', nameBn: 'মাছ ও বাজার', emoji: '🐟', type: EntryType.expense, isDefault: true),
+    CategoryModel(nameEn: 'Fruits', nameBn: 'ফলমূল', emoji: '🍎', type: EntryType.expense, isDefault: true),
     CategoryModel(nameEn: 'Food', nameBn: 'খাবার', emoji: '🍽️', type: EntryType.expense, isDefault: true),
     CategoryModel(nameEn: 'Groceries', nameBn: 'বাজার ও মুদি', emoji: '🛒', type: EntryType.expense, isDefault: true),
     CategoryModel(nameEn: 'Child & Baby Care', nameBn: 'বাচ্চার খরচ', emoji: '👶', type: EntryType.expense, isDefault: true),
@@ -76,7 +77,7 @@ class AppConstants {
   static const List<String> categoryEmojis = [
     '🍜', '🛒', '👶', '💊', '🩺', '👕', '🤝', '🚌', '💡', '⚡', '🌐', '🏠', '🛍️', '🏥', '📚',
     '👨‍👩‍👧', '☕', '🧹', '📱', '⛽', '💳', '🤲', '🔧', '✈️', '🛡️', '🏋️', '📦', '💇', '🎬',
-    '💼', '🏪', '💻', '📈', '🏢', '📊', '⏱️', '🌍', '🎖️', '🎁', '🏦', '🏷️', '💰', '🎮', '🚗', '🎓', '💸',
+    '💼', '🏪', '💻', '📈', '🏢', '📊', '⏱️', '🌍', '🎖️', '🎁', '🏦', '🏷️', '💰', '🎮', '🚗', '🎓', '💸', '🍎',
   ];
 
   /// Checks if a category name matches any standard default category

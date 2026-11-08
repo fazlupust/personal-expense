@@ -138,6 +138,7 @@ class AppTranslations extends Translations {
     'Utilities': 'ইউটিলিটি ও বিল',
     'Health & Medicine': 'স্বাস্থ্য ও ওষুধ',
     'Fish': 'মাছ ও বাজার',
+    'Fruits': 'ফলমূল',
     'DPS Saving': 'ডিপিএস ও সঞ্চয়',
     'Food': 'খাবার',
     'Groceries': 'বাজার ও মুদি',
