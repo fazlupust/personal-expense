@@ -129,6 +129,8 @@ class AppTranslations extends Translations {
     'Deposit': 'ডিপোজিট',
     'Deposit / Investment': 'ডিপোজিট ও বিনিয়োগ',
     'Savings': 'সঞ্চয়',
+    'Extra Cost': 'অতিরিক্ত খরচ',
+    'Extra Expense': 'অতিরিক্ত ব্যয়',
     // Default categories & accounts
     'Child Food': 'বাচ্চার খাবার',
     'Food & Dining': 'খাবার ও রেস্তোরাঁ',
