@@ -167,6 +167,30 @@ void main() {
       expect(controller.categories.contains(userCat), isFalse);
     });
 
+    test('normal user can update custom category emoji, but cannot update default category without developer role', () async {
+      final customCat = CategoryModel(
+        id: 'user_cat_2',
+        nameEn: 'My Special Hobby',
+        nameBn: 'বিশেষ শখ',
+        emoji: '🏷️',
+        type: EntryType.expense,
+        isDefault: false,
+      );
+      controller.categories.add(customCat);
+
+      // 1. Normal user can update custom category emoji
+      await controller.updateCategoryEmoji(customCat, '🎨');
+      final updatedCustom = controller.categories.firstWhere((c) => c.id == 'user_cat_2');
+      expect(updatedCustom.emoji, '🎨');
+
+      // 2. Normal user cannot update default category (no dev auth registered)
+      final defaultCat = controller.categories.firstWhere((c) => c.nameEn == 'Fruits');
+      final initialEmoji = defaultCat.emoji;
+      await controller.updateCategoryEmoji(defaultCat, '🍇');
+      final afterAttempt = controller.categories.firstWhere((c) => c.nameEn == 'Fruits');
+      expect(afterAttempt.emoji, initialEmoji);
+    });
+
     test('contains newly requested default categories', () {
       final names = AppConstants.defaultCategories.map((c) => c.nameEn).toList();
       expect(names, contains('Child & Baby Care'));

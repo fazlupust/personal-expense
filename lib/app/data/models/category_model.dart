@@ -42,6 +42,36 @@ class CategoryModel {
   // Backward compatibility getter for existing UI widgets
   String get name => _name ?? (nameEn.isNotEmpty ? nameEn : nameBn);
 
+  CategoryModel copyWith({
+    String? id,
+    String? nameBn,
+    String? nameEn,
+    String? name,
+    EntryType? type,
+    bool? isActive,
+    bool? isDefault,
+    String? createdBy,
+    String? updatedBy,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    String? emoji,
+  }) {
+    return CategoryModel(
+      id: id ?? this.id,
+      nameBn: nameBn ?? this.nameBn,
+      nameEn: nameEn ?? this.nameEn,
+      name: name ?? _name,
+      type: type ?? this.type,
+      isActive: isActive ?? this.isActive,
+      isDefault: isDefault ?? this.isDefault,
+      createdBy: createdBy ?? this.createdBy,
+      updatedBy: updatedBy ?? this.updatedBy,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      emoji: emoji ?? this.emoji,
+    );
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,

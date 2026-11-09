@@ -103,6 +103,59 @@ class CategoryService extends GetxService {
     });
   }
 
+  /// Update or upsert category emoji
+  Future<String> upsertCategoryEmoji(CategoryModel cat, String newEmoji) async {
+    final uid = _auth.currentUid ?? '';
+    if (cat.id.isNotEmpty) {
+      await _collection.doc(cat.id).set({
+        'id': cat.id,
+        'name_bn': cat.nameBn,
+        'name_en': cat.nameEn,
+        'type': cat.type.name,
+        'emoji': newEmoji,
+        'is_active': true,
+        'is_default': cat.isDefault || cat.isDefaultCategory,
+        'updated_by': uid,
+        'updated_at': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+      return cat.id;
+    }
+
+    try {
+      final snapshot = await _collection
+          .where('type', isEqualTo: cat.type.name)
+          .where('name_en', isEqualTo: cat.nameEn)
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        final docId = snapshot.docs.first.id;
+        await _collection.doc(docId).update({
+          'emoji': newEmoji,
+          'updated_by': uid,
+          'updated_at': FieldValue.serverTimestamp(),
+        });
+        return docId;
+      }
+    } catch (_) {}
+
+    final docRef = _collection.doc();
+    await docRef.set({
+      'id': docRef.id,
+      'name_bn': cat.nameBn,
+      'name_en': cat.nameEn,
+      'type': cat.type.name,
+      'is_active': true,
+      'is_default': cat.isDefault || cat.isDefaultCategory,
+      'created_by': uid,
+      'updated_by': uid,
+      'emoji': newEmoji,
+      'created_at': FieldValue.serverTimestamp(),
+      'updated_at': FieldValue.serverTimestamp(),
+    });
+    return docRef.id;
+  }
+
   /// Soft delete category (sets is_active to false as per specification)
   Future<void> softDeleteCategory(String categoryId) async {
     final uid = _auth.currentUid ?? '';

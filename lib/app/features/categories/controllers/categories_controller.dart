@@ -6,6 +6,7 @@ import '../../../data/models/category_model.dart';
 import '../../../data/models/entry_type.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../data/services/category_service.dart';
+import '../../transactions/controllers/transactions_controller.dart';
 
 class CategoriesController extends GetxController {
   CategoriesController() {
@@ -376,6 +377,89 @@ class CategoriesController extends GetxController {
         colorText: Colors.white,
         icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 24),
         duration: const Duration(seconds: 3),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        borderRadius: 12,
+      );
+    }
+  }
+
+  /// Update category emoji (Developers can update all categories including defaults; normal users can update custom categories)
+  Future<void> updateCategoryEmoji(CategoryModel c, String newEmoji) async {
+    final clean = newEmoji.trim();
+    if (clean.isEmpty) return;
+
+    final isDev = Get.isRegistered<AuthService>() && Get.find<AuthService>().isDeveloper;
+    final isDefault = c.isDefaultCategory || c.isDefault || AppConstants.isDefaultCategory(c.nameEn, c.nameBn, c.name);
+
+    if (isDefault && !isDev) {
+      if (Get.context != null) {
+        Get.snackbar(
+          'Alert'.tr,
+          'Default categories can only be modified by a Developer.'.tr,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: const Color(0xFFD97706),
+          colorText: Colors.white,
+          icon: const Icon(Icons.lock_outline_rounded, color: Colors.white, size: 24),
+          duration: const Duration(seconds: 3),
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          borderRadius: 12,
+        );
+      }
+      return;
+    }
+
+    // 1. Immediately update in-memory category list for zero-latency UI update
+    final idx = categories.indexWhere((item) =>
+        (item.id.isNotEmpty && item.id == c.id) ||
+        (item.type == c.type &&
+            (item.nameEn.toLowerCase() == c.nameEn.toLowerCase() ||
+                item.nameBn == c.nameBn ||
+                item.name.toLowerCase() == c.name.toLowerCase())));
+
+    final updatedCat = c.copyWith(emoji: clean);
+    if (idx >= 0) {
+      categories[idx] = categories[idx].copyWith(emoji: clean);
+    } else {
+      categories.add(updatedCat);
+    }
+    update();
+
+    // Notify other controllers so dashboard bars and transaction tiles update instantly
+    if (Get.isRegistered<TransactionsController>()) {
+      Get.find<TransactionsController>().update();
+    }
+
+    // 2. Persist to Firestore if online & logged in
+    if (Get.isRegistered<CategoryService>() &&
+        Get.isRegistered<AuthService>() &&
+        Get.find<AuthService>().isLoggedIn) {
+      try {
+        final service = Get.find<CategoryService>();
+        final realDocId = await service.upsertCategoryEmoji(c, clean);
+        if (c.id.isEmpty && realDocId.isNotEmpty) {
+          final postIdx = categories.indexWhere((item) =>
+              item.type == c.type &&
+              (item.nameEn.toLowerCase() == c.nameEn.toLowerCase() ||
+                  item.nameBn == c.nameBn));
+          if (postIdx >= 0) {
+            categories[postIdx] = categories[postIdx].copyWith(id: realDocId);
+            update();
+          }
+        }
+      } catch (e) {
+        debugPrint('[CategoriesController] Error updating category emoji: $e');
+      }
+    }
+
+    if (Get.context != null) {
+      Get.snackbar(
+        'Success'.tr,
+        'Category icon updated successfully'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFF1F8A5B),
+        colorText: Colors.white,
+        icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 24),
+        duration: const Duration(seconds: 2),
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         borderRadius: 12,
       );
